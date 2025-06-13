@@ -8,3 +8,6 @@ simple_auth_manager_passwords.json.generated
 downloads
 *.csv
 *.json
+standalone_admin_password.txt
+webserver_config.py
+airflow-webserver.pid

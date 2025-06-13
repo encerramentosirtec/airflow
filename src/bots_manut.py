@@ -171,52 +171,61 @@ class Bots:
         sh = GS_SERVICE.open_by_key('1VFxxABMX1WQDbYFll2nO5CEp2FGuNpIqTMftncVRpic')
         ws = sh.worksheet("id_relatorios_geoex")
         ids = pd.DataFrame(ws.get_all_records())
-        id_relatorio = ids.loc[3].ID
 
-        download = self.geoex.baixar_relatorio(id_relatorio)
-        if download['sucess']:
-            try:
+        id_relatorios = []
+        id_relatorios.append(ids.loc[3].ID)
+        id_relatorios.append(ids.loc[5].ID)
+        df_att = pd.DataFrame()
 
-                # Leitura dos dados
-                df = pd.read_csv(
-                    #os.path.join(PATH, 'downloads/Geoex - Processos com HRO - Consulta.csv'),
-                    os.path.join(PATH, 'downloads/Geoex - Processos com HRO - Consulta.csv'),
-                    encoding='ISO-8859-1',
-                    sep=';',
-                    parse_dates=['DT_ENVIO'],
-                    dayfirst=True
+        for id in id_relatorios:
+            download = self.geoex.baixar_relatorio(id)
+            if download['sucess']:
+                try:
+                    # Leitura dos dados
+                    df = pd.read_csv(
+                        os.path.join(PATH, 'downloads/Geoex - Processos com HRO - Consulta.csv'),
+                        encoding='ISO-8859-1',
+                        sep=';',
+                        parse_dates=['DT_ENVIO'],
+                        dayfirst=True
+                    )
+
+                    # Sequência de tratamento dos dados
+                    df['PROJETO'] = df['PROJETO'].str.replace('Y-', 'B-') # NUMERO.1 é a antiga coluna PROJETO
+                    df.query("STATUS != 'CANCELADO'")
+                    df = df.sort_values('DT_ENVIO', ascending=False)
+                    df.drop_duplicates('PROCESSO', inplace=True) # NUMERO é a a antiga coluna PROCESSO
+                    df['DT_ENVIO'] = df['DT_ENVIO'].astype(str)
+
+                    print(df)
+
+                    # atualizar df_att com os valores de df
+                    df_att = pd.concat([df_att, df], ignore_index=True)
+
+                except Exception as e:
+                    raise
+            
+            else:
+                raise Exception(
+                    f"""
+                    Falha ao baixar csv.
+                    Statuscode: { download['status_code'] }
+                    Message: { download['data'] }
+                    """
                 )
-
-                # Sequência de tratamento dos dados
-                df['PROJETO'] = df['PROJETO'].str.replace('Y-', 'B-') # NUMERO.1 é a antiga coluna PROJETO
-                df.query("STATUS != 'CANCELADO'")
-                df = df.sort_values('DT_ENVIO', ascending=False)
-                df.drop_duplicates('PROCESSO', inplace=True) # NUMERO é a a antiga coluna PROCESSO
-                df['DT_ENVIO'] = df['DT_ENVIO'].astype(str)
-
-                # Atualização da base
-                sh = GS_SERVICE.open_by_key('1wb7jj5wQM_61-yQruIn4UGI9KrQH4CL__W-X0MPcif0')
-                ws = sh.worksheet('BASE_HRO')
-                ws.clear()
-                ws.update(range_name='A1', values=[df.columns.tolist()])
-                ws.update(range_name='A2', values=df.fillna("").values.tolist())
-
-                return {
-                    'status': 'Ok',
-                    'message': f"[{  datetime.strftime(datetime.now(), format='%H:%M')  }] Base atualizada!"
-                }
-            except Exception as e:
-                raise
         
-        else:
-            raise Exception(
-                f"""
-                Falha ao baixar csv.
-                Statuscode: { download['status_code'] }
-                Message: { download['data'] }
-                """
-            )
-        
+        # Atualização da base
+        sh = GS_SERVICE.open_by_key('1wb7jj5wQM_61-yQruIn4UGI9KrQH4CL__W-X0MPcif0')
+        # sh = GS_SERVICE.open_by_key('1CcVqctnXFYRIMU4ensbEFqV5LiXJRNu6RflFRBwsJMc') # Planilha de testes
+        ws = sh.worksheet('BASE_HRO')
+        ws.clear()
+        ws.update(range_name='A1', values=[df_att.columns.tolist()])
+        ws.update(range_name='A2', values=df_att.fillna("").values.tolist())
+
+        return {
+            'status': 'Ok',
+            'message': f"[{  datetime.strftime(datetime.now(), format='%H:%M')  }] Base atualizada!"
+        }
 
 
 
