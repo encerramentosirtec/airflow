@@ -8,7 +8,7 @@ from time import sleep
 import re
 
 PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..') # Altera diretório raiz de execução do código
-GS_SERVICE = gspread.service_account(filename=os.path.join(PATH, 'assets/auth_google/service_account_manut.json')) # Inicia o serviço do google sheets
+GS_SERVICE = gspread.service_account(filename=os.path.join(PATH, 'assets/auth_google/causal_scarab.json')) # Inicia o serviço do google sheets
 
 
 from src.geoex import Geoex

@@ -2,6 +2,7 @@ import os
 import re
 import json
 import gspread
+import traceback
 import numpy as np
 import pandas as pd
 from time import sleep
@@ -9,17 +10,17 @@ from src.geoex import Geoex
 from pendulum import timezone
 from datetime import datetime
 from src.config import configs
-from hooks.geoex_hook import GeoexHook
+from src.geoex import Geoex, GeoexHook
 
 class Bots:
 
-    def __init__(self, cookie_path='assets/auth_geoex/cookie_ccm.json', cred_path='assets/auth_geoex/causal_scarab.json'):
+    def __init__(self, cookie_path='assets/auth_geoex/cookie_ccm.json', cred_path='assets/auth_google/causal_scarab.json'):
         self.PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..') # Altera diretório raiz de execução do código
         
         with open(os.path.join(self.PATH, cookie_path), 'r') as f:
             self.cookie = json.load(f)
             
-        self.geoex = Geoex(cookie_path)
+        self.geoex = Geoex('cookie_ccm.json')
         self.GS_SERVICE = gspread.service_account(filename=os.path.join(os.getcwd(), cred_path))
         self.br_tz = timezone("Brazil/East")
 
@@ -38,6 +39,35 @@ class Bots:
 
         return df
 
+
+    # As-Built
+    def fazer_requisicao(self, url, body):
+        resposta = ''
+        fim = False
+        
+        while True:
+            r = GeoexHook(self.cookie).run("POST", url, json=body)
+                
+            if r.status_code!=200:
+                print(' Erro na requisição: Code: '+str(r.status_code)+', Reason: '+str(r.reason))
+                sleep(30)
+                fim = True
+                continue
+            if fim:
+                fim = False
+                print(' Erro na requisição: Code: '+str(r.status_code)+', Reason: '+str(r.reason))
+            try:
+                resposta = r.json()
+            except Exception as e:
+                print(r)
+                raise e
+            break
+        
+        if resposta["IsUnauthorized"]:
+            print(resposta)
+            raise "Cookie Inválido"
+        
+        return resposta
 
     def asbuilt(self):
         ####################### LENDO CARTEIRAS ONLINE
@@ -190,21 +220,13 @@ class Bots:
         qtd = len(obras_concluidas_sem_pasta_no_fechamento)
 
         jequie = ['CRAVOLÂNDIA', 'BREJÕES', 'IRAJUBA', 'ITAQUARA', 'ITIRUÇU', 'JAGUAQUARA', 'JEQUIÉ', 'LAFAIETE COUTINHO', 'LAJEDO DO TOBOCAL', 'MANOEL VITORINO', 'MARACÁS', 'NOVA ITARANA', 'PLANALTINO', 'SANTA INÊS', 'LAFAIETE COUTINHO']
-
         vitoria_da_conquista = ['ANAGÉ', 'BARRA DO CHOÇA', 'BELO CAMPO', 'BOA NOVA', 'BOM JEJUS DA SERRA', 'CAETANOS', 'CÂNDIDO SALES', 'CARAÍBAS', 'CONDEÚBA', 'CORDEIROS', 'ENCRUZILHADA', 'MAETINGA', 'MIRANTE', 'PIRIPÁ', 'PLANALTO', 'POÇÕES', 'PRESIDENTE JANIO QUADROS', 'TREMEDAL', 'VITÓRIA DA CONQUISTA']
-
         itapetinga = ['MACARANI', 'CAATIBA', 'FIRMINO ALVES', 'IBICUÍ', 'IGUAÍ', 'ITAMBÉ', 'ITAPETINGA', 'ITARANTIM', 'ITORORÓ', 'MAIQUINIQUE', 'NOVA CANAÃ', 'POTIRAGUÁ', 'RIBEIRÃO DO LARGO']
-
         barreiras = ['ANGICAL', 'BAIANÓPOLIS', 'BARREIRAS', 'CATOLÂNDIA', 'COTEGIPE', 'CRISTÓPOLIS', 'FORMOSA DO RIO PRETO', 'LUIS EDUARDO MAGALHÃES', 'RIACHÃO DAS NEVES', 'SANTA RITA DE CÁSSIA', 'SÃO DESIDÉRIO', 'WANDERLEY']
-
         ibotirama = ['IBOTIRAMA', 'MUQUEM DO SÃO FRANCISCO', 'OLIVEIRA DOS BREJINHOS', 'BARRA', 'BURITIRAMA', 'MORPARÁ', 'BROTAS DE MACAÚBAS', 'IPUPIARA', 'MANSIDÃO', 'BOQUIRA', 'MACAÚBAS', 'IBITIARA', 'NOVO HORIZONTE', 'IBIPITANGA']
-
         bom_jesus_da_lapa = ['BOM JESUS DA LAPA', 'PARATINGA', 'RIACHO DE SANTANA', 'MATINA', 'SERRA DO RAMALHO', 'SÍTIO DO MATO', 'SANTANA', 'CANÁPOLIS', 'SERRA DOURADA', 'TABOCAS DO BREJO VELHO', 'BREJOLÂNDIA', 'SANTA MARIA DA VITORIA', 'SÃO FÉLIX DO CORIBE', 'JABORANDI', 'CORIBE', 'COCOS', 'FEIRA DA MATA', 'CORRENTINA']
-
         guanambi = ['CAETITÉ', 'CANDIBA', 'CARINHANHA', 'FEIRA DA MATA', 'GUANAMBI', 'IGAPORÃ', 'IUIÚ', 'JACARACI', 'LICÍNIO DE ALMEIDA', 'MALHADA', 'MATINA', 'MORTUGABA', 'PALMAS DE MONTE ALTO', 'PINDAÍ', 'RIACHO DE SANTANA', 'SEBASTIÃO LARANJEIRAS', 'URANDI']
-
         irece = ['AMÉRICA DOURADA', 'BARRA DO MENDES', 'BARRO ALTO', 'CAFARNAUM', 'CENTRAL', 'GENTIO DO OURO', 'IBIPEBA', 'IBITITÁ', 'IRECÊ', 'ITAGUAÇU DA BAHIA', 'JOÃO DOURADO', 'JUSSARA', 'LAPÃO', 'MORRO DO CHAPÉU', 'MULUNGU DO MORRO', 'PRESIDENTE DUTRA', 'SÃO GABRIEL', 'UIBAÍ', 'XIQUE-XIQUE']
-        
         livramento = ['RIO DE CONTAS', 'ÉRICO CARDOSO', 'CATURAMA', 'RIO DO PIRES']
         
         status_aceitos = ['CRIADO', 'CANCELADO', 'ACEITO', 'ACEITO COM RESTRIÇÕES', 'REJEITADO', 'VALIDADO']
@@ -220,35 +242,6 @@ class Bots:
             35 : 'VALIDADO'
         }
         
-        def fazer_requisicao(url, body):
-            """Função auxiliar para realizar requisições POST."""
-            resposta = ''
-            fim = False
-            
-            while True:
-                r = GeoexHook(cookie_path).run("POST", url, json=body)
-                    
-                if r.status_code!=200:
-                    print(' Erro na requisição: Code: '+str(r.status_code)+', Reason: '+str(r.reason))
-                    sleep(30)
-                    fim = True
-                    continue
-                if fim:
-                    fim = False
-                    print(' Erro na requisição: Code: '+str(r.status_code)+', Reason: '+str(r.reason))
-                try:
-                    resposta = r.json()
-                except Exception as e:
-                    print(r)
-                    raise e
-                break
-            
-            if resposta["IsUnauthorized"]:
-                print(Fore.RED + resposta)
-                raise "Cookie Inválido"
-            #print(resposta)
-            return resposta
-
         database = "dags/BOB_V2/db.csv"
 
         df = pd.read_csv(database)
@@ -260,17 +253,15 @@ class Bots:
                 x += 1
                 continue
             
-            #sleep(2)
-            resposta = fazer_requisicao(url=url, body={'id': str(i)})
+            resposta = self.fazer_requisicao(url=url, body={'id': str(i)})
             
             try:
-                #resposta = resposta.json()
                 id_projeto = resposta['Content']['ProjetoId']
                     
                 url_pasta = 'ConsultarProjeto/EnvioPasta/Itens'
                 body_pasta = {'ProjetoId': id_projeto}
                 
-                resposta_pasta = fazer_requisicao(url=url_pasta, body=body_pasta)
+                resposta_pasta = self.fazer_requisicao(url=url_pasta, body=body_pasta)
                 conteudo_pasta = resposta_pasta['Content']['Envios']
                 envio = []
                 for j in conteudo_pasta:
@@ -285,9 +276,7 @@ class Bots:
                     #print(envio, status_pasta)
                 else:
                     status_pasta = statuspastaid.get(envio['HistoricoStatusId'],envio['HistoricoStatusId'])
-                    #print(envio, status_pasta)
 
-                #status_pasta = resposta['Content']['EnvioPastaStatus']
                 if not(status_pasta in status_aceitos) and str(i)!='B-1130987':
                     try:
                         vl_projeto = resposta['Content']['VlProjeto']
@@ -352,7 +341,7 @@ class Bots:
                 else:
                     project_name = resposta['Content'].get('Titulo', '')
                     df.loc[len(df)] = [i, project_name, status_pasta]
-                    print(Fore.RED + f'\n{status_pasta} - {i} - ({x}/{str(len(obras_concluidas_sem_pasta_no_fechamento))})')
+                    print(f'\n{status_pasta} - {i} - ({x}/{str(len(obras_concluidas_sem_pasta_no_fechamento))})')
             except Exception as e:
                 print('\nsem acesso ao projeto ', i)
                 print(resposta)
@@ -374,7 +363,142 @@ class Bots:
 
                 pastas_pendentes.clear()
                 pastas_pendentes.update(values=dados_list, range_name='A1')
-                sh.worksheet('data atualização').update(range_name='A1', values=[[datetime.now(br_tz).strftime("%d/%m/%Y %H:%M")]])
+                sh.worksheet('data atualização').update(range_name='A1', values=[[datetime.now(self.br_tz).strftime("%d/%m/%Y %H:%M")]])
                 break
             except Exception as e:
                 print(e)
+
+
+    # Data pendência
+    def data_pendencia():
+        # Abrir credenciais do Google Sheets
+        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+        creds = ServiceAccountCredentials.from_json_keyfile_name('dags/_internal/jimmy.json', scope)
+        gs = gspread.authorize(creds)
+        sh = gs.open_by_key('141SkTq1Gr049nSwqgIwxoP4MbNhR5Y8WbMTSfGQf9ik')
+        url_geo = 'Cadastro/ConsultarProjeto/'
+        cookie_path = 'dags/_internal/cookie_ccm.json'
+
+        
+        with open('dags/_internal/cookie_ccm.json', 'r') as f:
+            cookie = json.load(f)
+        
+        def hora_atual():
+            data_e_hora_atuais = datetime.now()
+            data_e_hora_em_texto = data_e_hora_atuais.strftime('%d/%m/%Y %H:%M')
+
+            return data_e_hora_em_texto
+
+        def data_geo(projetoid):
+            with open('dags/BOB_V2/_internal/cookie.json', 'r') as f:
+                cookie = json.load(f)
+            
+            url = 'ConsultarProjeto/TermoGeo/Itens'
+            header = {
+                'Cookie': cookie['cookie'],
+                'User-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+                'Gxsessao': cookie['Gxsessao'],
+                'Gxbot': cookie['Gxbot'],
+            }
+
+            body = {
+                'ProjetoId': projetoid
+            }
+
+            try:
+                r = GeoexHook(cookie_path).run('POST', url, json = body).json()
+                return r['Content']['Items'][0]['Data']
+            except Exception as e:
+                print('Não foi possível acessar a página do GEOEX.')
+                print(e)
+                return ''
+
+        def procura_projeto(projeto):
+            datazps = ''
+            fim = True
+
+            url = url_geo+'Item'
+            header = {
+                'Cookie': cookie['cookie'],
+                'User-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+                'Gxsessao': cookie['Gxsessao'],
+                'Gxbot': cookie['Gxbot'],
+            }
+
+            body = {
+                'id': projeto
+            }
+
+            while True:
+                try:
+                    r = GeoexHook(cookie_path).run('POST', url, json = body)
+                    if r.status_code!=200:
+                        print("\033[K", projeto+' Erro na requisição: Code: '+str(r.status_code)+', Reason: '+str(r.reason), end='\r')
+                        sleep(30)
+                        fim = True
+                        continue
+                    if fim:
+                        print(' Erro na requisição: Code: '+str(r.status_code)+', Reason: '+str(r.reason))
+                        fim = False
+                        #print('')
+                    r = r.json()
+                    break
+                except Exception as e:
+                    print(hora_atual())
+                    traceback.print_exc()
+                    print('Requisição', r)
+                    print('Projeto ', projeto)
+                    raise Exception('Não foi possível acessar a página do GEOEX.')
+            
+            if r['Content'] != None:
+                if r['Content']['DtZps09'] != None:
+                    datazps = datetime.fromisoformat(r['Content']['DtZps09']).date().strftime("%d/%m/%Y")
+                else:
+                    datazps = ''
+            elif r['IsUnauthorized']:
+                print(r)
+                raise Exception('Cookie inválido! Não autorizado')
+            
+            return datazps
+
+        def acha_nome(nome):
+            inicio = nome.find("'")
+            inicio += 1
+            fim = nome[inicio:].find("'")
+            fim = inicio + fim
+            return nome[inicio:fim]
+
+        planilha='Etapa de documentos'
+        sheet = sh.worksheet(planilha).get_all_values()
+        sheet = pd.DataFrame(sheet, columns = sheet.pop(0))
+
+        valores = []
+        #valores2 = []
+        tamanho = sheet.shape[0]
+
+        for c,j in enumerate(sheet['Projeto']):
+            if j != '':
+                '''if sheet['Data ZPS09'][c] != '':
+                    a = []
+                else:
+                    a = [procura_projeto(j)]
+                    if a == ['']: a = []'''
+                a = [procura_projeto(j)]
+                if a == ['']: a = []
+            else:
+                a = []
+            
+            print(c,'/',tamanho,' : ',j,'-',a)
+            valores.append(a)
+            #valores2.append({'Projeto': j, 'Data ZPS09': a})
+
+        
+        try:
+            sh.worksheet(planilha).update(range_name='H2:H', values=valores, value_input_option='USER_ENTERED')
+        except Exception as e:
+            traceback.print_exc()
+            print('Erro ao escrever na planilha')
+            #print(e)
+                
+        print('Acabou!')
+
