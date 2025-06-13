@@ -1,8 +1,7 @@
-from airflow.providers.http.hooks.http import HttpHook
 import os
-import json
-from time import sleep
 import cloudscraper
+from time import sleep
+from airflow.providers.http.hooks.http import HttpHook
 
 class GeoexHook(HttpHook):
 
@@ -10,12 +9,6 @@ class GeoexHook(HttpHook):
         self.PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..') # Altera diretório raiz de execução do código
         self.cookie = cookie
 
-        # with open(os.path.join(self.PATH,'assets/auth_geoex/{json_file}'), 'r') as f:
-        #     self.cookie = json.load(f)
-        
-        #self.conn_id = 'geoex_default'
-        #super().__init__(http_conn_id=self.conn_id)
-        #print(os.getcwd())
         self.base_url = 'https://geoex.com.br/api/'
 
         self.header = {
@@ -23,7 +16,6 @@ class GeoexHook(HttpHook):
             'Gxsessao': self.cookie['gxsessao'],
             'Gxbot': self.cookie['gxbot'],
             'User-Agent': self.cookie['useragent']
-            # 'Content-Type': 'application/json;charset=UTF-8'
         }
         
         self.scraper = cloudscraper.create_scraper(delay=10, browser='chrome')
@@ -36,8 +28,6 @@ class GeoexHook(HttpHook):
     
 
     def connect_to_endpoint(self, url, method, **kwargs):
-        #r = requests.Request(method, url, **kwargs)
-        #prep = session.prepare_request(r)
         while True:
             try:
                 #response = self.run_and_check(session, prep, {})
