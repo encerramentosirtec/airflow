@@ -1,19 +1,17 @@
 from airflow.providers.http.hooks.http import HttpHook
 import os
-import requests
 import json
 from time import sleep
 import cloudscraper
 
 class GeoexHook(HttpHook):
 
-    def __init__(self):
-        #self.PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..') # Altera diretório raiz de execução do código
-        self.PATH = os.path.join(os.getcwd(),"dags")
-        #print(self.PATH)
-        
-        with open(os.path.join(self.PATH,'_internal/cookie_hugo.json'), 'r') as f:
-            self.cookie = json.load(f)
+    def __init__(self, cookie):
+        self.PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..') # Altera diretório raiz de execução do código
+        self.cookie = cookie
+
+        # with open(os.path.join(self.PATH,'assets/auth_geoex/{json_file}'), 'r') as f:
+        #     self.cookie = json.load(f)
         
         #self.conn_id = 'geoex_default'
         #super().__init__(http_conn_id=self.conn_id)

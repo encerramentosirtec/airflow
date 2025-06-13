@@ -1,0 +1,9 @@
+__pycache__/
+.vscode
+venv
+assets
+logs
+airflow.cfg
+airflow.db
+simple_auth_manager_passwords.json.generated
+downloads

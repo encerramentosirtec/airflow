@@ -8,18 +8,15 @@ from time import sleep
 import re
 
 PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..') # Altera diretório raiz de execução do código
-#PATH = os.getcwd()
-print(PATH)
-#GS_SERVICE = gspread.service_account(filename=os.path.join(PATH, 'service_account.json')) # Inicia o serviço do google sheets
-GS_SERVICE = gspread.service_account(filename=os.path.join(PATH, '_internal/causal_scarab.json')) # Inicia o serviço do google sheets
+GS_SERVICE = gspread.service_account(filename=os.path.join(PATH, 'assets/auth_google/service_account_manut.json')) # Inicia o serviço do google sheets
 
 
-from pipeline_manut_main.src.geoex import Geoex
+from src.geoex import Geoex
 
 class Bots:
 
     def __init__(self):
-        self.geoex = Geoex()
+        self.geoex = Geoex(json_file='cookie_hugo.json')
 
 
     def le_planilha_google(self, url, aba, render_option='UNFORMATTED_VALUE'):
@@ -47,7 +44,7 @@ class Bots:
             # ATUALIZA NA PLANILHA GOOGLE
             try:
                 #df = pd.read_csv(os.path.join(PATH, 'downloads/Geoex - Relatório - Acompanhamento - Detalhado.csv'), encoding='ISO-8859-1', sep=';', thousands='.', decimal=',')
-                df = pd.read_csv(os.path.join(PATH, 'pipeline_manut_main/downloads/Geoex - Relatório - Acompanhamento - Detalhado.csv'), encoding='ISO-8859-1', sep=';', thousands='.', decimal=',')
+                df = pd.read_csv(os.path.join(PATH, 'downloads/Geoex - Relatório - Acompanhamento - Detalhado.csv'), encoding='ISO-8859-1', sep=';', thousands='.', decimal=',')
                 
                 # Filtrando o dataframe
                 df = df[~df['TITULO'].str.startswith(('COBRANCA', 'LIGACAO', 'PERDAS')) & ~df['TITULO'].str.contains('SOLAR', na=False)]
@@ -116,7 +113,7 @@ class Bots:
             try:
                 # Leitura dos dados
                 df = pd.read_csv(
-                    os.path.join(PATH, 'pipeline_manut_main/downloads/Geoex - Acomp - Envio de pastas - Consulta.csv'),
+                    os.path.join(PATH, 'downloads/Geoex - Acomp - Envio de pastas - Consulta.csv'),
                     encoding='ISO-8859-1',
                     sep=';',
                     parse_dates=['ENVIO_PASTA_DATA_SOLICITACAO'], 
@@ -183,7 +180,7 @@ class Bots:
                 # Leitura dos dados
                 df = pd.read_csv(
                     #os.path.join(PATH, 'downloads/Geoex - Processos com HRO - Consulta.csv'),
-                    os.path.join(PATH, 'pipeline_manut_main/downloads/Geoex - Processos com HRO - Consulta.csv'),
+                    os.path.join(PATH, 'downloads/Geoex - Processos com HRO - Consulta.csv'),
                     encoding='ISO-8859-1',
                     sep=';',
                     parse_dates=['DT_ENVIO'],
@@ -225,15 +222,15 @@ class Bots:
 
     def read_cji3(self):
         try:
-            os.rename(os.path.join(PATH, 'pipeline_manut_main/assets/cji3.XLS'), os.path.join(PATH, 'pipeline_manut_main/assets/cji3.csv'))
+            os.rename(os.path.join(PATH, 'assets/cji3.XLS'), os.path.join(PATH, 'assets/cji3.csv'))
         except FileExistsError:
-            os.remove(os.path.join(PATH, 'pipeline_manut_main/assets/cji3.csv'))
-            os.rename(os.path.join(PATH, 'pipeline_manut_main/assets/cji3.XLS'), os.path.join(PATH, 'pipeline_manut_main/assets/cji3.csv'))
+            os.remove(os.path.join(PATH, 'assets/cji3.csv'))
+            os.rename(os.path.join(PATH, 'assets/cji3.XLS'), os.path.join(PATH, 'assets/cji3.csv'))
         except FileNotFoundError:
             pass
 
         cji3 = pd.read_csv(
-            os.path.join(PATH, 'pipeline_manut_main/assets/cji3.csv'),
+            os.path.join(PATH, 'assets/cji3.csv'),
             sep='\t',
             encoding='ISO-8859-1',
             skiprows=1,
@@ -263,15 +260,15 @@ class Bots:
 
     def read_zmm370(self):
         try:
-            os.rename(os.path.join(PATH, 'pipeline_manut_main/assets/zmm370.XLS'), os.path.join(PATH, 'pipeline_manut_main/assets/zmm370.csv'))
+            os.rename(os.path.join(PATH, 'assets/zmm370.XLS'), os.path.join(PATH, 'assets/zmm370.csv'))
         except FileExistsError:
-            os.remove(os.path.join(PATH, 'pipeline_manut_main/assets/zmm370.csv'))
-            os.rename(os.path.join(PATH, 'pipeline_manut_main/assets/zmm370.XLS'), os.path.join(PATH, 'pipeline_manut_main/assets/zmm370.csv'))
+            os.remove(os.path.join(PATH, 'assets/zmm370.csv'))
+            os.rename(os.path.join(PATH, 'assets/zmm370.XLS'), os.path.join(PATH, 'assets/zmm370.csv'))
         except FileNotFoundError:
             pass
 
         zmm370 = pd.read_csv(
-            os.path.join(PATH, 'pipeline_manut_main/assets/zmm370.csv'),
+            os.path.join(PATH, 'assets/zmm370.csv'),
             sep='\t',
             encoding='ISO-8859-1',
             skiprows=1,
@@ -481,4 +478,3 @@ class Bots:
             print(hro)
             print(r['data'])
             
-    #def conferir_arquivos(self):

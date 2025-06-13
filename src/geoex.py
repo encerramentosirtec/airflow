@@ -1,15 +1,19 @@
 import os
+import sys
 import pandas as pd
 from time import sleep
+import json
 
-from pipeline_manut_main.hook.geoex_hook import GeoexHook
+from hooks.geoex_hook import GeoexHook
 
 class Geoex:
 
-    def __init__(self):
-        #self.PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..') # Altera diretório raiz de execução do código
-        self.PATH = os.path.join(os.getcwd(),'dags')
-        #print(self.PATH)
+    def __init__(self, json_file):
+        self.PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..') # Altera diretório raiz de execução do código
+        
+        with open(os.path.join(self.PATH, f'assets/auth_geoex/{json_file}'), 'r') as f:
+            self.cookie = json.load(f)
+
 
     def confere_arquivos(self, projeto_id):
         id_pastas = {
@@ -48,7 +52,7 @@ class Geoex:
 
         
         while True:
-            r = GeoexHook().run(endpoint, json=json)
+            r = GeoexHook(self.cookie).run(endpoint, json=json)
             
             if r.status_code == 200:
                 arquivos_015 = 0
@@ -88,7 +92,7 @@ class Geoex:
             "Relatorio": id_relatorio
         }
 
-        r = GeoexHook().run('POST', endpoint, json=json)
+        r = GeoexHook(self.cookie).run('POST', endpoint, json=json)
 
         if r.status_code == 200:
             id = r.json()['Content']
@@ -106,7 +110,7 @@ class Geoex:
                     "Tipo": "Baixar",
                 }
 
-                r = GeoexHook().run('POST', endpoint, json=json)
+                r = GeoexHook(self.cookie).run('POST', endpoint, json=json)
                 
                 print('estagio 1', r)
 
@@ -137,7 +141,7 @@ class Geoex:
                     "Tipo": "Baixar",
                 }
 
-                r = GeoexHook().run('POST', endpoint, json=json)
+                r = GeoexHook(self.cookie).run('POST', endpoint, json=json)
 
                 print('estagio 2', r.json())
 
@@ -153,9 +157,9 @@ class Geoex:
         else:
             return {'sucess': False, 'status_code': r.status_code, 'data': r}
 
-        csv = GeoexHook().run('GET', arquivo)
+        csv = GeoexHook(self.cookie).run('GET', arquivo)
         #with open(os.path.join(self.PATH, f'downloads/{nome}'), 'wb') as f:
-        with open(os.path.join(self.PATH,f'pipeline_manut_main/downloads/{nome}'), 'wb') as f:
+        with open(os.path.join(self.PATH,f'downloads/{nome}'), 'wb') as f:
             f.write(csv.content)
 
         return {'sucess': True}
@@ -167,7 +171,7 @@ class Geoex:
             'id': projeto
         }
 
-        r = GeoexHook().run('POST', endpoint, json=json)
+        r = GeoexHook(self.cookie).run('POST', endpoint, json=json)
 
         if r.status_code == 200:
             content = r.json()
@@ -190,7 +194,7 @@ class Geoex:
             }
         }
 
-        r = GeoexHook().run('POST', endpoint, json=json)
+        r = GeoexHook(self.cookie).run('POST', endpoint, json=json)
     
         if r.status_code == 200:
             content = r.json()
@@ -209,7 +213,7 @@ class Geoex:
                 "Serial": serial,
             }
 
-            r = GeoexHook().run('POST', endpoint, json=json)
+            r = GeoexHook(self.cookie).run('POST', endpoint, json=json)
             if r.status_code == 200:
                 content = r.json()
                 if content['StatusCode'] == 200:
@@ -307,7 +311,7 @@ class Geoex:
                 ]
             }
             
-            r = GeoexHook().run('POST', endpoint, json=json)
+            r = GeoexHook(self.cookie).run('POST', endpoint, json=json)
 
             if r.status_code == 200:
                 content = r.json()
@@ -325,7 +329,7 @@ class Geoex:
 
         endpoint = 'QARegistroOperacional/AtualizacaoEmMassa/EncerramentoOnlineOperacional/Salvar'
 
-        r = GeoexHook().run('POST', endpoint, files=files)
+        r = GeoexHook(self.cookie).run('POST', endpoint, files=files)
 
         if r.status_code == 200:
             content = r.json()
@@ -362,7 +366,7 @@ class Geoex:
             "Serial": serial
         }
         
-        r = GeoexHook().run('POST', endpoint, json=json)
+        r = GeoexHook(self.cookie).run('POST', endpoint, json=json)
 
         if r.status_code == 200:
             content = r.json()

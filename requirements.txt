@@ -3,3 +3,5 @@ gspread==6.2.1
 pandas==2.3.0
 numpy==2.3.0
 cloudscraper==1.2.71
+
+# Instalar o airflow com comando: pip install "apache-airflow==3.0.2" "apache-airflow-providers-google==8.0.0"

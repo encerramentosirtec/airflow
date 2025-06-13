@@ -1,16 +1,16 @@
 import sys
 import os
-#PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), "..")
-#os.chdir(PATH)
-#sys.path.insert(0, PATH)
-#print(os.getcwd())
+
+PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), "..")
+os.chdir(PATH)
+sys.path.insert(0, PATH)
 
 import pendulum
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
-from pipeline_manut_main.src.bots import Bots
+from src.bots_manut import Bots
 
 bots = Bots()
 
@@ -25,12 +25,12 @@ default_args = {
 }
 
 with DAG(
-    'main',
-    schedule_interval='*/30 6-22 * * *',
+    'pipeline_manut',
+    schedule='*/30 6-22 * * *',
     start_date=pendulum.today('America/Sao_Paulo'),
     catchup=False,
     default_args = default_args,
-    default_view="graph",
+    # default_view="graph",
     max_active_runs = 1,
     tags = ['manut', 'geoex']
 ):
