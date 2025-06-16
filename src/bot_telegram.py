@@ -56,6 +56,17 @@ def testa_cookie(c='', g='', gb=''):
     else:
         return True
 
+def push_cookie(ti):
+    data_new = abre_json('dags/_internal/cookie_heli.json')
+    cookie_new = data_new['cookie']
+    gxsessao_new = data_new['gxsessao']
+    useragent_new = data_new['useragent']
+    gxbot_new = data_new['gxbot']
+    ti.xcom_push(key='cookie_manut', value=cookie_new)
+    ti.xcom_push(key='gxsessao_manut', value=gxsessao_new)
+    ti.xcom_push(key='useragent_manut', value=useragent_new)
+    ti.xcom_push(key='gxbot_manut', value=gxbot_new)
+
 class Bots:
 
     def __init__(self):
