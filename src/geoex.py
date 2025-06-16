@@ -1,6 +1,6 @@
 import os
-import sys
-import pandas as pd
+#import sys
+#import pandas as pd
 from time import sleep
 import json
 
@@ -86,7 +86,7 @@ class Geoex:
                 
 
 
-    def baixar_relatorio(self, id_relatorio):
+    def baixar_relatorio(self, id_relatorio, file_path = 'downloads'):
         endpoint = 'Relatorio/Agendar'
         json = {
             "Relatorio": id_relatorio
@@ -159,7 +159,7 @@ class Geoex:
 
         csv = GeoexHook(self.cookie).run('GET', arquivo)
         #with open(os.path.join(self.PATH, f'downloads/{nome}'), 'wb') as f:
-        with open(os.path.join(self.PATH,f'downloads/{nome}'), 'wb') as f:
+        with open(os.path.join(self.PATH,f'{file_path}/{nome}'), 'wb') as f:
             f.write(csv.content)
 
         return {'sucess': True}
