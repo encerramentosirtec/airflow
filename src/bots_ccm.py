@@ -1,5 +1,5 @@
 import os
-import re
+#import re
 import json
 import gspread
 import traceback
@@ -24,6 +24,15 @@ class Bots:
         self.GS_SERVICE = gspread.service_account(filename=os.path.join(os.getcwd(), cred_path))
         self.br_tz = timezone("Brazil/East")
 
+        self.statuspastaid = {
+            1 : 'CRIADO',
+            6 : 'CANCELADO',
+            30 : 'ACEITO',
+            31 : 'ACEITO COM RESTRIÇÕES',
+            32 : 'REJEITADO',
+            35 : 'VALIDADO'
+        }
+
 
 
     def le_planilha_google(self, url, aba, intervalo=None, render_option='UNFORMATTED_VALUE'):
@@ -33,9 +42,10 @@ class Bots:
             sh = self.GS_SERVICE.open_by_key(url)
         ws = sh.worksheet(aba)
         if intervalo == None:
-            df = pd.DataFrame(ws.get_all_values(value_render_option=render_option))
+            df = ws.get_all_values(value_render_option=render_option)
         else:
-            df = pd.DataFrame(ws.get_all_values(range_name='A1:F', value_render_option=render_option))
+            df = ws.get_all_values(range_name=intervalo, value_render_option=render_option)
+        df = pd.DataFrame(df, columns = df.pop(0))
 
         return df
 
@@ -111,7 +121,7 @@ class Bots:
                 print('lendo diaC')
                 break
             except Exception as e:
-                print(e)
+                traceback.print_exc()
                 sleep(62)
                 pass
 
@@ -125,6 +135,7 @@ class Bots:
         datas_para_filtrar = ['01/01/2023', '01/02/2023', '01/03/2023', '01/04/2023', '01/05/2023', '01/06/2023']
         obras_concluidas_completo = obras_concluidas_completo.loc[~obras_concluidas_completo['CARTEIRA'].isin(datas_para_filtrar)]
         obras_concluidas = (((obras_concluidas_completo['PROJETO'].drop_duplicates())))
+        print(obras_concluidas)
 
         obras_concluidas_formatado = []
         for i in obras_concluidas:
@@ -337,7 +348,7 @@ class Bots:
                         municipio = ''
                     
                     projetos_pendente_asbuilt.append([unidade, i, titulo, vl_projeto, data_energ, supervisor, municipio])
-                    print(Fore.GREEN + f'\n{status_pasta} - {i} - {unidade} - {municipio} - {titulo} - {data_energ} - {vl_projeto} - ({x}/{str(len(obras_concluidas_sem_pasta_no_fechamento))})')
+                    print(f'\n{status_pasta} - {i} - {unidade} - {municipio} - {titulo} - {data_energ} - {vl_projeto} - ({x}/{str(len(obras_concluidas_sem_pasta_no_fechamento))})')
                 else:
                     project_name = resposta['Content'].get('Titulo', '')
                     df.loc[len(df)] = [i, project_name, status_pasta]
@@ -369,136 +380,66 @@ class Bots:
                 print(e)
 
 
-    # Data pendência
-    def data_pendencia():
-        # Abrir credenciais do Google Sheets
-        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-        creds = ServiceAccountCredentials.from_json_keyfile_name('dags/_internal/jimmy.json', scope)
-        gs = gspread.authorize(creds)
-        sh = gs.open_by_key('141SkTq1Gr049nSwqgIwxoP4MbNhR5Y8WbMTSfGQf9ik')
-        url_geo = 'Cadastro/ConsultarProjeto/'
-        cookie_path = 'dags/_internal/cookie_ccm.json'
+    # LV Geral
+    
+    def lv_geral(self):
+        url = 'Cadastro/ConsultarProjeto/Item'
 
-        
-        with open('dags/_internal/cookie_ccm.json', 'r') as f:
-            cookie = json.load(f)
-        
-        def hora_atual():
-            data_e_hora_atuais = datetime.now()
-            data_e_hora_em_texto = data_e_hora_atuais.strftime('%d/%m/%Y %H:%M')
+        id = '1OGcmrWmbZs0ouApHKaVfYEJEhzfEfBIa7eMezkLvk84'
 
-            return data_e_hora_em_texto
+        gspread_service = gspread.service_account(filename=os.path.join(self.PATH, 'dags/_internal/causal_scarab.json'))
+        sh = gspread_service.open_by_key(id)
 
-        def data_geo(projetoid):
-            with open('dags/BOB_V2/_internal/cookie.json', 'r') as f:
-                cookie = json.load(f)
+        lv = self.le_planilha_google(id, "LV GERAL")
+        lv = lv[lv['PROJETO']!='']
+        lv['PROJETO'] = lv['PROJETO'].str.strip()
+
+        status = []
+        for index, row in lv.iterrows():
+            primeiro = lv[lv['PROJETO'] == row['PROJETO']].index[0]
             
-            url = 'ConsultarProjeto/TermoGeo/Itens'
-            header = {
-                'Cookie': cookie['cookie'],
-                'User-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
-                'Gxsessao': cookie['Gxsessao'],
-                'Gxbot': cookie['Gxbot'],
-            }
-
-            body = {
-                'ProjetoId': projetoid
-            }
-
-            try:
-                r = GeoexHook(cookie_path).run('POST', url, json = body).json()
-                return r['Content']['Items'][0]['Data']
-            except Exception as e:
-                print('Não foi possível acessar a página do GEOEX.')
-                print(e)
-                return ''
-
-        def procura_projeto(projeto):
-            datazps = ''
-            fim = True
-
-            url = url_geo+'Item'
-            header = {
-                'Cookie': cookie['cookie'],
-                'User-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
-                'Gxsessao': cookie['Gxsessao'],
-                'Gxbot': cookie['Gxbot'],
-            }
-
-            body = {
-                'id': projeto
-            }
-
-            while True:
-                try:
-                    r = GeoexHook(cookie_path).run('POST', url, json = body)
-                    if r.status_code!=200:
-                        print("\033[K", projeto+' Erro na requisição: Code: '+str(r.status_code)+', Reason: '+str(r.reason), end='\r')
-                        sleep(30)
-                        fim = True
-                        continue
-                    if fim:
-                        print(' Erro na requisição: Code: '+str(r.status_code)+', Reason: '+str(r.reason))
-                        fim = False
-                        #print('')
-                    r = r.json()
-                    break
-                except Exception as e:
-                    print(hora_atual())
-                    traceback.print_exc()
-                    print('Requisição', r)
-                    print('Projeto ', projeto)
-                    raise Exception('Não foi possível acessar a página do GEOEX.')
-            
-            if r['Content'] != None:
-                if r['Content']['DtZps09'] != None:
-                    datazps = datetime.fromisoformat(r['Content']['DtZps09']).date().strftime("%d/%m/%Y")
-                else:
-                    datazps = ''
-            elif r['IsUnauthorized']:
-                print(r)
-                raise Exception('Cookie inválido! Não autorizado')
-            
-            return datazps
-
-        def acha_nome(nome):
-            inicio = nome.find("'")
-            inicio += 1
-            fim = nome[inicio:].find("'")
-            fim = inicio + fim
-            return nome[inicio:fim]
-
-        planilha='Etapa de documentos'
-        sheet = sh.worksheet(planilha).get_all_values()
-        sheet = pd.DataFrame(sheet, columns = sheet.pop(0))
-
-        valores = []
-        #valores2 = []
-        tamanho = sheet.shape[0]
-
-        for c,j in enumerate(sheet['Projeto']):
-            if j != '':
-                '''if sheet['Data ZPS09'][c] != '':
-                    a = []
-                else:
-                    a = [procura_projeto(j)]
-                    if a == ['']: a = []'''
-                a = [procura_projeto(j)]
-                if a == ['']: a = []
-            else:
-                a = []
-            
-            print(c,'/',tamanho,' : ',j,'-',a)
-            valores.append(a)
-            #valores2.append({'Projeto': j, 'Data ZPS09': a})
-
-        
-        try:
-            sh.worksheet(planilha).update(range_name='H2:H', values=valores, value_input_option='USER_ENTERED')
-        except Exception as e:
-            traceback.print_exc()
-            print('Erro ao escrever na planilha')
-            #print(e)
+            if row['PROJETO'] and row['PROJETO']!='' and primeiro==index:
+                data = {"id": row['PROJETO']}
                 
-        print('Acabou!')
+                try:
+                    resposta = self.fazer_requisicao(url, data)
+                    id_projeto = resposta['Content']['ProjetoId']
+                    sleep(1)
+                    
+                    url_pasta = 'ConsultarProjeto/EnvioPasta/Itens'
+                    body_pasta = {'ProjetoId': id_projeto} 
+                    
+                    try:
+                        resposta_pasta = self.fazer_requisicao(url=url_pasta, body=body_pasta)#, headers=headers)
+                        conteudo_pasta = resposta_pasta['Content']['Envios']
+                        sleep(1)
+                        status_pasta = ''
+                        for i in conteudo_pasta:
+                            if i['EmpresaId']==70:
+                                status_pasta = self.statuspastaid.get(i['Ultimo']['HistoricoStatusId'],i['Ultimo']['HistoricoStatusId'])
+                                break
+                            else:
+                                status_pasta = ''    
+                    except:
+                        status_pasta = ''
+                    
+                    status.append(str(status_pasta))
+                except Exception as e:
+                    print(e)
+                    status_pasta = ''
+                    status.append('')
+                    pass
+            elif row['PROJETO']!='' and primeiro!=index:
+                print(len(status))
+                status.append(str(status[primeiro]))
+                print(f'{(index+1):03}/{lv.shape[0]} - projeto: {row['PROJETO']}, status pasta: {status[primeiro]} (repetido)')
+                continue
+            else:
+                status.append('')
+            
+            print(f'{(index+1):03}/{lv.shape[0]} - projeto: {row['PROJETO']}, status pasta: {status_pasta}')
 
+        df_dict = pd.DataFrame(status)
+        print(df_dict)
+
+        sh.worksheet("LV GERAL").update('Z2', df_dict.values.tolist())
