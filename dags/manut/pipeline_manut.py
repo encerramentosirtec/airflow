@@ -1,7 +1,7 @@
 import sys
 import os
 
-PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), "..")
+PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../..")
 os.chdir(PATH)
 sys.path.insert(0, PATH)
 
