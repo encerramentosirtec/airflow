@@ -43,7 +43,7 @@ class GeoexHook(HttpHook):
                     sleep(10)
                     continue
                 if response.status_code == 403:
-                    raise "status code 403 - atualizar cookie"
+                    raise Exception("status code 403 - atualizar cookie")
                 else:
                     break
 
