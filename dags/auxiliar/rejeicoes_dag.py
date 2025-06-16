@@ -21,7 +21,7 @@ with DAG('rejeicoes',
         start_date=today('America/Sao_Paulo'),
         schedule_interval = '0 8,11,14,17 * * 1-6',
         max_active_runs = 1,
-        tags = ['rejeicoes', 'geoex', 'fechamento', 'email'],
+        tags = ['rejeicoes', 'geoex', 'email', 'aux'],
         catchup = False) as dag:
 
     relatorio = PythonOperator(

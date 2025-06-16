@@ -86,11 +86,9 @@ class Geoex(GeoexHook):
                 
 
 
-    def baixar_relatorio(self, id_relatorio, file_path = 'downloads'):
+    def baixar_relatorio(self, id_relatorio, name = None, file_path = 'downloads'):
         endpoint = 'Relatorio/Agendar'
-        json = {
-            "Relatorio": id_relatorio
-        }
+        json = {"Relatorio": id_relatorio}
 
         r = GeoexHook(self.cookie).run('POST', endpoint, json=json)
 
@@ -157,8 +155,9 @@ class Geoex(GeoexHook):
         else:
             return {'sucess': False, 'status_code': r.status_code, 'data': r}
 
+        if name != None: nome = f'{name}.csv'
+
         csv = GeoexHook(self.cookie).run('GET', arquivo)
-        #with open(os.path.join(self.PATH, f'downloads/{nome}'), 'wb') as f:
         with open(os.path.join(self.PATH,f'{file_path}/{nome}'), 'wb') as f:
             f.write(csv.content)
 

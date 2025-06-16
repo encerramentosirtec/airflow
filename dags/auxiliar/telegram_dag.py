@@ -19,7 +19,7 @@ with DAG('bot-telegram',
         start_date=today('America/Sao_Paulo'),
         schedule_interval = None,
         max_active_runs = 1,
-        tags = ['manut', 'telegram'],
+        tags = ['manut', 'telegram', 'aux'],
         catchup = False) as dag:
     
     run_bot = PythonOperator(

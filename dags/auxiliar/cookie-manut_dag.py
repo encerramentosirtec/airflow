@@ -16,7 +16,7 @@ with DAG('cookie-manut',
         default_view="graph",
         start_date=today('America/Sao_Paulo'),
         schedule_interval = None,
-        tags = ['manut', 'cookie'],
+        tags = ['manut', 'cookie', 'aux'],
         catchup = False) as dag:
     
     push_cookie = PythonOperator(

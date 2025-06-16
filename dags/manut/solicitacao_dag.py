@@ -20,7 +20,7 @@ with DAG('solicitacoes-de-reservas',
         start_date=today('America/Sao_Paulo'),
         schedule_interval = '0 6,12 * * 1-6',
         max_active_runs = 1,
-        tags = ['reservas', 'geoex'],
+        tags = ['reservas', 'geoex', 'manut'],
         catchup = False) as dag:
 
     solicitacoes = PythonOperator(
