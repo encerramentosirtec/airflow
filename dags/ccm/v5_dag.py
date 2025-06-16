@@ -2,24 +2,26 @@ from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator, BranchPythonOperator
 from datetime import datetime
 from pendulum import timezone, duration
-from BOB_V2.Commands.bib_geoex import atualiza_pasta
+from src.bots_ccm import Bots
+
+bot = Bots()
 
 def conquista():
-    atualiza_pasta('OBRAS CONQUISTA')
+    bot.atualiza_pasta_v5('OBRAS CONQUISTA')
 def barreiras():
-    atualiza_pasta('OBRAS BARREIRAS')
+    bot.atualiza_pasta_v5('OBRAS BARREIRAS')
 def irece():
-    atualiza_pasta('OBRAS IRECE')
+    bot.atualiza_pasta_v5('OBRAS IRECE')
 def brumado():
-    atualiza_pasta('OBRAS BRUMADO')
+    bot.atualiza_pasta_v5('OBRAS BRUMADO')
 def jequie():
-    atualiza_pasta('OBRAS JEQUIE')
+    bot.atualiza_pasta_v5('OBRAS JEQUIE')
 def ibotirama():
-    atualiza_pasta('OBRAS IBOTIRAMA')
+    bot.atualiza_pasta_v5('OBRAS IBOTIRAMA')
 def lapa():
-    atualiza_pasta('OBRAS LAPA')
+    bot.atualiza_pasta_v5('OBRAS LAPA')
 def guanambi():
-    atualiza_pasta('OBRAS GUANAMBI')
+    bot.atualiza_pasta_v5('OBRAS GUANAMBI')
 
 br_tz = timezone("Brazil/East")
 

@@ -23,6 +23,7 @@ class Bots:
             self.cookie = json.load(f)
             
         self.geoex = Geoex('cookie_ccm.json')
+        self.cred_path = cred_path
         self.GS_SERVICE = gspread.service_account(filename=os.path.join(os.getcwd(), cred_path))
         self.br_tz = timezone("Brazil/East")
 
@@ -498,7 +499,7 @@ class Bots:
             print(r)
             raise Exception('Erro não identificado')
     
-    def atualiza_aba(self, aba):
+    def atualiza_aba_v2(self, aba):
         gs = gspread.service_account(filename=os.path.join(self.PATH, 'dags/_internal/jimmy.json'))
         sh = gs.open_by_key(configs.id_planilha_postagemV5)
         v5 = sh.worksheet(aba).get_all_values()
@@ -540,7 +541,7 @@ class Bots:
             except Exception as e:
                 print(e)
     
-    def atualiza_data(self):
+    def atualiza_data_v2(self):
         SERVICE_ACCOUNT_FILE = os.path.join(self.PATH, 'dags/_internal/causal_scarab.json')
         SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
         spreadsheetId = '18-AoLupeaUIOdkW89o6SLK6Z9d8X0dKXgdjft_daMBk'
@@ -573,7 +574,7 @@ class Bots:
 
     # V5
     def consulta_projeto(self, projeto):
-        #print(cookie, '\n', gxsessao, '\n', useragent)
+        datazps09 = ''
         estagio_hektor = ''
         projetoid = ''
         r = ''
@@ -591,11 +592,14 @@ class Bots:
                 
             if r['Content']['ProjetoId'] != None:
                 projetoid = r['Content']['ProjetoId']
+                
+            if r['Content']['DtZps09'] != None:
+                datazps09 = datetime.fromisoformat(r['Content']['DtZps09']).date().strftime("%d/%m/%Y")
         elif r['IsUnauthorized']:
             print(r)
             raise Exception('Cookie inválido! Não autorizado')
         
-        return estagio_hektor, projetoid
+        return estagio_hektor, projetoid, datazps09
 
     def consulta_pasta(self, projetoid):
         #print(cookie, '\n', gxsessao, '\n', useragent)
@@ -659,9 +663,9 @@ class Bots:
         
         return status_encerramento
 
-    def atualiza_pasta(self, aba):
+    def atualiza_pasta_v5(self, aba):
         scope = 'https://spreadsheets.google.com/feeds'
-        creds = ServiceAccountCredentials.from_json_keyfile_name('dags/_internal/causal_scarab.json', scope)
+        creds = ServiceAccountCredentials.from_json_keyfile_name(os.path.join(os.getcwd(), self.cred_path), scope)
         gs = authorize(creds)
         sh = gs.open_by_key(configs.id_planilha_postagemV5)
         valores = [[],[],[],[]]
@@ -684,7 +688,7 @@ class Bots:
                 status_encerramento = ''
             else:
                 try:
-                    hektor, projetoid = self.consulta_projeto(j)
+                    hektor, projetoid, datazps09 = self.consulta_projeto(j)
                     if hektor == ('','',''):
                         hektor=''
                     sleep(1)
@@ -712,4 +716,48 @@ class Bots:
 
         print('Pastas atualizadas!')
 
+
+    # ZPS09
+    def atualiza_zps09(self):
+        scope = 'https://spreadsheets.google.com/feeds'
+        creds = ServiceAccountCredentials.from_json_keyfile_name(os.path.join(os.getcwd(), self.cred_path), scope)
+        gs = authorize(creds)
+        aba = 'Auxiliar (transporte)'
+        sh = gs.open_by_key(configs.id_planilha_postagemV5)
+        valores = [[],[],[],[]]
+
+        print('Atualizando ZPS09')
+
+        sheet = sh.worksheet(aba).get_all_values()
+        sheet = pd.DataFrame(sheet, columns = sheet.pop(0))
+        tamanho = sheet.shape[0]
+        
+        for i,j in enumerate(sheet['PROJETO']):
+            if j=="":
+                valores.append([''])
+                zps09 = ''
+            else:
+                if sheet['DATA ZPS09'][i]!='':
+                    valores.append([])
+                    zps09=f'{sheet['DATA ZPS09'][i]} (existente)'
+                else:
+                    try:
+                        a, b, zps09 = self.consulta_projeto(j)
+                        valores.append([zps09])
+                        sleep(1)
+                    except Exception as e:
+                        print(f'Erro no projeto {j}')
+                        traceback.print_exc()
+                        raise e
+            
+            print(f'{str(i+1)}/{str(tamanho)} - {j}: {zps09}')
+
+        while True:
+            try:
+                sh.worksheet(aba).update(range_name="E2", values=valores[1], value_input_option='USER_ENTERED')
+                break
+            except Exception as e:
+                print(e)
+
+        print('ZPS09 atualizada!')
 

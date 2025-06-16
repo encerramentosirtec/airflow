@@ -2,24 +2,26 @@ from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
 from pendulum import timezone, duration
-from BOB_V2.Commands.v2_atesto import atualiza_aba, atualiza_data
+from src.bots_ccm import Bots
+
+bot = Bots()
 
 def conquista():
-    atualiza_aba('OBRAS CONQUISTA')
+    bot.atualiza_aba_v2('OBRAS CONQUISTA')
 def barreiras():
-    atualiza_aba('OBRAS BARREIRAS')
+    bot.atualiza_aba_v2('OBRAS BARREIRAS')
 def irece():
-    atualiza_aba('OBRAS IRECE')
+    bot.atualiza_aba_v2('OBRAS IRECE')
 def brumado():
-    atualiza_aba('OBRAS BRUMADO')
+    bot.atualiza_aba_v2('OBRAS BRUMADO')
 def jequie():
-    atualiza_aba('OBRAS JEQUIE')
+    bot.atualiza_aba_v2('OBRAS JEQUIE')
 def ibotirama():
-    atualiza_aba('OBRAS IBOTIRAMA')
+    bot.atualiza_aba_v2('OBRAS IBOTIRAMA')
 def lapa():
-    atualiza_aba('OBRAS LAPA')
+    bot.atualiza_aba_v2('OBRAS LAPA')
 def guanambi():
-    atualiza_aba('OBRAS GUANAMBI')
+    bot.atualiza_aba_v2('OBRAS GUANAMBI')
 
 br_tz = timezone("Brazil/East")
 
@@ -84,7 +86,7 @@ with DAG('v2_atesto',
     
     atualiza_data = PythonOperator(
         task_id='atualiza_data',
-        python_callable=atualiza_data
+        python_callable=bot.atualiza_data_v2
     )
     
     brumado>>conquista>>barreiras>>irece>>jequie>>ibotirama>>lapa>>guanambi>>atualiza_data

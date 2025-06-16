@@ -11,7 +11,7 @@ br_tz = timezone("Brazil/East")
 PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../..")
 os.chdir(PATH)
 sys.path.insert(0, PATH)
-bots = Bots()
+bot = Bots()
 
 default_args = {
     'depends_on_past' : False,
@@ -32,7 +32,7 @@ with DAG('asbuilt',
     
     asbuilt = PythonOperator(
         task_id='asbuilt',
-        python_callable=bots.asbuilt,
+        python_callable=bot.asbuilt,
         retries=2,
         retry_delay=duration(seconds=20)
     )

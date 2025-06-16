@@ -12,23 +12,23 @@ default_args = {
     'email' : ['heli.silva@sirtec.com.br'],
     'email_on_failure' : True,
     'email_on_retry' : False,
-    'owner' : 'bob',
-    'retries' : 2,
-    'retry_delay' : duration(seconds=5)
+    'owner' : 'bob'
 }
 
-with DAG('lv',
+with DAG('atualizarzps09',
         default_args = default_args,
         default_view="graph",
         start_date=datetime(2024,12,1,tzinfo=br_tz),
-        schedule_interval = '0,30 2,6,7,8,9,10,11,13,15,16,17,19,21 * * 1-6',
+        schedule_interval = '0 8,11,13,15 * * 1-6',
         max_active_runs = 1,
         tags = ['obra', 'geoex'],
         catchup = False) as dag:
     
-    lv = PythonOperator(
-        task_id='lv',
-        python_callable=bot.lv_geral
+    atualizarzps09 = PythonOperator(
+        task_id='atualizarzps09',
+        python_callable=bot.atualiza_zps09,
+        retries=2,
+        retry_delay=duration(seconds=20)
     )
 
-    lv
+    atualizarzps09
