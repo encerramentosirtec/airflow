@@ -1,8 +1,9 @@
 from airflow.models.dag import DAG
-from airflow.operators.python import PythonOperator, BranchPythonOperator
-from manut.src.solicitacao_reservas import atualiza_solicitacoes
+from airflow.operators.python import PythonOperator
+from src.bots_manut import Bots
 from pendulum import today, duration
 
+bot = Bots()
 default_args = {
     'depends_on_past' : False,
     'email' : ['heli.silva@sirtec.com.br'],
@@ -24,7 +25,7 @@ with DAG('solicitacoes-de-reservas',
 
     solicitacoes = PythonOperator(
         task_id = 'solicitacoes',
-        python_callable = atualiza_solicitacoes
+        python_callable = bot.atualiza_solicitacoes
     )
 
     solicitacoes

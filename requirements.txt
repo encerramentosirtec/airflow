@@ -5,5 +5,9 @@ oauth2client
 pandas==2.3.0
 numpy==2.3.0
 cloudscraper==1.2.71
+seaborn
+matplotlib
+babel
+smtplib
 
 # Instalar o airflow com comando: pip install "apache-airflow==3.0.2" "apache-airflow-providers-google==8.0.0"

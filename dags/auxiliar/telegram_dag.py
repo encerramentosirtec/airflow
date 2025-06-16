@@ -1,7 +1,7 @@
 from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator
 from src.bot_telegram import Bots
-from datetime import datetime
+from pendulum import today
 
 bot = Bots()
 
@@ -16,7 +16,7 @@ default_args = {
 with DAG('bot-telegram',
         default_args = default_args,
         default_view="graph",
-        start_date=datetime(2024,12,1),
+        start_date=today('America/Sao_Paulo'),
         schedule_interval = None,
         max_active_runs = 1,
         tags = ['manut', 'telegram'],

@@ -383,7 +383,6 @@ class Bots:
 
 
     # LV Geral
-    
     def lv_geral(self):
         id = configs.id_planilha_postagemV5
 
@@ -445,7 +444,6 @@ class Bots:
 
 
     # V2 atesto
-    
     def pesquisa_geoex(self, projeto, atesto):
         body = {
             'id': projeto

@@ -1,11 +1,12 @@
-from datetime import datetime
+import os
+import re
 import gspread
 import json
 import numpy as np
-import os
 import pandas as pd
 from time import sleep
-import re
+from datetime import datetime
+from oauth2client.service_account import ServiceAccountCredentials
 
 PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..') # Altera diretório raiz de execução do código
 GS_SERVICE = gspread.service_account(filename=os.path.join(PATH, 'assets/auth_google/causal_scarab.json')) # Inicia o serviço do google sheets
@@ -16,7 +17,24 @@ from src.geoex import Geoex
 class Bots:
 
     def __init__(self):
-        self.geoex = Geoex(json_file='cookie_hugo.json')
+        self.geoex = Geoex(cookie_file='cookie_hugo.json')
+        self.endpoint_projeto = 'Cadastro/ConsultarProjeto/Item'
+        self.endpoint_reserva = 'ConsultarProjetoSolicitacaoReserva/Itens'
+        self.planilha_juncao = '1JFfnQaw-llIvPUp7J03jeNCugE56an7XkOXBxoQmE2k'
+
+        scope = 'https://spreadsheets.google.com/feeds'
+        creds = ServiceAccountCredentials.from_json_keyfile_name(os.path.join(PATH, 'assets/auth_google/jimmy.json'), scope)
+        self.gs = gspread.authorize(creds)
+        
+        self.reservas_ids = {
+            1: 'CRIADO',
+            6 : 'CANCELADO',
+            30 : 'ACEITO',
+            31 : 'ACEITO COM RESTRIÇÕES',
+            32 : 'REJEITADO',
+            35 : 'VALIDADO',
+            148 : 'ATENDIDO'
+        }
 
 
     def le_planilha_google(self, url, aba, render_option='UNFORMATTED_VALUE'):
@@ -486,4 +504,74 @@ class Bots:
             r = self.geoex.aceitar_hro(hro)
             print(hro)
             print(r['data'])
+    
+
+    # Solicitação de Reservas
+    def consulta_solicitacao(self, projeto):
+        status = ['']
+        serial = ['']
+        reserva = ['']
+        try:
+            r = self.geoex.run("POST", self.endpoint_projeto, json={'id': projeto}).json()
+        except Exception as e:
+            print(projeto, str(r.content), str(r.status_code), str(r.reason))
+            raise e
             
+        try:
+            body = {'ProjetoId': r['Content']['ProjetoId'],
+                'Rejeitadas': False,
+                'Paginacao': {'TotalPorPagina': "10", 'Pagina': "1"}}
+        except Exception as e:
+            print(projeto, r['Message'], r['StatusCode'], r['Content'])
+            raise e
+            
+        sleep(1)
+        try:
+            r = self.geoex.run("POST", self.endpoint_reserva, json=body).json()
+        except Exception as e:
+            print(projeto, r.content, str(r.status_code), str(r.reason))
+            raise e
+        
+        try:
+            if r['Content']['TotalWithFilter']!=0:
+                status = []
+                serial = []
+                reserva = []
+                for i in r['Content']['Items']:
+                    id = i['HistoricoAtual']['HistoricoStatusId']
+                    serial.append(i['Serial'])
+                    reserva.append(i['NumeroReserva'])
+                    status.append(self.reservas_ids.get(id, id))
+        except Exception as e:
+            if r['Message']=='Não foi possível processar sua solicitação. Ocorreu um erro no servidor. Tente novamente.':
+                status = ['ERRO']
+                serial = ['']
+            else:
+                print(projeto, r['Message'], r['Content'])
+                raise e
+                
+        return status, serial, reserva
+        
+    def atualiza_solicitacoes(self):
+        titulo = ['Projeto','Status','Solicitação','Reserva']
+        sheet = self.le_planilha_google(url=self.planilha_juncao, aba='Junção')
+        sheet['Projeto'] = sheet['Projeto'].str.strip()
+        sheet = sheet[sheet['Projeto']!='']
+        sheet = sheet[sheet['Categoria de pagamento'].isin(['CAPEX_OC', 'CAPEX_PREV'])]
+        sheet = sheet[sheet['Status movimentação dos materiais'].isin(['B. Pendente criação de reservas'])]
+        sheet = sheet.sort_values(by=['Projeto','Status movimentação dos materiais'], ascending=[True, True])
+        sheet = sheet.drop_duplicates(subset=['Projeto'], keep='first')
+        
+        valores = []
+        for i, projeto in enumerate(sheet['Projeto']):
+            status, serial, reserva = self.consulta_solicitacao(projeto)
+            for j, k, l in zip(status, serial, reserva):
+                valores.append([projeto, j, k, l])
+            print(f'{i+1}/{sheet.shape[0]}: {projeto}, {status}, {serial}, {reserva}')
+        
+        sh = self.gs.open_by_key(self.planilha_juncao)
+        sh.worksheet("Solicitações").clear()
+        sh.worksheet("Solicitações").update(range_name="A1", values=[titulo], value_input_option='USER_ENTERED')
+        sh.worksheet("Solicitações").update(range_name="A2", values=valores, value_input_option='USER_ENTERED')
+    
+    

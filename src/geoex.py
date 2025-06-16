@@ -6,12 +6,12 @@ import json
 
 from hooks.geoex_hook import GeoexHook
 
-class Geoex:
+class Geoex(GeoexHook):
 
-    def __init__(self, json_file):
+    def __init__(self, cookie_file):
         self.PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..') # Altera diretório raiz de execução do código
         
-        with open(os.path.join(self.PATH, f'assets/auth_geoex/{json_file}'), 'r') as f:
+        with open(os.path.join(self.PATH, f'assets/auth_geoex/{cookie_file}'), 'r') as f:
             self.cookie = json.load(f)
 
 

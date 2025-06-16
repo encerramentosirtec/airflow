@@ -1,7 +1,7 @@
 from airflow.models.dag import DAG
-from airflow.operators.python import PythonOperator, BranchPythonOperator
+from airflow.operators.python import PythonOperator
 from datetime import datetime
-from pendulum import timezone, duration
+from pendulum import timezone, duration, today
 from src.bots_ccm import Bots
 
 bot = Bots()
@@ -18,7 +18,7 @@ default_args = {
 with DAG('atualizarzps09',
         default_args = default_args,
         default_view="graph",
-        start_date=datetime(2024,12,1,tzinfo=br_tz),
+        start_date=today('America/Sao_Paulo'),
         schedule_interval = '0 8,11,13,15 * * 1-6',
         max_active_runs = 1,
         tags = ['obra', 'geoex'],
