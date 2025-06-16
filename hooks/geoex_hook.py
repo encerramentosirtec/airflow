@@ -30,7 +30,6 @@ class GeoexHook(HttpHook):
     def connect_to_endpoint(self, url, method, **kwargs):
         while True:
             try:
-                #response = self.run_and_check(session, prep, {})
                 if method=='POST':
                     response = self.scraper.post(url=url, headers = self.header, **kwargs)
                 else:
