@@ -11,6 +11,8 @@ from pendulum import timezone
 from datetime import datetime
 from src.config import configs
 from src.geoex import Geoex, GeoexHook
+from googleapiclient.discovery import build
+from google.oauth2.service_account import Credentials
 
 class Bots:
 
@@ -443,3 +445,133 @@ class Bots:
         print(df_dict)
 
         sh.worksheet("LV GERAL").update('Z2', df_dict.values.tolist())
+
+
+    # V2 atesto
+    
+    def pesquisa_geoex(self, projeto, atesto):
+        url = 'Cadastro/ConsultarProjeto/Item'
+        
+        body = {
+            'id': projeto
+        }
+
+        try:
+            r = self.fazer_requisicao(url, body)
+        except Exception as e:
+            print('Não foi possível acessar a página do Geoex.')
+            print(e)
+            return 'erro'
+        
+        if r['Content'] != None:
+            id_projeto = r['Content']['ProjetoId']
+
+            url = 'ConsultarProjeto/Postagem/Itens'
+            body = {
+                "ProjetoId": id_projeto,
+                "Search": atesto,
+                "Rejeitadas": True,
+                "Arquivadas": False,
+                "Paginacao": {
+                "TotalPorPagina": "10",
+                "Pagina": "1"
+                }
+            }
+
+            r = self.fazer_requisicao(url, body)
+        
+            if r['Content']['Items'] == []:
+                print('ID',atesto,'não pertence ao projeto',projeto + '.')
+                return 'erro'
+            else:
+                status_id = r['Content']['Items'][0]['Status']
+
+                if status_id == "Rejeitado":
+                    status_id = "Rejeitado"
+                elif status_id == "Postado":
+                    status_id = atesto
+                elif status_id != "Rejeitado":
+                    if status_id != "Postado":
+                        status_id = "OK"
+                else:
+                    status_id = status_id
+                
+                return status_id
+        elif r['IsUnauthorized']:
+            print(r)
+            raise Exception('Cookie inválido! Não autorizado')
+        else:
+            print(r)
+            raise Exception('Erro não identificado')
+    
+    def atualiza_aba(self, aba):
+        gs = gspread.service_account(filename=os.path.join(self.PATH, 'dags/_internal/jimmy.json'))
+        sh = gs.open_by_key('1OGcmrWmbZs0ouApHKaVfYEJEhzfEfBIa7eMezkLvk84')
+        v5 = sh.worksheet(aba).get_all_values()
+        v5 = pd.DataFrame(v5, columns=v5.pop(0))
+        projetos = v5['PROJETO']
+        colunas = ['ATESTO CAVA', 'ATESTO SUCATA', 'ATESTO LINHA VIVA', 'ATESTO EXCEDENTE', 'ATESTO FUNDAÇÃO', 'ARRASTAMENTO', 'ABERTURA DE FAIXA', 'ATESTO PODA']
+        status_ids = [[] for _ in range(len(colunas))]
+
+        for i, coluna in enumerate(colunas):
+            sleep(2)
+            atestos = v5[coluna]
+            for projeto, atesto in zip(projetos, atestos):
+                if atesto.startswith('PM'):
+                    status = self.pesquisa_geoex(projeto, atesto)
+                    if status != 'erro':
+                        status_ids[i].append([status])
+                    else:
+                        status_ids[i].append([atesto])
+                else:
+                    status_ids[i].append([atesto])
+                    status = atesto
+                
+                print(f'{coluna} {projetos[projetos == projeto].index.tolist()[0]+1}/{projetos.shape[0]} - projeto: {projeto}, atesto: {atesto}, status: {status}')
+
+        for i, coluna in enumerate(colunas):
+            v5[coluna] = status_ids[i]
+
+        while True:
+            try:
+                sh.worksheet(aba).update(range_name='U2:U', values=status_ids[0])
+                sh.worksheet(aba).update(range_name='V2:V', values=status_ids[1])
+                sh.worksheet(aba).update(range_name='W2:W', values=status_ids[2])
+                sh.worksheet(aba).update(range_name='Y2:Y', values=status_ids[3])
+                sh.worksheet(aba).update(range_name='Z2:Z', values=status_ids[4])
+                sh.worksheet(aba).update(range_name='AA2:AA', values=status_ids[5])
+                sh.worksheet(aba).update(range_name='AB2:AB', values=status_ids[6])
+                sh.worksheet(aba).update(range_name='AE2:AE', values=status_ids[7])
+                break
+            except Exception as e:
+                print(e)
+    
+    def atualiza_data(self):
+        SERVICE_ACCOUNT_FILE = os.path.join(self.PATH, 'dags/_internal/causal_scarab.json')
+        SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+        spreadsheetId = '18-AoLupeaUIOdkW89o6SLK6Z9d8X0dKXgdjft_daMBk'
+        range_name = 'Atestos pendentes!D2:D2'
+
+        credentials = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+        service = build('sheets', 'v4', credentials=credentials)
+
+        try:
+            clear_result = service.spreadsheets().values().clear(
+                spreadsheetId=spreadsheetId, range=range_name).execute()
+            print("Intervalo limpo com sucesso.")
+        except Exception as err:
+            print(err)
+
+        hora = datetime.now(self.br_tz).strftime("%d/%m/%Y %H:%M")
+        values = [[f"{hora}"]]
+        body = {'values': values}
+
+        try:
+            result = service.spreadsheets().values().update(
+                spreadsheetId=spreadsheetId, range=range_name,
+                valueInputOption='RAW', body=body).execute()
+            print(f"{result.get('updatedCells')} células atualizadas.")
+        except Exception as err:
+            print(err)
+
+        print('['+ datetime.now(self.br_tz).strftime("%H:%M") + "] Status dos atesto atualizados!\n")
