@@ -1,18 +1,18 @@
 import os
-#import re
 import json
 import gspread
 import traceback
-import numpy as np
 import pandas as pd
 from time import sleep
 from src.geoex import Geoex
 from pendulum import timezone
 from datetime import datetime
+from gspread import authorize
 from src.config import configs
 from src.geoex import Geoex, GeoexHook
 from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials
+from oauth2client.service_account import ServiceAccountCredentials
 
 class Bots:
 
@@ -25,6 +25,11 @@ class Bots:
         self.geoex = Geoex('cookie_ccm.json')
         self.GS_SERVICE = gspread.service_account(filename=os.path.join(os.getcwd(), cred_path))
         self.br_tz = timezone("Brazil/East")
+
+        self.url_geo = 'Cadastro/ConsultarProjeto/Item'
+        self.url_pasta = 'ConsultarProjeto/EnvioPasta/Itens'
+        self.url_termo_geo = 'ConsultarProjeto/TermoGeo/Itens'
+        self.url_encerramento = 'ConsultarProjeto/EncerramentoOnline'
 
         self.statuspastaid = {
             1 : 'CRIADO',
@@ -230,8 +235,6 @@ class Bots:
 
         ####################### CONFERE QUAIS OBRAS ESTÃO PENDENTES DE ENVIO DA PASTA NO GEOEX
 
-        qtd = len(obras_concluidas_sem_pasta_no_fechamento)
-
         jequie = ['CRAVOLÂNDIA', 'BREJÕES', 'IRAJUBA', 'ITAQUARA', 'ITIRUÇU', 'JAGUAQUARA', 'JEQUIÉ', 'LAFAIETE COUTINHO', 'LAJEDO DO TOBOCAL', 'MANOEL VITORINO', 'MARACÁS', 'NOVA ITARANA', 'PLANALTINO', 'SANTA INÊS', 'LAFAIETE COUTINHO']
         vitoria_da_conquista = ['ANAGÉ', 'BARRA DO CHOÇA', 'BELO CAMPO', 'BOA NOVA', 'BOM JEJUS DA SERRA', 'CAETANOS', 'CÂNDIDO SALES', 'CARAÍBAS', 'CONDEÚBA', 'CORDEIROS', 'ENCRUZILHADA', 'MAETINGA', 'MIRANTE', 'PIRIPÁ', 'PLANALTO', 'POÇÕES', 'PRESIDENTE JANIO QUADROS', 'TREMEDAL', 'VITÓRIA DA CONQUISTA']
         itapetinga = ['MACARANI', 'CAATIBA', 'FIRMINO ALVES', 'IBICUÍ', 'IGUAÍ', 'ITAMBÉ', 'ITAPETINGA', 'ITARANTIM', 'ITORORÓ', 'MAIQUINIQUE', 'NOVA CANAÃ', 'POTIRAGUÁ', 'RIBEIRÃO DO LARGO']
@@ -244,7 +247,6 @@ class Bots:
         
         status_aceitos = ['CRIADO', 'CANCELADO', 'ACEITO', 'ACEITO COM RESTRIÇÕES', 'REJEITADO', 'VALIDADO']
         projetos_pendente_asbuilt = [['UNIDADE', 'PROJETO', 'TÍTULO', 'VALOR DO PROJETO', 'DATA DE ENERGIZAÇÃO', 'SUPERVISOR', 'MUNICÍPIO']]
-        url = 'Cadastro/ConsultarProjeto/Item'
         
         statuspastaid = {
             1 : 'CRIADO',
@@ -266,15 +268,13 @@ class Bots:
                 x += 1
                 continue
             
-            resposta = self.fazer_requisicao(url=url, body={'id': str(i)})
+            resposta = self.fazer_requisicao(url=self.url_geo, body={'id': str(i)})
             
             try:
                 id_projeto = resposta['Content']['ProjetoId']
-                    
-                url_pasta = 'ConsultarProjeto/EnvioPasta/Itens'
                 body_pasta = {'ProjetoId': id_projeto}
                 
-                resposta_pasta = self.fazer_requisicao(url=url_pasta, body=body_pasta)
+                resposta_pasta = self.fazer_requisicao(url=self.url_pasta, body=body_pasta)
                 conteudo_pasta = resposta_pasta['Content']['Envios']
                 envio = []
                 for j in conteudo_pasta:
@@ -286,7 +286,6 @@ class Bots:
                         
                 if envio=='PENDENTE' or envio==None or envio==[]:
                     status_pasta = 'PENDENTE'
-                    #print(envio, status_pasta)
                 else:
                     status_pasta = statuspastaid.get(envio['HistoricoStatusId'],envio['HistoricoStatusId'])
 
@@ -385,9 +384,7 @@ class Bots:
     # LV Geral
     
     def lv_geral(self):
-        url = 'Cadastro/ConsultarProjeto/Item'
-
-        id = '1OGcmrWmbZs0ouApHKaVfYEJEhzfEfBIa7eMezkLvk84'
+        id = configs.id_planilha_postagemV5
 
         gspread_service = gspread.service_account(filename=os.path.join(self.PATH, 'dags/_internal/causal_scarab.json'))
         sh = gspread_service.open_by_key(id)
@@ -404,15 +401,14 @@ class Bots:
                 data = {"id": row['PROJETO']}
                 
                 try:
-                    resposta = self.fazer_requisicao(url, data)
+                    resposta = self.fazer_requisicao(self.url_geo, data)
                     id_projeto = resposta['Content']['ProjetoId']
                     sleep(1)
                     
-                    url_pasta = 'ConsultarProjeto/EnvioPasta/Itens'
                     body_pasta = {'ProjetoId': id_projeto} 
                     
                     try:
-                        resposta_pasta = self.fazer_requisicao(url=url_pasta, body=body_pasta)#, headers=headers)
+                        resposta_pasta = self.fazer_requisicao(url=self.url_pasta, body=body_pasta)#, headers=headers)
                         conteudo_pasta = resposta_pasta['Content']['Envios']
                         sleep(1)
                         status_pasta = ''
@@ -450,14 +446,12 @@ class Bots:
     # V2 atesto
     
     def pesquisa_geoex(self, projeto, atesto):
-        url = 'Cadastro/ConsultarProjeto/Item'
-        
         body = {
             'id': projeto
         }
 
         try:
-            r = self.fazer_requisicao(url, body)
+            r = self.fazer_requisicao(self.url_geo, body)
         except Exception as e:
             print('Não foi possível acessar a página do Geoex.')
             print(e)
@@ -506,7 +500,7 @@ class Bots:
     
     def atualiza_aba(self, aba):
         gs = gspread.service_account(filename=os.path.join(self.PATH, 'dags/_internal/jimmy.json'))
-        sh = gs.open_by_key('1OGcmrWmbZs0ouApHKaVfYEJEhzfEfBIa7eMezkLvk84')
+        sh = gs.open_by_key(configs.id_planilha_postagemV5)
         v5 = sh.worksheet(aba).get_all_values()
         v5 = pd.DataFrame(v5, columns=v5.pop(0))
         projetos = v5['PROJETO']
@@ -575,3 +569,147 @@ class Bots:
             print(err)
 
         print('['+ datetime.now(self.br_tz).strftime("%H:%M") + "] Status dos atesto atualizados!\n")
+
+
+    # V5
+    def consulta_projeto(self, projeto):
+        #print(cookie, '\n', gxsessao, '\n', useragent)
+        estagio_hektor = ''
+        projetoid = ''
+        r = ''
+        projeto = str(projeto)#.strip()
+
+        body = {
+            'id':projeto
+        }
+
+        r = self.fazer_requisicao(self.url_geo, body)
+        
+        if r['Content'] != None:
+            if r['Content']['GseProjeto'] != None:
+                estagio_hektor = r['Content']['GseProjeto']['Status']['Nome']
+                
+            if r['Content']['ProjetoId'] != None:
+                projetoid = r['Content']['ProjetoId']
+        elif r['IsUnauthorized']:
+            print(r)
+            raise Exception('Cookie inválido! Não autorizado')
+        
+        return estagio_hektor, projetoid
+
+    def consulta_pasta(self, projetoid):
+        #print(cookie, '\n', gxsessao, '\n', useragent)
+        status_pasta = ''
+        r = ''
+        envio = 0
+
+        body = {'ProjetoId': projetoid}
+
+        r = self.fazer_requisicao(self.url_pasta, body)
+        
+        if r['Content'] != None:
+            if r['Content']['Envios'] != None:
+                for i in r['Content']['Envios']:
+                    if i['EmpresaId']==70:
+                        if i['Ultimo'] != None:
+                            envio = i['Ultimo']['HistoricoStatusId']
+                        break
+                status_pasta = self.statuspastaid.get(envio,envio)
+        elif r['IsUnauthorized']:
+            print(r)
+            raise Exception('Cookie inválido! Não autorizado')
+        
+        return status_pasta
+
+    def consulta_termogeo(self, projetoid):
+        #print(cookie, '\n', gxsessao, '\n', useragent)
+        termo = ''
+        r = ''
+
+        body = {
+            'ProjetoId': projetoid,
+            'Paginacao': {'Pagina': 1, 'TotalPorPagina': 100}
+        }
+
+        r = self.fazer_requisicao(self.url_termo_geo, body)
+        
+        if r['Content'] != None:
+            if r['Content']['Items'] != []:
+                termo = r['Content']['Items'][0]['HistoricoStatus']['Nome']
+        elif r['IsUnauthorized']:
+            print(r)
+            raise Exception('Cookie inválido! Não autorizado')
+        
+        return termo
+
+    def consulta_encerramento(self, projetoid):
+        status_encerramento = ''
+        r = ''
+
+        body = {'ProjetoId': projetoid}
+
+        r = self.fazer_requisicao(self.url_encerramento, body)
+        
+        if r['Content'] != None:
+            if r['Content']['Item'] != None:
+                status_encerramento = r['Content']['Item']['HistoricoAtual']['Status']
+        elif r['IsUnauthorized']:
+            print(r)
+            raise Exception('Cookie inválido! Não autorizado')
+        
+        return status_encerramento
+
+    def atualiza_pasta(self, aba):
+        scope = 'https://spreadsheets.google.com/feeds'
+        creds = ServiceAccountCredentials.from_json_keyfile_name('dags/_internal/causal_scarab.json', scope)
+        gs = authorize(creds)
+        sh = gs.open_by_key(configs.id_planilha_postagemV5)
+        valores = [[],[],[],[]]
+        hektor = ''
+
+        print('Atualizando V5')
+
+        sheet = sh.worksheet(aba).get_all_values()
+        sheet = pd.DataFrame(sheet, columns = sheet.pop(0))
+        tamanho = sheet.shape[0]
+
+        for i,j in enumerate(sheet['PROJETO']):
+            
+            if j=="":
+                valores[0].append([''])
+                valores[1].append([''])
+                valores[2].append([''])
+                hektor = ''
+                status_pasta = ''
+                status_encerramento = ''
+            else:
+                try:
+                    hektor, projetoid = self.consulta_projeto(j)
+                    if hektor == ('','',''):
+                        hektor=''
+                    sleep(1)
+                    status_pasta = self.consulta_pasta(projetoid)
+                    sleep(1)
+                    status_encerramento = self.consulta_encerramento(projetoid)
+                    
+                    valores[0].append([hektor])
+                    valores[1].append([status_pasta])
+                    valores[2].append([status_encerramento])
+                except Exception as e:
+                    print(f'Erro no projeto {j}')
+                    traceback.print_exc()
+                    raise e
+            
+            print(f'{str(i+1)}/{str(tamanho)} - {j}')
+            print(f'hektor: {hektor}')
+            print(f'status_pasta: {status_pasta}')
+            print(f'status_encerramento: {status_encerramento}')
+            print('-------------------------------------------')
+
+        sh.worksheet(aba).update(range_name="K2:K", values=valores[1])
+        sh.worksheet(aba).update(range_name="AP2:AP", values=valores[0])
+        sh.worksheet(aba).update(range_name="BG2:BG", values=valores[2])
+
+        print('Pastas atualizadas!')
+
+
