@@ -258,7 +258,7 @@ class Bots:
             35 : 'VALIDADO'
         }
         
-        database = "dags/BOB_V2/db.csv"
+        database = "assets/db/db.csv"
 
         df = pd.read_csv(database)
 
