@@ -1,5 +1,7 @@
 pendulum==3.1.0
 gspread==6.2.1
+google-api-python-client
+oauth2client
 pandas==2.3.0
 numpy==2.3.0
 cloudscraper==1.2.71
