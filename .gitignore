@@ -21,5 +21,4 @@ tests
 .dockerignore
 Dockerfile
 packages.txt
-Readme.md
 .astro
