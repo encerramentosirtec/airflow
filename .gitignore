@@ -28,3 +28,5 @@ airflow-webserver.pid
 standalone_admin_password.txt
 webserver_config.py
 airflow-webserver.pid
+.airflowignore
+dags/exampledag.py
