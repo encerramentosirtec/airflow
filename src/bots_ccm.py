@@ -16,15 +16,15 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 class Bots:
 
-    def __init__(self, cookie_path='assets/auth_geoex/cookie_ccm.json', cred_path='assets/auth_google/causal_scarab.json'):
+    def __init__(self, cookie_file='cookie_ccm.json', cred_file='causal_scarab.json'):
         self.PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..') # Altera diretório raiz de execução do código
         
-        with open(os.path.join(self.PATH, cookie_path), 'r') as f:
+        with open(os.path.join(self.PATH, f'assets/auth_geoex/{cookie_file}'), 'r') as f:
             self.cookie = json.load(f)
             
-        self.geoex = Geoex('cookie_ccm.json')
-        self.cred_path = cred_path
-        self.GS_SERVICE = gspread.service_account(filename=os.path.join(os.getcwd(), cred_path))
+        self.geoex = Geoex(cookie_file)
+        self.cred_file = cred_file
+        self.GS_SERVICE = gspread.service_account(filename=os.path.join(os.getcwd(), f'assets/auth_google/{cred_file}'))
         self.br_tz = timezone("Brazil/East")
 
         self.url_geo = 'Cadastro/ConsultarProjeto/Item'
@@ -142,8 +142,9 @@ class Bots:
         # Filtro para a carteira
         datas_para_filtrar = ['01/01/2023', '01/02/2023', '01/03/2023', '01/04/2023', '01/05/2023', '01/06/2023']
         obras_concluidas_completo = obras_concluidas_completo.loc[~obras_concluidas_completo['CARTEIRA'].isin(datas_para_filtrar)]
-        obras_concluidas = (((obras_concluidas_completo['PROJETO'].drop_duplicates())))
-        print(obras_concluidas)
+        obras_concluidas = obras_concluidas_completo['PROJETO'].drop_duplicates()
+        obras_concluidas = obras_concluidas.dropna()
+        #print(obras_concluidas)
 
         obras_concluidas_formatado = []
         for i in obras_concluidas:
@@ -158,47 +159,55 @@ class Bots:
         ####################### LENDO PLANILHA DO FECHAMENTO
         while True:
             try:
-                obras_recepcionadas_resolucao = self.le_planilha_google(configs.id_planilha_planejamento, "Obras em resolução de problema")
+                obras_recepcionadas_resolucao = self.le_planilha_google(configs.id_planilha_postagemV5, "Obras em resolução de problema")
                 obras_recepcionadas_resolucao = obras_recepcionadas_resolucao.query("PROJETO != ''")
                 obras_recepcionadas_resolucao = obras_recepcionadas_resolucao['PROJETO']
                 print('obras_recepcionadas_resolucao')
+                sleep(5)
 
-                obras_recepcionadas_vtc = self.le_planilha_google(configs.id_planilha_planejamento, "OBRAS CONQUISTA")
+                obras_recepcionadas_vtc = self.le_planilha_google(configs.id_planilha_postagemV5, "OBRAS CONQUISTA")
                 obras_recepcionadas_vtc = obras_recepcionadas_vtc.query("PROJETO != ''")
                 obras_recepcionadas_vtc = obras_recepcionadas_vtc['PROJETO']
                 print('obras_recepcionadas_vtc')
+                sleep(5)
 
-                obras_recepcionadas_jeq = self.le_planilha_google(configs.id_planilha_planejamento, "OBRAS JEQUIE")
+                obras_recepcionadas_jeq = self.le_planilha_google(configs.id_planilha_postagemV5, "OBRAS JEQUIE")
                 obras_recepcionadas_jeq = obras_recepcionadas_jeq.query("PROJETO != ''")
                 obras_recepcionadas_jeq = obras_recepcionadas_jeq['PROJETO']
                 print('obras_recepcionadas_jeq')
+                sleep(5)
 
-                obras_recepcionadas_bjl = self.le_planilha_google(configs.id_planilha_planejamento, "OBRAS LAPA")
+                obras_recepcionadas_bjl = self.le_planilha_google(configs.id_planilha_postagemV5, "OBRAS LAPA")
                 obras_recepcionadas_bjl = obras_recepcionadas_bjl.query("PROJETO != ''")
                 obras_recepcionadas_bjl = obras_recepcionadas_bjl['PROJETO']
                 print('obras_recepcionadas_bjl')
+                sleep(5)
 
-                obras_recepcionadas_ire = self.le_planilha_google(configs.id_planilha_planejamento, "OBRAS IRECE")
+                obras_recepcionadas_ire = self.le_planilha_google(configs.id_planilha_postagemV5, "OBRAS IRECE")
                 obras_recepcionadas_ire = obras_recepcionadas_ire.query("PROJETO != ''")
                 obras_recepcionadas_ire = obras_recepcionadas_ire['PROJETO']
                 print('obras_recepcionadas_ire')
+                sleep(5)
 
-                obras_recepcionadas_gbi = self.le_planilha_google(configs.id_planilha_planejamento, "OBRAS GUANAMBI")
+                obras_recepcionadas_gbi = self.le_planilha_google(configs.id_planilha_postagemV5, "OBRAS GUANAMBI")
                 obras_recepcionadas_gbi = obras_recepcionadas_gbi.query("PROJETO != ''")
                 obras_recepcionadas_gbi = obras_recepcionadas_gbi['PROJETO']
                 print('obras_recepcionadas_gbi')
+                sleep(5)
                 
-                obras_recepcionadas_brr = self.le_planilha_google(configs.id_planilha_planejamento, "OBRAS BARREIRAS")
+                obras_recepcionadas_brr = self.le_planilha_google(configs.id_planilha_postagemV5, "OBRAS BARREIRAS")
                 obras_recepcionadas_brr = obras_recepcionadas_brr.query("PROJETO != ''")
                 obras_recepcionadas_brr = obras_recepcionadas_brr['PROJETO']
                 print('obras_recepcionadas_brr')
+                sleep(5)
                 
-                obras_recepcionadas_ibt = self.le_planilha_google(configs.id_planilha_planejamento, "OBRAS IBOTIRAMA")
+                obras_recepcionadas_ibt = self.le_planilha_google(configs.id_planilha_postagemV5, "OBRAS IBOTIRAMA")
                 obras_recepcionadas_ibt = obras_recepcionadas_ibt.query("PROJETO != ''")
                 obras_recepcionadas_ibt = obras_recepcionadas_ibt['PROJETO']
                 print('obras_recepcionadas_ibt')
+                sleep(5)
                 
-                obras_recepcionadas_bru = self.le_planilha_google(configs.id_planilha_planejamento, "OBRAS BRUMADO")
+                obras_recepcionadas_bru = self.le_planilha_google(configs.id_planilha_postagemV5, "OBRAS BRUMADO")
                 obras_recepcionadas_bru = obras_recepcionadas_bru.query("PROJETO != ''")
                 obras_recepcionadas_bru = obras_recepcionadas_bru['PROJETO']
                 print('obras_recepcionadas_bru')

@@ -34,7 +34,6 @@ class GeoexHook(HttpHook):
                     response = self.scraper.post(url=url, headers = self.header, **kwargs)
                 else:
                     response = self.scraper.get(url=url, headers = self.header)
-                print(response.status_code)
                 break
             except:
                 print(response.status_code)
@@ -50,7 +49,6 @@ class GeoexHook(HttpHook):
     
 
     def run(self, method, endpoint, **kwargs):
-        #session = self.get_conn(headers=self.header)
         url_raw = self.create_url(endpoint)
         
         return self.connect_to_endpoint(url_raw, method, **kwargs)

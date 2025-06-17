@@ -17,9 +17,9 @@ default_args = {
 
 with DAG('relatorio-hro',
         default_args = default_args,
-        default_view="graph",
+        #default_view="graph",
         start_date=pendulum.today('America/Sao_Paulo'),
-        schedule_interval = '0 7-18 * * 1-6',
+        schedule = '0 7-18 * * 1-6',
         tags = ['stc', 'geoex'],
         catchup = False) as dag:
     

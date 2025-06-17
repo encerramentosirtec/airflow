@@ -1,9 +1,11 @@
-from airflow.models.dag import DAG
-from airflow.operators.python import PythonOperator#, BranchPythonOperator
-from src.bots_auxiliar import Bots
+#from airflow.models.dag import DAG
+from airflow.sdk import DAG
+#from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
+from src.bots_auxiliar import Bots_aux
 from pendulum import today, duration
 
-bot = Bots()
+bot = Bots_aux()
 
 default_args = {
     'depends_on_past' : False,
@@ -17,9 +19,9 @@ default_args = {
 
 with DAG('sequencia-de-pendencias',
         default_args = default_args,
-        default_view="graph",
+        #default_view="graph",
         start_date=today('America/Sao_Paulo'),
-        schedule_interval = '0,15,30,45 7,18 * * 1-6',
+        schedule = '0,15,30,45 7,18 * * 1-6',
         max_active_runs = 1,
         tags = ['sequencia', 'gpm', 'aux'],
         catchup = False) as dag:

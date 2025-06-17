@@ -16,9 +16,9 @@ default_args = {
 
 with DAG('solicitacoes-de-reservas',
         default_args = default_args,
-        default_view="graph",
+        #default_view="graph",
         start_date=today('America/Sao_Paulo'),
-        schedule_interval = '0 6,12 * * 1-6',
+        schedule = '0 6,12 * * 1-6',
         max_active_runs = 1,
         tags = ['reservas', 'geoex', 'manut'],
         catchup = False) as dag:

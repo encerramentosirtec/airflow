@@ -12,14 +12,15 @@ default_args = {
     'email' : ['heli.silva@sirtec.com.br'],
     'email_on_failure' : True,
     'email_on_retry' : False,
+    'retries' : 2,
     'owner' : 'bob'
 }
 
 with DAG('atualizarzps09',
         default_args = default_args,
-        default_view="graph",
+        #default_view="graph",
         start_date=today('America/Sao_Paulo'),
-        schedule_interval = '0 8,11,13,15 * * 1-6',
+        schedule = '0 8,11,13,15 * * 1-6',
         max_active_runs = 1,
         tags = ['obra', 'geoex'],
         catchup = False) as dag:

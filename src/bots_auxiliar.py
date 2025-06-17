@@ -19,20 +19,17 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 from babel.numbers import format_currency
 
-class Bots():
+class Bots_aux():
     def __init__(self):
-        self.cred_path = 'assets/auth_google/jimmy.json'
-        scope = 'https://spreadsheets.google.com/feeds'
-        creds = ServiceAccountCredentials.from_json_keyfile_name(self.cred_path, scope)
-        self.gs = authorize(creds)
         self.planilha_gpm = '1_M4Ae3TkkbTl9XYrKviuYkzl0TStvfbEWox_oR9DpP0'
-
         self.planilha_rejeicoes = '1RhXWgyRZwEZHU-RAin0l3mrjyGJ5uvvxB86vkD8aIr8'
 
         self.PATH = os.getcwd()
-        self.cookie_path = 'assets/auth_geoex/cookie_ccm.json'
+        self.cred_path = 'jimmy.json'
+        self.cookie_path = 'cookie_ccm.json'
         self.geoex = Geoex(self.cookie_path)
         self.bot = Bots(self.cookie_path, self.cred_path)
+        self.gs = self.bot.GS_SERVICE
 
         self.id = 'MmdCNEV0dVRxYVRnUGdMZSFhVCN0SnV0SjNWZWBUZS1UcXZhJ3QnNEpnbGcjdHF0djR1cVRKZ1AyZ2RhcXZ0Z1BnWExITFhMQkFWciAiIGhITDtZcmdsZ2RhcXZ0SmdQRGxnZGFxdnRWJ2dQRGxnOGVhJ3QnNEpnUC9ERGlsRFcmbHwobER8JmxdRERsRG9ubER8bmxEb29sXURdbF1Eb2xEXWlsXURXbERdfGxEfDdsXUR8bERvfGxEXURsRFdvbF1XbEREKGxvKGxXbmxEfGlsXWxEbzdsRHwobFdsRG5sRHxEbER8bERvbERXbEREbERdbERdJmxpbER8XWwmbER8b2xEb11sN2wobF1ubF03bF0obERvKGxEXW9sRCZsRF1ubF1EbEREJmxEb1dsXXxsfGxvbF1dbERvRGxEfFdsRChsRF0obEQ3bERdN2xEXVdsRGxdb2xEaWxEXV1mbGdJYU9USkhLcXRKZ1AvZmxnTHZPcTRKdEpnUC8obmZsZ0B1dHV9SmdQL3xdZmxnSVQnVEpnUC10RUo0PmxnZGFFdXFUSmdQLzJnWFR2NGdQZ0BJckk4QGdsZ150RVRxZ1BnQkx7TFZJcl9IZz5sMmdYVHY0Z1BnSUhfSEBnbGdedEVUcWdQZ1jDg0hnPmwyZ1hUdjRnUGdJViNIIF9MIEhZQnJnbGdedEVUcWdQZ2c+bDJnWFR2NGdQZyNMQsONSF9IICIgSVYjSGdsZ150RVRxZ1BnQEg7VmhWSXLDh8ODSGc+bDJnWFR2NGdQZyNMQsONSF9IZ2xnXnRFVHFnUGdnPmwyZ1hUdjRnUGc4WFZfcl9MZ2xnXnRFVHFnUGdnPmwyZ1hUdjRnUGdMWyNCTEByZ2xnXnRFVHFnUGdAVkJJTGgzQFZYSGc+bDJnWFR2NGdQZ0xJVis4TElyZ2xnXnRFVHFnUGdnPmwyZ1hUdjRnUGc4QDjDgUJWSGdsZ150RVRxZ1BnZz5mbGdbVCd9RVRnUGdMZWA0cXF0djRldVRoVGV1dEthRWdsZ1hUdjRnUGdyYFR2TyAiIExlIWFUICc0IE90SnV0SiAiIFZlYFRlLVRxdmEndCc0SmdsZ0lhT1RnUGdZdGFDdHFnbGdMQ3U0ZUp0VGdQZ3NgSiFnPg=='
         self.setores = {
@@ -83,6 +80,20 @@ class Bots():
                         ('REDES', 'RELOCAÇÃO'): 'CCM',
                         ('REDES', 'SOLAR'): 'STC'
                         }
+        self.projetos_solar = [
+                    "B-1160585",
+                    "B-1164163",
+                    "B-1164268",
+                    "B-1171923",
+                    "B-1171933",
+                    "B-1175485",
+                    "B-1175543",
+                    "B-1176528",
+                    "B-1183486",
+                    "B-1184574",
+                    "B-1184714",
+                    "B-1158437"
+                    ]
 
     # Sequencia de dias com pendencia por equipe
     def atualiza_sequencia(self):
@@ -192,6 +203,9 @@ class Bots():
         mapa = dict(zip(unidades['Projeto'], unidades['UTD']))
         valores = dict(zip(unidades['Projeto'], unidades['VALOR']))
         localidade = df['PROJETO'].map(mapa)
+
+        df = df[~df['PROJETO'].isin(self.projetos_solar)]
+        
         df['VALOR'] = df['PROJETO'].map(valores)
         df['LOCALIDADE'].fillna(localidade, inplace=True)
         df['VALOR'].fillna(0, inplace=True)

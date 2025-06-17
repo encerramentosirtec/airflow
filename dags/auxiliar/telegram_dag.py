@@ -1,5 +1,7 @@
-from airflow.models.dag import DAG
-from airflow.operators.python import PythonOperator
+#from airflow.models.dag import DAG
+from airflow.sdk import DAG
+#from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 from src.bot_telegram import Bots
 from pendulum import today
 
@@ -10,14 +12,15 @@ default_args = {
     'email' : ['heli.silva@sirtec.com.br'],
     'email_on_failure' : True,
     'email_on_retry' : False,
+    'retries' : 2,
     'owner' : 'heli'
 }
 
 with DAG('bot-telegram',
         default_args = default_args,
-        default_view="graph",
+        #default_view="graph",
         start_date=today('America/Sao_Paulo'),
-        schedule_interval = None,
+        schedule = None,
         max_active_runs = 1,
         tags = ['manut', 'telegram', 'aux'],
         catchup = False) as dag:
