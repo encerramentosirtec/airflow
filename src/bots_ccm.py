@@ -696,7 +696,7 @@ class Bots:
             else:
                 try:
                     hektor, projetoid, datazps09 = self.consulta_projeto(j)
-                    if hektor == ('','',''):
+                    if (hektor, projetoid, datazps09) == ('','',''):
                         hektor=''
                     sleep(1)
                     status_pasta = self.consulta_pasta(projetoid)
@@ -726,11 +726,8 @@ class Bots:
 
     # ZPS09
     def atualiza_zps09(self):
-        scope = 'https://spreadsheets.google.com/feeds'
-        creds = ServiceAccountCredentials.from_json_keyfile_name(os.path.join(os.getcwd(), self.cred_path), scope)
-        gs = authorize(creds)
         aba = 'Auxiliar (transporte)'
-        sh = gs.open_by_key(configs.id_planilha_postagemV5)
+        sh = self.GS_SERVICE.open_by_key(configs.id_planilha_postagemV5)
         valores = [[],[],[],[]]
 
         print('Atualizando ZPS09')

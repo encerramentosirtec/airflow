@@ -2,8 +2,10 @@
 from airflow.sdk import DAG
 #from airflow.operators.python import PythonOperator
 from airflow.providers.standard.operators.python import PythonOperator
-from src.bot_telegram import push_cookie
-from pendulum import today
+from src.bot_telegram import Bots
+from pendulum import today, duration
+
+bot = Bots()
 
 default_args = {
     'depends_on_past' : False,
@@ -11,7 +13,8 @@ default_args = {
     'email_on_failure' : True,
     'email_on_retry' : False,
     'retries' : 2,
-    'owner' : 'heli'
+    'owner' : 'heli',
+    'retry_delay' : duration(seconds=5)
 }
 
 with DAG('cookie-manut',
@@ -24,7 +27,7 @@ with DAG('cookie-manut',
     
     push_cookie = PythonOperator(
         task_id = 'push_cookie',
-        python_callable = push_cookie
+        python_callable = bot.push_cookie
     )
 
     push_cookie

@@ -1,12 +1,11 @@
 import os
 import json
 import telebot
-import logging
+import requests
 import traceback
+from datetime import datetime
+from airflow.sdk import Variable
 from hooks.geoex_hook import GeoexHook
-from airflow.api.client.local_client import Client
-
-PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..') # Altera diretório raiz de execução do código
 
 def abre_json(arquivo):
     with open(arquivo) as dados:
@@ -17,68 +16,89 @@ def escreve_json(arquivo, dicionario):
     with open(arquivo, "w") as outfile: 
         json.dump(dicionario, outfile)
 
-def testa_cookie(c='', g='', gb=''):
-    url_geo = 'Cadastro/ConsultarProjeto/Item'
-    if c=='' and g=='' and gb=='':
-        return False
-    id_projeto = ''
-    r = ''
-    projeto = 'B-1131975'
-
-    cookie = {
-        'Cookie': c,
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0',
-        'Gxsessao': g,
-        'Gxbot': gb
-    }
-    body = {
-        'id': projeto
-    }
-
-    while True:
-        try:
-            r = GeoexHook(cookie).run('POST', url_geo, json = body)
-            r = r.json()
-            break
-        except Exception as e:
-            print('Não foi possível acessar a página do GEOEX.')
-            print(r.content)
-            return False
-
-    if r['Content'] != None:
-        id_projeto = r['Content']['ProjetoId']
-    elif r['IsUnauthorized']:
-        print('Cookie inválido! Não autorizado')
-        return False
-
-    if id_projeto=='':
-        return False
-    else:
-        return True
-
-def push_cookie(ti):
-    data_new = abre_json('dags/_internal/cookie_heli.json')
-    cookie_new = data_new['cookie']
-    gxsessao_new = data_new['gxsessao']
-    useragent_new = data_new['useragent']
-    gxbot_new = data_new['gxbot']
-    ti.xcom_push(key='cookie_manut', value=cookie_new)
-    ti.xcom_push(key='gxsessao_manut', value=gxsessao_new)
-    ti.xcom_push(key='useragent_manut', value=useragent_new)
-    ti.xcom_push(key='gxbot_manut', value=gxbot_new)
-
 class Bots:
 
     def __init__(self):
-        os.environ['NO_PROXY'] = '*'
-        API_TOKEN = '6394622366:AAH0NNKN2pGbdB6u-erOmHgdg7FWoPnvGTM'
+        self.PATH = os.getenv('AIRFLOW_HOME')
+
+        #os.environ['NO_PROXY'] = '*'
+        API_TOKEN = Variable.get("telegram_api_key", default=None)
         self.bot = telebot.TeleBot(API_TOKEN, threaded=False)
-        telebot.logger.setLevel(logging.DEBUG) # Outputs debug messages to console.
-        c = Client(None, None)
+        #telebot.logger.setLevel(logging.DEBUG) # Outputs debug messages to console.
+
+        #self.c = Client(None, None)
         self.cookie, self.gxsessao, self.gxbot = '', '', ''
-        self.data = abre_json('assets/auth_geoex/cookie_heli.json')
-        self.data_bob = abre_json('assets/auth_geoex/cookie_ccm.json')
-        self.data_hugo = abre_json('assets/auth_geoex/cookie_hugo.json')
+        self.data = abre_json(os.path.join(self.PATH, 'assets/auth_geoex/cookie_heli.json'))
+        self.data_bob = abre_json(os.path.join(self.PATH,'assets/auth_geoex/cookie_ccm.json'))
+        self.data_hugo = abre_json(os.path.join(self.PATH,'assets/auth_geoex/cookie_hugo.json'))
+
+    def testa_cookie(c='', g='', gb=''):
+        url_geo = 'Cadastro/ConsultarProjeto/Item'
+        if c=='' and g=='' and gb=='':
+            return False
+        id_projeto = ''
+        r = ''
+        projeto = 'B-1131975'
+
+        cookie = {
+            'cookie': c,
+            'useragent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0',
+            'gxsessao': g,
+            'gxbot': gb
+        }
+        body = {
+            'id': projeto
+        }
+
+        while True:
+            try:
+                r = GeoexHook(cookie).run('POST', url_geo, json = body)
+                r = r.json()
+                break
+            except Exception as e:
+                print('Não foi possível acessar a página do GEOEX.')
+                print(r.content)
+                return False
+
+        if r['Content'] != None:
+            id_projeto = r['Content']['ProjetoId']
+        elif r['IsUnauthorized']:
+            print('Cookie inválido! Não autorizado')
+            return False
+
+        if id_projeto=='':
+            return False
+        else:
+            return True
+
+    def push_cookie(self):
+        data_new = abre_json('assets/auth_geoex/cookie_heli.json')
+        
+        Variable.set(key='cookie_manut', value=data_new['cookie'])
+        Variable.set(key='gxsessao_manut', value=data_new['gxsessao'])
+        Variable.set(key='gxbot_manut', value=data_new['gxbot'])
+        if Variable.get("useragent_manut", default=None) == None:
+            Variable.set(key='useragent_manut', value=data_new['useragent'])
+
+    def get_cookie(self):
+        cookie = Variable.get("cookie_manut", default=None)
+        gxsessao = Variable.get("gxsessao_manut", default=None)
+        gxbot = Variable.get("gxbot_manut", default=None)
+        useragent = Variable.get("useragent_manut", default=None)
+        #print(cookie, '\n', gxsessao, '\n', gxbot, '\n', useragent)
+        return cookie, gxsessao, gxbot, useragent
+
+    def trigger_dag(self, dag_id):
+        headers = {'Content-Type': 'application/json'}
+        
+        response = requests.post(
+            f"http://host.docker.internal:8080/api/v2/dags/{dag_id}/dagRuns",
+            headers=headers,
+            json={
+                'logical_date': datetime.now().astimezone().isoformat()
+            }
+        )
+        return response
 
     def run_bot(self):
         print("Iniciando bot")
@@ -90,7 +110,13 @@ class Bots:
             /help - Ajuda sobre o funcionamento do bot 
             /cookie - Atualizar cookie e gxsessao
             /cookie_hugo - Atualizar cookie e gxsessao
+            /xcom - Atualizar XCom com o cookie
             """)
+
+        @self.bot.message_handler(commands=['xcom'])
+        def xcom_start(message):
+            r = self.trigger_dag('cookie-manut')
+            self.bot.send_message(message.chat.id, f'{r.status_code} | {json.dumps(r.json(), indent=4, ensure_ascii=False)}')
 
         @self.bot.message_handler(commands=['cookie'])
         def send_cookie(message):
@@ -113,7 +139,7 @@ class Bots:
         def ler_gxsessao(message):
             self.gxsessao = message.text
             try:
-                cookie_valido = testa_cookie(c=self.cookie, g=self.gxsessao, gb=self.gxbot)
+                cookie_valido = self.testa_cookie(c=self.cookie, g=self.gxsessao, gb=self.gxbot)
             except:
                 traceback.print_exc()
             
@@ -126,9 +152,10 @@ class Bots:
                 self.data_bob['gxsessao']=self.gxsessao
                 self.data_bob['gxbot']=self.gxbot
                 
+                print(self.data, self.data_bob)
                 escreve_json('assets/auth_geoex/cookie_heli.json',self.data)
                 escreve_json('assets/auth_geoex/cookie_ccm.json',self.data_bob)
-                self.c.trigger_dag(dag_id='cookie-manut')
+                self.trigger_dag(dag_id='cookie-manut')
                 msg = 'Informações atualizadas com sucesso!'
             else:
                 msg = 'Dados inválidos.'
@@ -155,7 +182,7 @@ class Bots:
         def read_gxsessao(message):
             self.gxsessao = message.text
             try:
-                cookie_valido = testa_cookie(c=self.cookie, g=self.gxsessao, gb=self.gxbot)
+                cookie_valido = self.testa_cookie(c=self.cookie, g=self.gxsessao, gb=self.gxbot)
             except:
                 traceback.print_exc()
             
@@ -165,7 +192,7 @@ class Bots:
                 self.data_hugo['gxbot']=self.gxbot
                 
                 escreve_json('assets/auth_geoex/cookie_hugo.json', self.data_hugo)
-                self.c.trigger_dag(dag_id='cookie-manut')
+                self.trigger_dag(dag_id='cookie-manut')
                 msg = 'Informações atualizadas com sucesso!'
             else:
                 msg = 'Dados inválidos.'

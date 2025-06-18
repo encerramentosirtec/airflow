@@ -3,7 +3,7 @@ from airflow.sdk import DAG
 #from airflow.operators.python import PythonOperator
 from airflow.providers.standard.operators.python import PythonOperator
 from src.bot_telegram import Bots
-from pendulum import today
+from pendulum import today, duration
 
 bot = Bots()
 
@@ -13,7 +13,8 @@ default_args = {
     'email_on_failure' : True,
     'email_on_retry' : False,
     'retries' : 2,
-    'owner' : 'heli'
+    'owner' : 'heli',
+    'retry_delay' : duration(seconds=5)
 }
 
 with DAG('bot-telegram',

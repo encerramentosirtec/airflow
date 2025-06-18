@@ -13,3 +13,6 @@ apache-airflow-providers-standard>=0.0.1
 apache-airflow-providers-http
 
 # Instalar o airflow com comando: pip install "apache-airflow==3.0.2" "apache-airflow-providers-google==8.0.0"
+# winget install -e --id Astronomer.Astro
+# astro dev init
+# astro dev start
