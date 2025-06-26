@@ -1,10 +1,11 @@
 import gspread
 import pandas as pd
-
+import os
 
 class GoogleSheets:    
     def __init__(self, credentials):
-        self.gs_service = gspread.service_account(credentials) # Inicia o serviço do google sheets
+        self.path = os.getenv('AIRFLOW_HOME')
+        self.gs_service = gspread.service_account(os.path.join(self.path, f'assets/auth_google/{credentials}')) # Inicia o serviço do google sheets
 
 
     def le_planilha(self, url, aba, intervalo=None, render_option='UNFORMATTED_VALUE', dtype=None):

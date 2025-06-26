@@ -2,6 +2,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
 import json
+import numpy as np
 import os
 import pandas as pd
 import pendulum
@@ -10,22 +11,22 @@ import sys
 from time import sleep
 
 
-PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../..")
+PATH = os.getenv('AIRFLOW_HOME')
 os.chdir(PATH)
 sys.path.insert(0, PATH)
 
 from src.geoex import Geoex
-GEOEX = Geoex(cookie_file=os.path.join(PATH, 'assets/auth_geoex/cookie_hugo.json'))
+GEOEX = Geoex(cookie_file='cookie_hugo.json')
 
 from src.google_sheets import GoogleSheets
-GOOGLE_SHEETS = GoogleSheets(credentials=os.path.join(PATH, 'assets/auth_google/causal_scarab.json')) # Inicia o serviço do google sheets
+GOOGLE_SHEETS = GoogleSheets(credentials='causal_scarab.json') # Inicia o serviço do google sheets
 
 ID_RELATORIOS = GOOGLE_SHEETS.le_planilha(url='https://docs.google.com/spreadsheets/d/1VFxxABMX1WQDbYFll2nO5CEp2FGuNpIqTMftncVRpic', aba='id_relatorios_geoex')
 
 
 
 
-def atualizar_base_medicoes(self):
+def atualizar_base_medicoes():
     #print(os.getcwd())
     map_status = {
         'MPC': 'A. Pedido lançado',
@@ -41,7 +42,7 @@ def atualizar_base_medicoes(self):
         # ATUALIZA NA PLANILHA GOOGLE
         try:
             #df = pd.read_csv(os.path.join(PATH, 'downloads/Geoex - Relatório - Acompanhamento - Detalhado.csv'), encoding='ISO-8859-1', sep=';', thousands='.', decimal=',')
-            df = pd.read_csv(os.path.join(PATH, 'downloads/Geoex - Relatório - Acompanhamento - Detalhado.csv'), encoding='ISO-8859-1', sep=';', thousands='.', decimal=',')
+            df = pd.read_csv(os.path.join(PATH, 'downloads/Geoex - Relatório - Acompanhamento - Detalhado.csv'), encoding='ISO-8859-1', sep=';', thousands='.', decimal=',', dtype='str')
             
             # Filtrando o dataframe
             df = df[~df['TITULO'].str.startswith(('COBRANCA', 'LIGACAO', 'PERDAS')) & ~df['TITULO'].str.contains('SOLAR', na=False)]
@@ -71,7 +72,7 @@ def atualizar_base_medicoes(self):
                 'VALOR_PREVISTO': 'sum'
             })
 
-            GOOGLE_SHEETS.sobrescreve_planila(url='https://docs.google.com/spreadsheets/d/1wb7jj5wQM_61-yQruIn4UGI9KrQH4CL__W-X0MPcif0', aba='BASE_MEDIÇÕES', df=df_grouped)
+            GOOGLE_SHEETS.sobrescreve_planilha(url='https://docs.google.com/spreadsheets/d/1wb7jj5wQM_61-yQruIn4UGI9KrQH4CL__W-X0MPcif0', aba='BASE_MEDIÇÕES', df=df_grouped)
                             
             return {
                 'status': 'Ok',
@@ -90,7 +91,7 @@ def atualizar_base_medicoes(self):
         )
      
 
-def atualizar_base_hro(self):
+def atualizar_base_hro():
     id_relatorios = []
     id_relatorios.append(ID_RELATORIOS.loc[3].ID)
     id_relatorios.append(ID_RELATORIOS.loc[5].ID)
@@ -134,8 +135,8 @@ def atualizar_base_hro(self):
             )
     
     # Atualização da base
-    # GOOGLE_SHEETS.sobrescreve_planila(url='https://docs.google.com/spreadsheets/d/1CcVqctnXFYRIMU4ensbEFqV5LiXJRNu6RflFRBwsJMc', aba='BASE_HRO', df=df_att) # Planilha de testes
-    GOOGLE_SHEETS.sobrescreve_planila(url='https://docs.google.com/spreadsheets/d/1wb7jj5wQM_61-yQruIn4UGI9KrQH4CL__W-X0MPcif0', aba='BASE_HRO', df=df_att)
+    # GOOGLE_SHEETS.sobrescreve_planilha(url='https://docs.google.com/spreadsheets/d/1CcVqctnXFYRIMU4ensbEFqV5LiXJRNu6RflFRBwsJMc', aba='BASE_HRO', df=df_att) # Planilha de testes
+    GOOGLE_SHEETS.sobrescreve_planilha(url='https://docs.google.com/spreadsheets/d/1wb7jj5wQM_61-yQruIn4UGI9KrQH4CL__W-X0MPcif0', aba='BASE_HRO', df=df_att.fillna(""))
 
 
     return {
@@ -145,7 +146,68 @@ def atualizar_base_hro(self):
 
 
 
-def read_cji3(self):
+def atualizar_base_envio_pastas_consulta():
+    # Consulta id do relatorio
+    id_relatorio = ID_RELATORIOS.loc[1].ID
+
+    download = GEOEX.baixar_relatorio(id_relatorio)
+
+    if download['sucess']:
+        try:
+            # Leitura dos dados
+            df = pd.read_csv(
+                os.path.join(PATH, 'downloads/Geoex - Acomp - Envio de pastas - Consulta.csv'),
+                encoding='ISO-8859-1',
+                sep=';',
+                parse_dates=['ENVIO_PASTA_DATA_SOLICITACAO'], 
+                dayfirst=True
+            )
+
+            # Sequência de tratamento dos dados
+            df['PROJETO'] = df['PROJETO'].str.replace('Y-', 'B-')
+
+            data_corte = pd.Timestamp(day=1, month=1, year=2024)
+            df = df.query("ENVIO_PASTA_DATA_SOLICITACAO > @data_corte")
+
+            # map_status_ajustado = {
+            #     'ACEITO COM RESTRIÇÕES': 'A. Aceita',
+            #     'ACEITO': 'A. Aceita',
+            #     'VALIDADO': 'B. Validada',
+            #     'CRIADO': 'C. Enviada',
+            #     'REJEITADO': 'D. Rejeitada',
+            #     'CANCELADO': 'E. Cancelada'
+            # }
+            # df['STATUS AJUSTADO'] = df['STATUS'].map(lambda x: map_status_ajustado[x])
+
+            df = df.sort_values(['ENVIO_PASTA_DATA_SOLICITACAO'], ascending=False)
+
+            df = df.drop_duplicates(subset='PROJETO')
+
+            df['ENVIO_PASTA_DATA_SOLICITACAO'] = pd.to_datetime(df['ENVIO_PASTA_DATA_SOLICITACAO']).dt.strftime('%d/%m/%Y')
+
+            # Atualização da base
+            GOOGLE_SHEETS.sobrescreve_planilha(url='https://docs.google.com/spreadsheets/d/1wb7jj5wQM_61-yQruIn4UGI9KrQH4CL__W-X0MPcif0', aba='BASE_ENVIO_PASTAS', df=df.fillna("").values.tolist())
+
+        except Exception as e:
+            raise
+
+        return {
+            'status': 'Ok',
+            'message': f"[{  datetime.strftime(datetime.now(), format='%H:%M')  }] Base atualizada!"
+        }
+    
+    else:
+        raise Exception(
+            f"""
+            Falha ao baixar csv.
+            Statuscode: { download['status_code'] }
+            Message: { download['data'] }
+            """
+        )
+
+
+
+def read_cji3():
     try:
         os.rename(os.path.join(PATH, 'assets/cji3.XLS'), os.path.join(PATH, 'assets/cji3.csv'))
     except FileExistsError:
@@ -183,7 +245,7 @@ def read_cji3(self):
 
     return cji3    
 
-def read_zmm370(self):
+def read_zmm370():
     try:
         os.rename(os.path.join(PATH, 'assets/zmm370.XLS'), os.path.join(PATH, 'assets/zmm370.csv'))
     except FileExistsError:
@@ -218,11 +280,11 @@ def read_zmm370(self):
     return zmm370
 
 
-def atualizar_base_movimentacao(self):
+def atualizar_base_movimentacao():
     try:
         # Leitura dos arquivos das bases CJI3 e ZMM370
-        cji3 = self.read_cji3()
-        zmm370 = self.read_zmm370()
+        cji3 = read_cji3()
+        zmm370 = read_zmm370()
 
         # Leitura da base de controle dos materiais
         controle_materiais = GOOGLE_SHEETS.le_planilha(url='https://docs.google.com/spreadsheets/d/1QqO9eRly4n1GPuIvi-oBean1RkSOLl8A0UyL3uS2Lr4', aba='Junção')
@@ -304,7 +366,7 @@ def atualizar_base_movimentacao(self):
         merge = merge[ordem_colunas]
 
         # Atualiza a base
-        GOOGLE_SHEETS.sobrescreve_planila(url='https://docs.google.com/spreadsheets/d/1iX87gud0Q8DJIyntlIxR2UVrnzkRah0TF4CG-_NdryU', aba='Base', df=merge)
+        GOOGLE_SHEETS.sobrescreve_planilha(url='https://docs.google.com/spreadsheets/d/1iX87gud0Q8DJIyntlIxR2UVrnzkRah0TF4CG-_NdryU', aba='Base', df=merge)
 
         return {
             'status': 'Ok',
@@ -315,7 +377,7 @@ def atualizar_base_movimentacao(self):
         raise
 
 
-def criar_hros(self):
+def criar_hros():
     base = GOOGLE_SHEETS.le_planilha(url='https://docs.google.com/spreadsheets/d/1wb7jj5wQM_61-yQruIn4UGI9KrQH4CL__W-X0MPcif0', aba='Junção')
 
     map_operacao_contrato = {
@@ -363,7 +425,7 @@ def criar_hros(self):
     GEOEX.criar_hro_em_massa(files)
 
 
-def criar_pastas(self):
+def criar_pastas():
     df = GOOGLE_SHEETS.le_planilha(url='https://docs.google.com/spreadsheets/d/1wb7jj5wQM_61-yQruIn4UGI9KrQH4CL__W-X0MPcif0', aba='Junção')
     projetos_criar_pasta = df[
         (df["Estágio da pasta"].str.endswith("Pendente postagem da pasta (Sirtec - Fechamento)")) &
@@ -379,7 +441,7 @@ def criar_pastas(self):
         sleep(1)
 
 
-def aceitar_hros(self):
+def aceitar_hros():
     base_hro = GOOGLE_SHEETS.le_planilha(url='https://docs.google.com/spreadsheets/d/1wb7jj5wQM_61-yQruIn4UGI9KrQH4CL__W-X0MPcif0/edit?usp=sharing', aba='BASE_HRO')
     hros = base_hro.query("STATUS == 'ANALISADO'")['PROTOCOLO']
     for hro in hros:
@@ -413,43 +475,43 @@ with DAG(
 
     atualiza_hro = PythonOperator(
                                 task_id='atualiza_hro',
-                                python_callable=bots.atualizar_base_hro
+                                python_callable=atualizar_base_hro
     )
 
     atualiza_medicoes = PythonOperator(
                                     task_id='atualiza_medicoes',
-                                    python_callable=bots.atualizar_base_medicoes
+                                    python_callable=atualizar_base_medicoes
     )
 
     atualiza_base_movimentacoes = PythonOperator(
                                 task_id='atualiza_base_movimentacoes',
-                                python_callable=bots.atualizar_base_movimentacao
+                                python_callable=atualizar_base_movimentacao
                             )
     
     atualiza_pastas = PythonOperator(
                             task_id='atualiza_pastas',
-                            python_callable=bots.atualizar_base_envio_pastas_consulta
+                            python_callable=atualizar_base_envio_pastas_consulta
                             )
 
     cria_hros = PythonOperator(
                     task_id='cria_hros',
-                    python_callable=bots.criar_hros
+                    python_callable=criar_hros
                 )
     
 
     cria_pastas = PythonOperator(
                     task_id='cria_pastas',
-                    python_callable=bots.criar_pastas
+                    python_callable=criar_pastas
                 )
 
     aceita_hros = PythonOperator(
                     task_id='aceita_hros',
-                    python_callable=bots.aceitar_hros
+                    python_callable=aceitar_hros
                 )
 
     '''confere_arquivos = PythonOperator(
                     task_id='confere_arquivos',
-                    python_callable=bots.conferir_arquivos
+                    python_callable=conferir_arquivos
                 )'''
 
 
