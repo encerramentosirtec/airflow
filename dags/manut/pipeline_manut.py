@@ -186,7 +186,7 @@ def atualizar_base_envio_pastas_consulta():
             df['ENVIO_PASTA_DATA_SOLICITACAO'] = pd.to_datetime(df['ENVIO_PASTA_DATA_SOLICITACAO']).dt.strftime('%d/%m/%Y')
 
             # Atualização da base
-            GOOGLE_SHEETS.sobrescreve_planilha(url='https://docs.google.com/spreadsheets/d/1wb7jj5wQM_61-yQruIn4UGI9KrQH4CL__W-X0MPcif0', aba='BASE_ENVIO_PASTAS', df=df.fillna("").values.tolist())
+            GOOGLE_SHEETS.sobrescreve_planilha(url='https://docs.google.com/spreadsheets/d/1wb7jj5wQM_61-yQruIn4UGI9KrQH4CL__W-X0MPcif0', aba='BASE_ENVIO_PASTAS', df=df.fillna(""))
 
         except Exception as e:
             raise
