@@ -34,16 +34,17 @@ class GeoexHook(HttpHook):
                     response = self.scraper.post(url=url, headers = self.header, **kwargs)
                 else:
                     response = self.scraper.get(url=url, headers = self.header)
-                break
-            except:
-                print(response.status_code)
-                if (response.status_code == 429) or (response.status_code ==500):
+                
+                if (response.status_code == 429) or (response.status_code == 500):
                     sleep(10)
                     continue
-                if response.status_code == 403:
-                    raise Exception("status code 403 - atualizar cookie")
+                elif response.status_code == 403:
+                    raise TypeError("status code 403 - atualizar cookie")
                 else:
                     break
+            except Exception as e:
+                print(f'Status code: {response.status_code}')
+                raise e
 
         return response
     

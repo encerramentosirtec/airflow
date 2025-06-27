@@ -17,7 +17,8 @@ from oauth2client.service_account import ServiceAccountCredentials
 class Bots:
 
     def __init__(self, cookie_file='cookie_ccm.json', cred_file='causal_scarab.json'):
-        self.PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..') # Altera diretório raiz de execução do código
+        #self.PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..') # Altera diretório raiz de execução do código
+        self.PATH = os.getenv('AIRFLOW_HOME')
         
         with open(os.path.join(self.PATH, f'assets/auth_geoex/{cookie_file}'), 'r') as f:
             self.cookie = json.load(f)
@@ -57,36 +58,20 @@ class Bots:
 
         return df
 
-
-    # As-Built
     def fazer_requisicao(self, url, body):
         resposta = ''
-        fim = False
         
-        while True:
-            r = GeoexHook(self.cookie).run("POST", url, json=body)
-                
-            if r.status_code!=200:
-                print(' Erro na requisição: Code: '+str(r.status_code)+', Reason: '+str(r.reason))
-                sleep(30)
-                fim = True
-                continue
-            if fim:
-                fim = False
-                print(' Erro na requisição: Code: '+str(r.status_code)+', Reason: '+str(r.reason))
-            try:
-                resposta = r.json()
-            except Exception as e:
-                print(r)
-                raise e
-            break
+        r = GeoexHook(self.cookie).run("POST", url, json=body)
+        resposta = r.json()
         
-        if resposta["IsUnauthorized"]:
-            print(resposta)
-            raise "Cookie Inválido"
+        if resposta["IsUnauthorized"] or resposta['StatusCode']==403:
+            print('Cookie Inválido')
+            raise TypeError('Cookie Inválido')
         
         return resposta
 
+
+    # As-Built
     def asbuilt(self):
         ####################### LENDO CARTEIRAS ONLINE
         while True:
@@ -395,8 +380,7 @@ class Bots:
     def lv_geral(self):
         id = configs.id_planilha_postagemV5
 
-        gspread_service = gspread.service_account(filename=os.path.join(self.PATH, 'dags/_internal/causal_scarab.json'))
-        sh = gspread_service.open_by_key(id)
+        sh = self.GS_SERVICE.open_by_key(id)
 
         lv = self.le_planilha_google(id, "LV GERAL")
         lv = lv[lv['PROJETO']!='']
@@ -432,7 +416,9 @@ class Bots:
                     
                     status.append(str(status_pasta))
                 except Exception as e:
-                    print(e)
+                    if str(e) == 'Cookie Inválido':
+                        raise e
+                    print(f'erro {e}')
                     status_pasta = ''
                     status.append('')
                     pass
