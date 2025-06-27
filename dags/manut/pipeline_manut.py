@@ -72,7 +72,9 @@ def atualizar_base_medicoes():
                 'VALOR_PREVISTO': 'sum'
             })
 
-            GS_SERVICE.sobrescreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='BASE_MEDIÇÕES', df=df_grouped)
+            sucess = GS_SERVICE.sobrescreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='BASE_MEDIÇÕES', df=df_grouped)
+            if sucess:
+                GS_SERVICE.escreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Medições', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A4')
                             
             return {
                 'status': 'Ok',
@@ -135,7 +137,9 @@ def atualizar_base_hro():
             )
     
     # Atualização da base
-    GS_SERVICE.sobrescreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='BASE_HRO', df=df_att.fillna(""))
+    sucess = GS_SERVICE.sobrescreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='BASE_HRO', df=df_att.fillna(""))
+    if sucess:
+        GS_SERVICE.escreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Base HRO', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A3')
 
 
     return {
@@ -185,7 +189,9 @@ def atualizar_base_envio_pastas_consulta():
             df['DATA_SOLICITACAO'] = pd.to_datetime(df['DATA_SOLICITACAO']).dt.strftime('%d/%m/%Y')
 
             # Atualização da base
-            GS_SERVICE.sobrescreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='BASE_ENVIO_PASTAS', df=df.fillna(""))
+            sucess = GS_SERVICE.sobrescreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='BASE_ENVIO_PASTAS', df=df.fillna(""))
+            if sucess:
+                GS_SERVICE.escreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Envio de pastas', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A5')
 
         except Exception as e:
             raise
@@ -294,8 +300,8 @@ def atualizar_base_movimentacao():
         controle_materiais.rename(columns={
             'Código': 'Material',
         }, inplace=True)
-        controle_materiais = controle_materiais[['Operação', 'Projeto', 'Material', 'Quantidade']]
-        controle_materiais = controle_materiais.groupby(['Operação', 'Projeto', 'Material'], as_index=False).sum()
+        controle_materiais = controle_materiais[['Projeto', 'Material', 'Quantidade']]
+        controle_materiais = controle_materiais.groupby(['Projeto', 'Material'], as_index=False).sum()
         
         # Separação das reservas final 1 e final 2
         reservas_final1 = zmm370.query("RegistroFinal != 'X' and Tipomovimento in ['221', '921']")[['Projeto', 'Material', 'Quantidade', 'Reserva']]
@@ -401,23 +407,26 @@ def atualizar_base_movimentacao():
         merge.loc[ ((merge['Categoria'] == 'SUCATA') | (merge['Categoria'] == 'RECUP')) & merge['Status movimentação'].isnull() & ( merge['Estornar sucata'] > 0 ), 'Status movimentação'] = 'E. Pendente de estornar sucata'
 
         # Define reservas lixo
-        merge.loc[~merge['Status movimentação'].isnull() & (merge['Eliminar reserva lixo'] > 0), 'Status movimentação'] = 'F. Pendente eliminar reservas lixo'
+        merge.loc[merge['Status movimentação'].isnull() & (merge['Eliminar reserva lixo'] > 0) & ((merge['Quantidade Retirar'] == 0) & (merge['Quantidade Devolver'] == 0) ), 'Status movimentação'] = 'F. Pendente eliminar reservas lixo'
 
         # Define as movimentações Ok
         merge.loc[merge['Status movimentação'].isnull(), 'Status movimentação'] = 'G. Movimentação ok'
 
+        projetos_postagem = GS_SERVICE.le_planilha(spreadsheets.MANUT_POSTAGEM, aba='Junção', intervalo='D:J')
+        merge = merge.merge(projetos_postagem, on='Projeto', how='left')
+        
 
         ### Atualiza a base
         
-        # Selecionando colunas
-        ordem_colunas = ['Projeto', 'Material', 'Descrição', 'Categoria', 'Quantidade Aplicada', 'Quantidade Movimentada', 'Quantidade Disponível (221/921)', 'Quantidade Disponível (222/922)', 'Quantidade Retirar', 'Quantidade Devolver',  'Criar reserva de retirada', 'Criar reserva de devolução', 'Eliminar reserva lixo', 'Estornar sucata', 'Status movimentação']
-        merge = merge[ordem_colunas]
-        
         # Reordenando as colunas
         merge.sort_values(by=['Projeto', 'Status movimentação'], ascending=[True, True], inplace=True)
+        ordem_colunas = ['Categoria de pagamento', 'Operação', 'Projeto', 'Material', 'Descrição', 'Status movimentação', 'Quantidade Aplicada', 'Quantidade Movimentada', 'Quantidade Disponível (221/921)', 'Quantidade Disponível (222/922)', 'Quantidade Retirar', 'Quantidade Devolver',  'Criar reserva de retirada', 'Criar reserva de devolução', 'Eliminar reserva lixo', 'Estornar sucata', 'Reserva (221/921)', 'Reserva (222/922)']
+        merge = merge[ordem_colunas].fillna("")
 
         # Atualiza a base
-        GS_SERVICE.sobrescreve_planilha(url=spreadsheets.BASE_MOV_MATERIAIS, aba='Base', df=merge)
+        sucess = GS_SERVICE.sobrescreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='BASE_MOVIMENTAÇÕES', df=merge)
+        if sucess:
+            GS_SERVICE.escreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Movimentação de materiais', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A2')
 
         return {
             'status': 'Ok',
@@ -501,6 +510,9 @@ def aceitar_hros():
         print(r['data'])
 
 
+if __name__ == '__main__':
+    atualizar_base_movimentacao()
+    sys.exit()
 
 default_args = {
     'depends_on_past' : False,
@@ -559,11 +571,6 @@ with DAG(
                     task_id='aceita_hros',
                     python_callable=aceitar_hros
                 )
-
-    '''confere_arquivos = PythonOperator(
-                    task_id='confere_arquivos',
-                    python_callable=conferir_arquivos
-                )'''
 
 
 

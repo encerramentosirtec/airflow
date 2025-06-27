@@ -50,7 +50,7 @@ class Geoex(GeoexHook):
 
         
         while True:
-            r = GeoexHook(self.cookie).run(endpoint, json=json)
+            r = GeoexHook(self.cookie).run('POST', endpoint, json=json)
             
             if r.status_code == 200:
                 arquivos_015 = 0
