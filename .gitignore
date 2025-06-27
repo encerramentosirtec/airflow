@@ -7,6 +7,7 @@ airflow.db
 simple_auth_manager_passwords.json.generated
 downloads
 *.csv
+*.XLS
 *.json
 src/config.py
 astro
@@ -31,3 +32,4 @@ airflow-webserver.pid
 .airflowignore
 dags/exampledag.py
 upgrade-test* 
+testes.ipynb

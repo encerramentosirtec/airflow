@@ -1,6 +1,4 @@
 import os
-#import sys
-#import pandas as pd
 from time import sleep
 import json
 
@@ -9,13 +7,13 @@ from hooks.geoex_hook import GeoexHook
 class Geoex(GeoexHook):
 
     def __init__(self, cookie_file):
-        self.PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..') # Altera diretório raiz de execução do código
+        self.PATH = os.getenv('AIRFLOW_HOME') # Altera diretório raiz de execução do código
         
         with open(os.path.join(self.PATH, f'assets/auth_geoex/{cookie_file}'), 'r') as f:
             self.cookie = json.load(f)
 
 
-    def confere_arquivos(self, projeto_id):
+    def consultar_arquivos(self, projeto_id):
         id_pastas = {
             '411cb08a-fee6-452b-be48-0140a3da48bf': '015',
             '7764cedb-c13c-45b7-9954-788f5206c31f': '018',
@@ -164,7 +162,7 @@ class Geoex(GeoexHook):
         return {'sucess': True}
     
 
-    def busca_info_projeto(self, projeto):
+    def consultar_projeto(self, projeto):
         endpoint = 'Programacao/ConsultarProjeto/Item'
         json = {
             'id': projeto
@@ -182,7 +180,7 @@ class Geoex(GeoexHook):
             return {'sucess': False, 'status_code': r.status_code, 'data': None}
         
 
-    def busca_info_envio_de_pasta(self, projeto_id):
+    def consultar_envio_de_pasta(self, projeto_id):
         endpoint = 'ConsultarProjeto/EnvioPasta/Itens'
 
         json = {
@@ -225,7 +223,7 @@ class Geoex(GeoexHook):
 
     def enviar_pasta(self, projeto):
 
-        info_projeto = self.busca_info_projeto(projeto)
+        info_projeto = self.consultar_projeto(projeto)
 
         if info_projeto['sucess']:
             id_projeto = info_projeto['data']['ProjetoId']
