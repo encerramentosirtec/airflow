@@ -28,20 +28,20 @@ class GoogleSheets:
         return df
 
 
-    def escreve_planilha(self, url, aba, df):
+    def escreve_planilha(self, url, aba, df, input_option=''):
         try:
             sh = self.gs_service.open_by_url(url)
         except:
             sh = self.gs_service.open_by_key(url)
         ws = sh.worksheet(aba)
-        ws.update([df.columns.values.tolist()] + df.values.tolist())
+        ws.update([df.columns.values.tolist()] + df.values.tolist(), value_input_option=input_option)
 
 
-    def sobrescreve_planilha(self, url, aba, df):
+    def sobrescreve_planilha(self, url, aba, df, input_option=''):
         try:
             sh = self.gs_service.open_by_url(url)
         except:
             sh = self.gs_service.open_by_key(url)
         ws = sh.worksheet(aba)
         ws.clear()
-        ws.update([df.columns.values.tolist()] + df.values.tolist())
+        ws.update([df.columns.values.tolist()] + df.values.tolist(), value_input_option=input_option)

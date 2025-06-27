@@ -1,9 +1,104 @@
 from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator
-from src.bots_manut import Bots
+import pandas as pd
 from pendulum import today, duration
+from time import sleep
+import os
+import sys
 
-bot = Bots()
+PATH = os.getenv('AIRFLOW_HOME')
+os.chdir(PATH)
+sys.path.insert(0, PATH)
+
+
+import spreadsheets
+
+from src.geoex import Geoex
+GEOEX = Geoex(cookie_file='cookie_hugo.json')
+
+from src.google_sheets import GoogleSheets
+GS_SERVICE = GoogleSheets(credentials='causal_scarab.json') # Inicia o serviço do google sheets
+
+
+
+def consulta_solicitacao(projeto):
+    status = ['']
+    serial = ['']
+    reserva = [''] 
+
+    r = GEOEX.consultar_projeto(projeto)
+    if r['sucess']:
+        projeto_id = r['data']['ProjetoId']
+    else:
+        raise Exception(
+            f"""
+            Falha ao baixar csv.
+            Statuscode: { r['status_code'] }
+            Message: { r['data'] }
+            """
+        ) 
+
+        
+    try:
+        body = {'ProjetoId': projeto_id,
+            'Rejeitadas': False,
+            'Paginacao': {'TotalPorPagina': "10", 'Pagina': "1"}}
+    except Exception as e:
+        print(projeto, r['Message'], r['StatusCode'], r['Content'])
+        raise e
+        
+    sleep(1)
+
+    try:
+        r = self.geoex.run("POST", self.endpoint_reserva, json=body).json()
+    except Exception as e:
+        print(projeto, r.content, str(r.status_code), str(r.reason))
+        raise e
+    
+    try:
+        if r['Content']['TotalWithFilter']!=0:
+            status = []
+            serial = []
+            reserva = []
+            for i in r['Content']['Items']:
+                id = i['HistoricoAtual']['HistoricoStatusId']
+                serial.append(i['Serial'])
+                reserva.append(i['NumeroReserva'])
+                status.append(self.reservas_ids.get(id, id))
+    except Exception as e:
+        if r['Message']=='Não foi possível processar sua solicitação. Ocorreu um erro no servidor. Tente novamente.':
+            status = ['ERRO']
+            serial = ['']
+        else:
+            print(projeto, r['Message'], r['Content'])
+            raise e
+            
+    return status, serial, reserva
+    
+def atualiza_solicitacoes():
+    titulo = ['Projeto','Status','Solicitação','Reserva']
+    sheet = GS_SERVICE.le_planilha(url=spreadsheets.SOLICITACOES_RESERVA, aba='Junção')
+    sheet['Projeto'] = sheet['Projeto'].str.strip()
+    sheet = sheet[sheet['Projeto']!='']
+    sheet = sheet[sheet['Categoria de pagamento'].isin(['CAPEX_OC', 'CAPEX_PREV'])]
+    sheet = sheet[sheet['Status movimentação dos materiais'].isin(['B. Pendente criação de reservas'])]
+    sheet = sheet.sort_values(by=['Projeto','Status movimentação dos materiais'], ascending=[True, True])
+    sheet = sheet.drop_duplicates(subset=['Projeto'], keep='first')
+    
+    valores = []
+    for i, projeto in enumerate(sheet['Projeto']):
+        status, serial, reserva = consulta_solicitacao(projeto)
+        for j, k, l in zip(status, serial, reserva):
+            valores.append([projeto, j, k, l])
+        print(f'{i+1}/{sheet.shape[0]}: {projeto}, {status}, {serial}, {reserva}')
+    
+
+    df = pd.DataFrame(valores, columns=titulo)
+    GS_SERVICE.escreve_planilha(spreadsheets.SOLICITACOES_RESERVA, aba='Solicitações', df=df, input_option='USER_ENTERED')
+
+
+
+
 default_args = {
     'depends_on_past' : False,
     'email' : ['heli.silva@sirtec.com.br'],
@@ -25,7 +120,7 @@ with DAG('solicitacoes-de-reservas',
 
     solicitacoes = PythonOperator(
         task_id = 'solicitacoes',
-        python_callable = bot.atualiza_solicitacoes
+        python_callable = atualiza_solicitacoes
     )
 
     solicitacoes

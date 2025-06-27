@@ -32,3 +32,4 @@ airflow-webserver.pid
 .airflowignore
 dags/exampledag.py
 upgrade-test* 
+testes.ipynb
