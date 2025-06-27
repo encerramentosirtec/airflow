@@ -159,7 +159,7 @@ default_args = {
 
 with DAG(
     'atualiza_base_geoex_manut',
-    schedule='*/30 6-22 * * *',
+    schedule = '0 6,12 * * 1-6',
     start_date=pendulum.today('America/Sao_Paulo'),
     catchup=False,
     default_args = default_args,
