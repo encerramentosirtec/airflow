@@ -72,6 +72,7 @@ def atualizar_base_medicoes():
             })
 
             GS_SERVICE.sobrescreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='BASE_MEDIÇÕES', df=df_grouped)
+            GS_SERVICE.escreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Medições', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A4')
                             
             return {
                 'status': 'Ok',
@@ -135,6 +136,7 @@ def atualizar_base_hro():
     
     # Atualização da base
     GS_SERVICE.sobrescreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='BASE_HRO', df=df_att.fillna(""))
+    GS_SERVICE.escreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Base HRO', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A3')
 
 
     return {
@@ -185,6 +187,7 @@ def atualizar_base_envio_pastas_consulta():
 
             # Atualização da base
             GS_SERVICE.sobrescreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='BASE_ENVIO_PASTAS', df=df.fillna(""))
+            GS_SERVICE.escreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Envio de pastas', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A5')
 
         except Exception as e:
             raise
@@ -400,7 +403,7 @@ def atualizar_base_movimentacao():
         merge.loc[ ((merge['Categoria'] == 'SUCATA') | (merge['Categoria'] == 'RECUP')) & merge['Status movimentação'].isnull() & ( merge['Estornar sucata'] > 0 ), 'Status movimentação'] = 'E. Pendente de estornar sucata'
 
         # Define reservas lixo
-        merge.loc[~merge['Status movimentação'].isnull() & (merge['Eliminar reserva lixo'] > 0), 'Status movimentação'] = 'F. Pendente eliminar reservas lixo'
+        merge.loc[merge['Status movimentação'].isnull() & (merge['Eliminar reserva lixo'] > 0) & ((merge['Quantidade Retirar'] == 0) & (merge['Quantidade Devolver'] == 0) ), 'Status movimentação'] = 'F. Pendente eliminar reservas lixo'
 
         # Define as movimentações Ok
         merge.loc[merge['Status movimentação'].isnull(), 'Status movimentação'] = 'G. Movimentação ok'
@@ -409,14 +412,15 @@ def atualizar_base_movimentacao():
         ### Atualiza a base
         
         # Selecionando colunas
-        ordem_colunas = ['Projeto', 'Material', 'Descrição', 'Categoria', 'Quantidade Aplicada', 'Quantidade Movimentada', 'Quantidade Disponível (221/921)', 'Quantidade Disponível (222/922)', 'Quantidade Retirar', 'Quantidade Devolver',  'Criar reserva de retirada', 'Criar reserva de devolução', 'Eliminar reserva lixo', 'Estornar sucata', 'Status movimentação']
+        ordem_colunas = ['Projeto', 'Material', 'Descrição', 'Status movimentação', 'Quantidade Aplicada', 'Quantidade Movimentada', 'Quantidade Disponível (221/921)', 'Quantidade Disponível (222/922)', 'Quantidade Retirar', 'Quantidade Devolver',  'Criar reserva de retirada', 'Criar reserva de devolução', 'Eliminar reserva lixo', 'Estornar sucata', 'Reserva (221/921)', 'Reserva (222/922)']
         merge = merge[ordem_colunas]
         
         # Reordenando as colunas
         merge.sort_values(by=['Projeto', 'Status movimentação'], ascending=[True, True], inplace=True)
 
         # Atualiza a base
-        GS_SERVICE.sobrescreve_planilha(url=spreadsheets.BASE_MOV_MATERIAIS, aba='Base', df=merge)
+        GS_SERVICE.escreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='BASE_MOVIMENTAÇÕES', df=merge, range='C2')
+        GS_SERVICE.escreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Movimentação de materiais', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A2')
 
         return {
             'status': 'Ok',
@@ -500,6 +504,9 @@ def aceitar_hros():
         print(r['data'])
 
 
+if __name__ == '__main__':
+    atualizar_base_movimentacao()
+    sys.exit()
 
 default_args = {
     'depends_on_past' : False,
@@ -558,11 +565,6 @@ with DAG(
                     task_id='aceita_hros',
                     python_callable=aceitar_hros
                 )
-
-    '''confere_arquivos = PythonOperator(
-                    task_id='confere_arquivos',
-                    python_callable=conferir_arquivos
-                )'''
 
 
 
