@@ -71,8 +71,9 @@ def atualizar_base_medicoes():
                 'VALOR_PREVISTO': 'sum'
             })
 
-            GS_SERVICE.sobrescreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='BASE_MEDIÇÕES', df=df_grouped)
-            GS_SERVICE.escreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Medições', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A4')
+            sucess = GS_SERVICE.sobrescreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='BASE_MEDIÇÕES', df=df_grouped)
+            if sucess:
+                GS_SERVICE.escreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Medições', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A4')
                             
             return {
                 'status': 'Ok',
@@ -135,8 +136,9 @@ def atualizar_base_hro():
             )
     
     # Atualização da base
-    GS_SERVICE.sobrescreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='BASE_HRO', df=df_att.fillna(""))
-    GS_SERVICE.escreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Base HRO', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A3')
+    sucess = GS_SERVICE.sobrescreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='BASE_HRO', df=df_att.fillna(""))
+    if sucess:
+        GS_SERVICE.escreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Base HRO', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A3')
 
 
     return {
@@ -186,8 +188,9 @@ def atualizar_base_envio_pastas_consulta():
             df['DATA_SOLICITACAO'] = pd.to_datetime(df['DATA_SOLICITACAO']).dt.strftime('%d/%m/%Y')
 
             # Atualização da base
-            GS_SERVICE.sobrescreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='BASE_ENVIO_PASTAS', df=df.fillna(""))
-            GS_SERVICE.escreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Envio de pastas', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A5')
+            sucess = GS_SERVICE.sobrescreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='BASE_ENVIO_PASTAS', df=df.fillna(""))
+            if sucess:
+                GS_SERVICE.escreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Envio de pastas', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A5')
 
         except Exception as e:
             raise
@@ -419,8 +422,9 @@ def atualizar_base_movimentacao():
         merge.sort_values(by=['Projeto', 'Status movimentação'], ascending=[True, True], inplace=True)
 
         # Atualiza a base
-        GS_SERVICE.escreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='BASE_MOVIMENTAÇÕES', df=merge, range='C2')
-        GS_SERVICE.escreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Movimentação de materiais', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A2')
+        sucess = GS_SERVICE.escreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='BASE_MOVIMENTAÇÕES', df=merge, range='C2')
+        if sucess:
+            GS_SERVICE.escreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Movimentação de materiais', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A2')
 
         return {
             'status': 'Ok',

@@ -36,8 +36,13 @@ class GoogleSheets:
             sh = self.gs_service.open_by_url(url)
         except:
             sh = self.gs_service.open_by_key(url)
-        ws = sh.worksheet(aba)
-        ws.update(df.values.tolist(), range_name=range, value_input_option=input_option)
+
+        try:
+            ws = sh.worksheet(aba)
+            ws.update(df.values.tolist(), range_name=range, value_input_option=input_option)
+            return True
+        except:
+            return False
 
 
     def atualiza_planilha(self, url, aba, df, input_option=''):
@@ -48,9 +53,13 @@ class GoogleSheets:
             sh = self.gs_service.open_by_url(url)
         except:
             sh = self.gs_service.open_by_key(url)
-        ws = sh.worksheet(aba)
-        ws.append_rows(df.values.tolist(), value_input_option=input_option)
 
+        try:
+            ws = sh.worksheet(aba)
+            ws.append_rows(df.values.tolist(), value_input_option=input_option)
+            return True
+        except:
+            return False
 
     def sobrescreve_planilha(self, url, aba, df, input_option=''):
         """
@@ -60,6 +69,11 @@ class GoogleSheets:
             sh = self.gs_service.open_by_url(url)
         except:
             sh = self.gs_service.open_by_key(url)
-        ws = sh.worksheet(aba)
-        ws.clear()
-        ws.update([df.columns.values.tolist()] + df.values.tolist(), value_input_option=input_option)
+        
+        try:
+            ws = sh.worksheet(aba)
+            ws.clear()
+            ws.update([df.columns.values.tolist()] + df.values.tolist(), value_input_option=input_option)
+            return True
+        except:
+            return False
