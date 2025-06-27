@@ -17,15 +17,22 @@ class GoogleSheets:
         
         if intervalo == None:
             df = ws.get_all_records(value_render_option=render_option)
-        else:
-            df = ws.get_all_records(range_name=intervalo, value_render_option=render_option)
 
-        if dtype is not None:
-            df = pd.DataFrame(df, dtype=dtype)
-        else:
-            df = pd.DataFrame(df)
+            if dtype is not None:
+                df = pd.DataFrame(df, dtype=dtype)
+            else:
+                df = pd.DataFrame(df)
 
-        return df
+            return df
+        else:
+            df = ws.get_values(range_name=intervalo, value_render_option=render_option)
+
+            if dtype is not None:
+                df = pd.DataFrame(df[1:], columns=df[0], dtype=dtype)
+            else:
+                df = pd.DataFrame(df[1:], columns=df[0])
+
+            return df
 
 
     def escreve_planilha(self, url, aba, df, range, input_option=''):
@@ -41,8 +48,8 @@ class GoogleSheets:
             ws = sh.worksheet(aba)
             ws.update(df.values.tolist(), range_name=range, value_input_option=input_option)
             return True
-        except:
-            return False
+        except Exception as e:
+            return e
 
 
     def atualiza_planilha(self, url, aba, df, input_option=''):
@@ -58,8 +65,8 @@ class GoogleSheets:
             ws = sh.worksheet(aba)
             ws.append_rows(df.values.tolist(), value_input_option=input_option)
             return True
-        except:
-            return False
+        except Exception as e:
+            return e
 
     def sobrescreve_planilha(self, url, aba, df, input_option=''):
         """
@@ -75,5 +82,5 @@ class GoogleSheets:
             ws.clear()
             ws.update([df.columns.values.tolist()] + df.values.tolist(), value_input_option=input_option)
             return True
-        except:
-            return False
+        except Exception as e:
+            return e

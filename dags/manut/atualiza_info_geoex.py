@@ -130,9 +130,36 @@ def atualiza_base():
             
             sleep(1.5)
 
+        colunas = [
+                'Projeto', 
+                'Título', 
+                'Valor Projeto', 
+                'Valor Serviço', 
+                'Valor Material', 
+                'Status do projeto', 
+                'Status usuário - Operação', 
+                'Status flutuante - Encerramento', 
+                'Projeto GSE', 
+                'Status Héktor', 
+                'Arquivos 015', 
+                'Arquivos 018', 
+                'Arquivos 021', 
+                'Arquivos 127', 
+                'Arquivos 022', 
+                'Localidade', 
+                'Município', 
+                'Empresa', 
+                'ProjetoText', 
+                'Data ZPS09', 
+                'Grupo', 
+                'Unidade', 
+                'Id Investimento', 
+            ]
 
-        GS_SERVICE.sobrescreve_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_GEOEX', df=tabela, input_option='USER_ENTERED')
-        GS_SERVICE.escreve_planilha(url=sh.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Projetos Geoex', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A6')
+        df = pd.DataFrame(tabela, columns=colunas).fillna("")
+        sucess = GS_SERVICE.sobrescreve_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_GEOEX', df=df, input_option='USER_ENTERED')
+        if sucess:
+            GS_SERVICE.escreve_planilha(url=sh.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Projetos Geoex', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A6')
 
         print( {
             'status': 'Ok',
