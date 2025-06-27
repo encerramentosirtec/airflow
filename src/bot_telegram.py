@@ -4,7 +4,8 @@ import telebot
 import requests
 import traceback
 from datetime import datetime
-from airflow.sdk import Variable
+#from airflow.sdk import Variable
+from airflow.models import Variable
 from hooks.geoex_hook import GeoexHook
 
 def abre_json(arquivo):
@@ -22,7 +23,7 @@ class Bots:
         self.PATH = os.getenv('AIRFLOW_HOME')
 
         #os.environ['NO_PROXY'] = '*'
-        API_TOKEN = Variable.get("telegram_api_key", default=None)
+        API_TOKEN = Variable.get("telegram_api_key")
         self.bot = telebot.TeleBot(API_TOKEN, threaded=False)
         #telebot.logger.setLevel(logging.DEBUG) # Outputs debug messages to console.
 
@@ -77,14 +78,14 @@ class Bots:
         Variable.set(key='cookie_manut', value=data_new['cookie'])
         Variable.set(key='gxsessao_manut', value=data_new['gxsessao'])
         Variable.set(key='gxbot_manut', value=data_new['gxbot'])
-        if Variable.get("useragent_manut", default=None) == None:
+        if Variable.get("useragent_manut") == None:
             Variable.set(key='useragent_manut', value=data_new['useragent'])
 
     def get_cookie(self):
-        cookie = Variable.get("cookie_manut", default=None)
-        gxsessao = Variable.get("gxsessao_manut", default=None)
-        gxbot = Variable.get("gxbot_manut", default=None)
-        useragent = Variable.get("useragent_manut", default=None)
+        cookie = Variable.get("cookie_manut")
+        gxsessao = Variable.get("gxsessao_manut")
+        gxbot = Variable.get("gxbot_manut")
+        useragent = Variable.get("useragent_manut")
         #print(cookie, '\n', gxsessao, '\n', gxbot, '\n', useragent)
         return cookie, gxsessao, gxbot, useragent
 

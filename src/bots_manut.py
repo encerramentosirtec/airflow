@@ -46,7 +46,8 @@ class Bots:
 
 
     def atualizar_base_medicoes(self):
-        #print(os.getcwd())
+        print(os.getcwd())
+        print(PATH)
         map_status = {
             'MPC': 'A. Pedido lançado',
             'MVD': 'B. Validada',

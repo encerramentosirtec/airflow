@@ -155,8 +155,14 @@ class Geoex(GeoexHook):
 
         if name != None: nome = f'{name}.csv'
 
+        full_path = os.path.join(self.PATH, f'{file_path}/{nome}')
+        print(f"Tentando salvar em: {full_path}")
+
+        # Verifique se o diretório existe
+        os.makedirs(os.path.dirname(full_path), exist_ok=True)
+
         csv = GeoexHook(self.cookie).run('GET', arquivo)
-        with open(os.path.join(self.PATH,f'{file_path}/{nome}'), 'wb') as f:
+        with open(full_path, 'wb') as f:
             f.write(csv.content)
 
         return {'sucess': True}

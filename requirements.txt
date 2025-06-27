@@ -9,14 +9,13 @@ seaborn==0.13.2
 matplotlib==3.10.3
 babel==2.17.0
 telebot==0.0.5
-apache-airflow==3.0.2
-apache-airflow-providers-google==8.0.0
-apache-airflow-providers-standard>=0.0.1
-apache-airflow-providers-http==5.3.0
+#apache-airflow==3.0.2
+#apache-airflow-providers-google==8.0.0
+#apache-airflow-providers-standard>=0.0.1
+#apache-airflow-providers-http==5.3.0
 
 # Instalar o airflow com comando: pip install "apache-airflow==3.0.2" "apache-airflow-providers-google==8.0.0"
 # winget install -e --id Astronomer.Astro
 # astro dev init
 # astro dev start
 
-astro-run-dag # This package is needed for the astro run command. It will be removed before a deploy

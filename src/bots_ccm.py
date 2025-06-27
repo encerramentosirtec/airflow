@@ -423,7 +423,7 @@ class Bots:
                     status.append('')
                     pass
             elif row['PROJETO']!='' and primeiro!=index:
-                print(len(status))
+                #print(len(status))
                 status.append(str(status[primeiro]))
                 print(f'{(index+1):03}/{lv.shape[0]} - projeto: {row['PROJETO']}, status pasta: {status[primeiro]} (repetido)')
                 continue

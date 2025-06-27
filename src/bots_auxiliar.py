@@ -24,7 +24,7 @@ class Bots_aux():
         self.planilha_gpm = '1_M4Ae3TkkbTl9XYrKviuYkzl0TStvfbEWox_oR9DpP0'
         self.planilha_rejeicoes = '1RhXWgyRZwEZHU-RAin0l3mrjyGJ5uvvxB86vkD8aIr8'
 
-        self.PATH = os.getcwd()
+        self.PATH = os.getenv('AIRFLOW_HOME')
         self.cred_path = 'jimmy.json'
         self.cookie_path = 'cookie_ccm.json'
         self.geoex = Geoex(self.cookie_path)
@@ -186,7 +186,7 @@ class Bots_aux():
                 textcoords='offset points',
                 fontsize=10)
             
-        plt.savefig('dags/manut/downloads/grafico.png', dpi=300, bbox_inches='tight')
+        plt.savefig(os.path.join(self.PATH,'downloads/grafico.png'), dpi=300, bbox_inches='tight')
         plt.close() 
     
     def tratamento(self):
@@ -195,8 +195,8 @@ class Bots_aux():
         unidades = self.bot.le_planilha_google(self.planilha_rejeicoes, 'Projeto/UTD')
         unidades['VALOR'] = pd.to_numeric(unidades['VALOR'], errors='coerce')
         #print(unidades['VALOR'])
-        df = pd.read_csv('downloads/rejeicoes.csv', encoding='ISO-8859-1', sep=';', thousands='.', decimal=',', low_memory=False)
-        antigos = pd.read_csv('downloads/anteriores.csv', encoding='ISO-8859-1', sep=';', low_memory=False)
+        df = pd.read_csv(os.path.join(self.PATH,'downloads/rejeicoes.csv'), encoding='ISO-8859-1', sep=';', thousands='.', decimal=',', low_memory=False)
+        antigos = pd.read_csv(os.path.join(self.PATH,'downloads/anteriores.csv'), encoding='ISO-8859-1', sep=';', low_memory=False)
         projetos_antigos = antigos['PROJETO'].to_list()
         
         #preenchendo os projetos sem unidade com a unidade informada na planilha
@@ -247,7 +247,7 @@ class Bots_aux():
         df2['REPETICOES'] = df2['REPETICOES'].astype(int)
         
         #atualiza relação de projetos já enviados
-        projetos.to_csv('downloads/anteriores.csv', index=False, sep=';')#, thousands='.', decimal=',')
+        projetos.to_csv(os.path.join(self.PATH,'downloads/anteriores.csv'), index=False, sep=';')#, thousands='.', decimal=',')
         
         #df2['VALOR TOTAL'] = 'R$ ' + df2['VALOR'].round(2).astype(str)
         df2['VALOR TOTAL'] = df2['VALOR'].apply(
@@ -276,10 +276,10 @@ class Bots_aux():
         
         if projetos[~projetos['PROJETO'].isin(antigos['PROJETO'])].shape[0]>0:
             print('atualizando historico')
-            historico = pd.read_csv('downloads/historico.csv', encoding='ISO-8859-1', sep=';', low_memory=False)
+            historico = pd.read_csv(os.path.join(self.PATH,'downloads/historico.csv'), encoding='ISO-8859-1', sep=';', low_memory=False)
             dados['DATA_REGISTRO'] = datetime.now()
             novohist = pd.concat([historico,dados])
-            novohist.to_csv('downloads/historico.csv', index=False, sep=';')
+            novohist.to_csv(os.path.join(self.PATH,'downloads/historico.csv'), index=False, sep=';')
             
         if projetos.shape[0] != 0:
             return df3.hide(axis='index').to_html(), projetos[~projetos['PROJETO'].isin(antigos['PROJETO'])].shape[0], projetos.shape[0]
@@ -397,25 +397,25 @@ class Bots_aux():
         # Create a multipart message and set headers
         message = MIMEMultipart()
         message["From"] = sender_email
-        message["To"] = ", ".join(receiver_emails)
+        message["To"] = ", ".join(receiver_emails_test)
         #message["Bcc"] = "heli.silva@sirtec.com.br"
         message["Subject"] = "Relatório de rejeições de pastas"
 
         # Attach the HTML part
         message.attach(MIMEText(html, "html"))
         
-        with open('downloads/grafico.png', 'rb') as img:
-                msg_img = MIMEImage(img.read(), name=os.path.basename('downloads/grafico.png'))
+        with open(os.path.join(self.PATH,'downloads/grafico.png'), 'rb') as img:
+                msg_img = MIMEImage(img.read(), name=os.path.basename(os.path.join(self.PATH,'downloads/grafico.png')))
                 msg_img.add_header('Content-ID', f'<grafico>')
                 message.attach(msg_img)
 
-        with open('downloads/rejeicoes.csv', "rb") as fil:
+        with open(os.path.join(self.PATH,'downloads/rejeicoes.csv'), "rb") as fil:
             part = MIMEApplication(
                 fil.read(),
-                Name=basename('downloads/rejeicoes.csv')
+                Name=basename(os.path.join(self.PATH,'downloads/rejeicoes.csv'))
             )
         # After the file is closed
-        part['Content-Disposition'] = 'attachment; filename="%s"' % basename('downloads/rejeicoes.csv')
+        part['Content-Disposition'] = 'attachment; filename="%s"' % basename(os.path.join(self.PATH,'downloads/rejeicoes.csv'))
         message.attach(part)
         
         print('envia email')
@@ -423,6 +423,6 @@ class Bots_aux():
         with smtplib.SMTP_SSL(smtp_server, port) as server:
             #server.starttls()
             server.login(login, password)
-            server.sendmail(sender_email, receiver_emails, message.as_string())
+            server.sendmail(sender_email, receiver_emails_test, message.as_string())
 
         print('Sent')

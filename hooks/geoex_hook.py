@@ -23,7 +23,7 @@ class GeoexHook(HttpHook):
     
     def create_url(self, endpoint):
         url = f"{ self.base_url }{ endpoint }"
-        print(url)
+        #print(url)
         return url
     
 
