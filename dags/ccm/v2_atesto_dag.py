@@ -86,7 +86,7 @@ def atualiza_aba_v2(aba):
         sleep(2)
         atestos = v5[coluna]
         for projeto, atesto in zip(projetos, atestos):
-            if atesto.startswith('PM'):
+            if str(atesto).startswith('PM'):
                 status = pesquisa_geoex(projeto, atesto)
                 if status != 'erro':
                     status_ids[i].append([status])
