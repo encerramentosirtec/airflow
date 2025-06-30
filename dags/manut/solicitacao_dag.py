@@ -18,7 +18,16 @@ GEOEX = Geoex(cookie_file='cookie_hugo.json')
 
 from src.google_sheets import GoogleSheets
 GS_SERVICE = GoogleSheets(credentials='causal_scarab.json') # Inicia o serviço do google sheets
-
+endpoint_reserva = 'ConsultarProjetoSolicitacaoReserva/Itens'
+reservas_ids = {
+    1: 'CRIADO',
+    6 : 'CANCELADO',
+    30 : 'ACEITO',
+    31 : 'ACEITO COM RESTRIÇÕES',
+    32 : 'REJEITADO',
+    35 : 'VALIDADO',
+    148 : 'ATENDIDO'
+}
 
 
 def consulta_solicitacao(projeto):
@@ -50,7 +59,7 @@ def consulta_solicitacao(projeto):
     sleep(1)
 
     try:
-        r = self.geoex.run("POST", self.endpoint_reserva, json=body).json()
+        r = GEOEX.run("POST", endpoint_reserva, json=body).json()
     except Exception as e:
         print(projeto, r.content, str(r.status_code), str(r.reason))
         raise e
@@ -64,7 +73,7 @@ def consulta_solicitacao(projeto):
                 id = i['HistoricoAtual']['HistoricoStatusId']
                 serial.append(i['Serial'])
                 reserva.append(i['NumeroReserva'])
-                status.append(self.reservas_ids.get(id, id))
+                status.append(reservas_ids.get(id, id))
     except Exception as e:
         if r['Message']=='Não foi possível processar sua solicitação. Ocorreu um erro no servidor. Tente novamente.':
             status = ['ERRO']
