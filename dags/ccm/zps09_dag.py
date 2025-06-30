@@ -24,6 +24,8 @@ def consulta_projeto(projeto):
         if r['sucess']:
             if r['data']['DtZps09'] != None:
                 datazps09 = datetime.fromisoformat(r['data']['DtZps09']).date().strftime("%d/%m/%Y")
+        elif r['status_code'] == 400:
+            print('Projeto sem contrato')
         else:
             raise Exception(
                 f"""
