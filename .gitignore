@@ -9,7 +9,6 @@ downloads
 *.csv
 *.XLS
 *.json
-src/config.py
 astro
 .git
 .env
