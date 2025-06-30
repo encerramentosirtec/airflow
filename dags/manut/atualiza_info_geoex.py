@@ -1,5 +1,6 @@
 from airflow import DAG
-from airflow.providers.standard.operators.python import PythonOperator
+#from airflow.providers.standard.operators.python import PythonOperator
+from airflow.operators.python import PythonOperator
 import pandas as pd
 from datetime import datetime
 import os
