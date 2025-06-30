@@ -17,7 +17,7 @@ class Bots:
             self.cookie = json.load(f)
             
         self.geoex = Geoex('cookie_ccm.json')
-        self.hook = GeoexHook('cookie_ccm.json')
+        self.hook = GeoexHook(self.cookie)
         self.cred_path = cred_path
         self.GS_SERVICE = gspread.service_account(filename=os.path.join(self.PATH, cred_path))
         self.br_tz = timezone("Brazil/East")
