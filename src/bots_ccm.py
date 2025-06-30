@@ -239,6 +239,7 @@ class Bots:
         guanambi = ['CAETITÉ', 'CANDIBA', 'CARINHANHA', 'FEIRA DA MATA', 'GUANAMBI', 'IGAPORÃ', 'IUIÚ', 'JACARACI', 'LICÍNIO DE ALMEIDA', 'MALHADA', 'MATINA', 'MORTUGABA', 'PALMAS DE MONTE ALTO', 'PINDAÍ', 'RIACHO DE SANTANA', 'SEBASTIÃO LARANJEIRAS', 'URANDI']
         irece = ['AMÉRICA DOURADA', 'BARRA DO MENDES', 'BARRO ALTO', 'CAFARNAUM', 'CENTRAL', 'GENTIO DO OURO', 'IBIPEBA', 'IBITITÁ', 'IRECÊ', 'ITAGUAÇU DA BAHIA', 'JOÃO DOURADO', 'JUSSARA', 'LAPÃO', 'MORRO DO CHAPÉU', 'MULUNGU DO MORRO', 'PRESIDENTE DUTRA', 'SÃO GABRIEL', 'UIBAÍ', 'XIQUE-XIQUE']
         livramento = ['RIO DE CONTAS', 'ÉRICO CARDOSO', 'CATURAMA', 'RIO DO PIRES']
+        brumado = ['LIVRAMENTO DE NOSSA SENHORA', 'JUSSIAPÊ', 'LIVRAMENTO', 'DOM BASÍLIO', 'IBIASSUCÊ', 'ITUAÇU', 'BRUMADO', 'BOTUPORÃ']
         
         status_aceitos = ['CRIADO', 'CANCELADO', 'ACEITO', 'ACEITO COM RESTRIÇÕES', 'REJEITADO', 'VALIDADO']
         projetos_pendente_asbuilt = [['UNIDADE', 'PROJETO', 'TÍTULO', 'VALOR DO PROJETO', 'DATA DE ENERGIZAÇÃO', 'SUPERVISOR', 'MUNICÍPIO']]
@@ -252,7 +253,7 @@ class Bots:
             35 : 'VALIDADO'
         }
         
-        database = "assets/db/db.csv"
+        database = 'assets/db/db.csv'
 
         df = pd.read_csv(database)
 
