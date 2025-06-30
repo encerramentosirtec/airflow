@@ -41,7 +41,7 @@ def consulta_solicitacao(projeto):
     else:
         raise Exception(
             f"""
-            Falha ao baixar csv.
+            Falha consurtar projeto.
             Statuscode: { r['status_code'] }
             Message: { r['data'] }
             """
