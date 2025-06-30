@@ -657,10 +657,7 @@ class Bots:
         return status_encerramento
 
     def atualiza_pasta_v5(self, aba):
-        scope = 'https://spreadsheets.google.com/feeds'
-        creds = ServiceAccountCredentials.from_json_keyfile_name(os.path.join(os.getcwd(), self.cred_path), scope)
-        gs = authorize(creds)
-        sh = gs.open_by_key(configs.id_planilha_postagemV5)
+        sh = self.GS_SERVICE.open_by_key(configs.id_planilha_postagemV5)
         valores = [[],[],[],[]]
         hektor = ''
 
