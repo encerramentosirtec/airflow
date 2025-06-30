@@ -6,6 +6,7 @@ import pandas as pd
 from time import sleep
 from src.geoex import Geoex
 from pendulum import timezone
+from hooks.geoex_hook import GeoexHook
 
 class Bots:
 
@@ -16,6 +17,7 @@ class Bots:
             self.cookie = json.load(f)
             
         self.geoex = Geoex('cookie_ccm.json')
+        self.hook = GeoexHook('cookie_ccm.json')
         self.cred_path = cred_path
         self.GS_SERVICE = gspread.service_account(filename=os.path.join(self.PATH, cred_path))
         self.br_tz = timezone("Brazil/East")
@@ -93,7 +95,7 @@ class Bots:
     def consulta_projeto(self, projeto):
         datazps09, investimento, tipologia, contrato = '', '', '', ''
         try:
-            r = self.geoex.run("POST", self.url_geo, json={'id': projeto}).json()
+            r = self.hook.run("POST", self.url_geo, json={'id': projeto}).json()
         except Exception as e:
             print(projeto, r.content, str(r.status_code), str(r.reason))
             raise e
@@ -119,7 +121,7 @@ class Bots:
         data_pasta, analista, data_validacao, status_pasta = '', '', '', ''
         sleep(1)
         try:
-            r = self.geoex.run("POST", self.url_pasta, json=body).json()
+            r = self.hook.run("POST", self.url_pasta, json=body).json()
         except Exception as e:
             print(projeto, r.content, str(r.status_code), str(r.reason))
             raise e
