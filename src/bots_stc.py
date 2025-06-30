@@ -10,14 +10,14 @@ from pendulum import timezone
 class Bots:
 
     def __init__(self, cookie_path='assets/auth_geoex/cookie_ccm.json', cred_path='assets/auth_google/jimmy.json'):
-        self.PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..') # Altera diretório raiz de execução do código
+        self.PATH = os.getenv('AIRFLOW_HOME')
         
         with open(os.path.join(self.PATH, cookie_path), 'r') as f:
             self.cookie = json.load(f)
             
         self.geoex = Geoex('cookie_ccm.json')
         self.cred_path = cred_path
-        self.GS_SERVICE = gspread.service_account(filename=os.path.join(os.getcwd(), cred_path))
+        self.GS_SERVICE = gspread.service_account(filename=os.path.join(self.PATH, cred_path))
         self.br_tz = timezone("Brazil/East")
 
         self.url_geo = 'Cadastro/ConsultarProjeto/Item'
@@ -163,7 +163,7 @@ class Bots:
     # Relatório HRO
     def relatorio(self):
         hros = '1o8byF41_AmcXFykW8IcyN7fZkUmRZpICiJWqlpbT82M'
-        sh = self.GS_SERVICE.open_by_url(hros)
+        sh = self.GS_SERVICE.open_by_key(hros)
         infos = sh.worksheet('Infos').get_all_values()
         
         download = self.geoex.baixar_relatorio(infos[1][1], "sudoeste-oeste", 'downloads')
@@ -183,9 +183,9 @@ class Bots:
             )
             
     def tratamento(self):
-        df1 = pd.read_csv(os.path.join(self.PATH, 'dags/stc/downloads/sudoeste-oeste.csv'), encoding='ISO-8859-1', sep=';', thousands='.', decimal=',', low_memory=False)
+        df1 = pd.read_csv(os.path.join(self.PATH, 'downloads/sudoeste-oeste.csv'), encoding='ISO-8859-1', sep=';', thousands='.', decimal=',', low_memory=False)
         print('lendo sudoeste-oeste')
-        df2 = pd.read_csv(os.path.join(self.PATH, 'dags/stc/downloads/norte.csv'), encoding='ISO-8859-1', sep=';', thousands='.', decimal=',', low_memory=False)
+        df2 = pd.read_csv(os.path.join(self.PATH, 'downloads/norte.csv'), encoding='ISO-8859-1', sep=';', thousands='.', decimal=',', low_memory=False)
         print('lendo norte')
         
         df = pd.concat([df1, df2])
@@ -195,7 +195,7 @@ class Bots:
         df['CICLO'] = df['TITULO'].apply(lambda x: x.split(' / ')[4]).map(self.meses)
 
         hros = '1o8byF41_AmcXFykW8IcyN7fZkUmRZpICiJWqlpbT82M'
-        sh = self.GS_SERVICE.open_by_url(hros)
+        sh = self.GS_SERVICE.open_by_key(hros)
         ws = sh.worksheet('BASE_GEOEX')
         ws.clear()
         

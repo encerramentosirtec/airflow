@@ -20,7 +20,6 @@ airflow.db
 airflow.cfg
 tests
 .dockerignore
-Dockerfile
 packages.txt
 .astro
 standalone_admin_password.txt
