@@ -8,6 +8,7 @@ from datetime import datetime
 #from airflow.sdk import Variable
 from airflow.models import Variable
 from hooks.geoex_hook import GeoexHook
+from airflow.api.client.local_client import Client
 
 def abre_json(arquivo):
     with open(arquivo) as dados:
@@ -28,7 +29,7 @@ class Bots:
         self.bot = telebot.TeleBot(API_TOKEN, threaded=False)
         telebot.logger.setLevel(logging.DEBUG) # Outputs debug messages to console.
 
-        #self.c = Client(None, None)
+        self.c = Client(None, None)
         self.cookie, self.gxsessao, self.gxbot = '', '', ''
         self.data = abre_json(os.path.join(self.PATH, 'assets/auth_geoex/cookie_heli.json'))
         self.data_bob = abre_json(os.path.join(self.PATH,'assets/auth_geoex/cookie_ccm.json'))
@@ -155,9 +156,10 @@ class Bots:
                 self.data_bob['gxbot']=self.gxbot
                 
                 print(self.data, self.data_bob)
-                escreve_json('assets/auth_geoex/cookie_heli.json',self.data)
-                escreve_json('assets/auth_geoex/cookie_ccm.json',self.data_bob)
-                self.trigger_dag(dag_id='cookie-manut')
+                escreve_json(os.path.join(self.PATH,'assets/auth_geoex/cookie_heli.json'),self.data)
+                escreve_json(os.path.join(self.PATH,'assets/auth_geoex/cookie_ccm.json'),self.data_bob)
+                #self.trigger_dag(dag_id='cookie-manut')
+                self.c.trigger_dag(dag_id='cookie-manut')
                 msg = 'Informações atualizadas com sucesso!'
             else:
                 msg = 'Dados inválidos.'
