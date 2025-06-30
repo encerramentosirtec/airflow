@@ -141,7 +141,7 @@ class Bots:
         return data_pasta, analista, data_validacao, status_pasta, datazps09, investimento, tipologia, contrato
         
     def atualiza_solar(self):
-        sh = self.GS_SERVICE.open_by_url(self.planilha_solar)
+        sh = self.GS_SERVICE.open_by_key(self.planilha_solar)
         ws = sh.worksheet('Postagem de projetos')
         sheet = ws.get_all_values()
         sheet = pd.DataFrame(sheet, columns = sheet.pop(0))
