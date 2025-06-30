@@ -22,7 +22,7 @@ def consulta_projeto(projeto):
         r = GEOEX.consultar_projeto(projeto)
 
         if r['sucess']:
-            if r['Content']['DtZps09'] != None:
+            if r['data']['DtZps09'] != None:
                 datazps09 = datetime.fromisoformat(r['data']['DtZps09']).date().strftime("%d/%m/%Y")
         else:
             raise Exception(
