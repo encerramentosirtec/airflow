@@ -104,7 +104,8 @@ def atualiza_aba_v2(aba):
     intervalos = ['U2:U','V2:V','W2:W','Y2:Y','Z2:Z','AA2:AA','AB2:AB','AE2:AE']
     while True:
         try:
-            df = pd.DataFrame(status_ids, columns=colunas)
+            df = pd.DataFrame(status_ids).transpose()
+            df.columns = colunas
             for i,j in zip(colunas,intervalos):
                 GS_SERVICE.escreve_planilha(configs.id_planilha_postagemV5, aba, df[i], j, 'USER_ENTERED')
             break
