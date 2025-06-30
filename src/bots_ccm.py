@@ -494,7 +494,7 @@ class Bots:
             raise Exception('Erro não identificado')
     
     def atualiza_aba_v2(self, aba):
-        gs = gspread.service_account(filename=os.path.join(self.PATH, 'dags/_internal/jimmy.json'))
+        gs = gspread.service_account(filename=os.path.join(self.PATH, 'assets/auth_google/jimmy.json'))
         sh = gs.open_by_key(configs.id_planilha_postagemV5)
         v5 = sh.worksheet(aba).get_all_values()
         v5 = pd.DataFrame(v5, columns=v5.pop(0))
