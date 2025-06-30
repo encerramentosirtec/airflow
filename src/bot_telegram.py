@@ -33,7 +33,7 @@ class Bots:
         self.data_bob = abre_json(os.path.join(self.PATH,'assets/auth_geoex/cookie_ccm.json'))
         self.data_hugo = abre_json(os.path.join(self.PATH,'assets/auth_geoex/cookie_hugo.json'))
 
-    def testa_cookie(c='', g='', gb=''):
+    def testa_cookie(self, c='', g='', gb=''):
         url_geo = 'Cadastro/ConsultarProjeto/Item'
         if c=='' and g=='' and gb=='':
             return False
