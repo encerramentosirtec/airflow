@@ -1,5 +1,6 @@
 import os
 import json
+import logging
 import telebot
 import requests
 import traceback
@@ -25,7 +26,7 @@ class Bots:
         #os.environ['NO_PROXY'] = '*'
         API_TOKEN = Variable.get("telegram_api_key")
         self.bot = telebot.TeleBot(API_TOKEN, threaded=False)
-        #telebot.logger.setLevel(logging.DEBUG) # Outputs debug messages to console.
+        telebot.logger.setLevel(logging.DEBUG) # Outputs debug messages to console.
 
         #self.c = Client(None, None)
         self.cookie, self.gxsessao, self.gxbot = '', '', ''
