@@ -536,7 +536,7 @@ class Bots:
                 print(e)
     
     def atualiza_data_v2(self):
-        SERVICE_ACCOUNT_FILE = os.path.join(self.PATH, 'dags/_internal/causal_scarab.json')
+        SERVICE_ACCOUNT_FILE = os.path.join(self.PATH, 'assets/auth_google/causal_scarab.json')
         SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
         spreadsheetId = '18-AoLupeaUIOdkW89o6SLK6Z9d8X0dKXgdjft_daMBk'
         range_name = 'Atestos pendentes!D2:D2'
@@ -706,46 +706,4 @@ class Bots:
         sh.worksheet(aba).update(range_name="BG2:BG", values=valores[2])
 
         print('Pastas atualizadas!')
-
-
-    # ZPS09
-    def atualiza_zps09(self):
-        aba = 'Auxiliar (transporte)'
-        sh = self.GS_SERVICE.open_by_key(configs.id_planilha_postagemV5)
-        valores = [[],[],[],[]]
-
-        print('Atualizando ZPS09')
-
-        sheet = sh.worksheet(aba).get_all_values()
-        sheet = pd.DataFrame(sheet, columns = sheet.pop(0))
-        tamanho = sheet.shape[0]
-        
-        for i,j in enumerate(sheet['PROJETO']):
-            if j=="":
-                valores.append([''])
-                zps09 = ''
-            else:
-                if sheet['DATA ZPS09'][i]!='':
-                    valores.append([])
-                    zps09=f'{sheet['DATA ZPS09'][i]} (existente)'
-                else:
-                    try:
-                        a, b, zps09 = self.consulta_projeto(j)
-                        valores.append([zps09])
-                        sleep(1)
-                    except Exception as e:
-                        print(f'Erro no projeto {j}')
-                        traceback.print_exc()
-                        raise e
-            
-            print(f'{str(i+1)}/{str(tamanho)} - {j}: {zps09}')
-
-        while True:
-            try:
-                sh.worksheet(aba).update(range_name="E2", values=valores[1], value_input_option='USER_ENTERED')
-                break
-            except Exception as e:
-                print(e)
-
-        print('ZPS09 atualizada!')
 

@@ -6,7 +6,7 @@ import traceback
 import pandas as pd
 from time import sleep
 from datetime import datetime
-from pendulum import timezone, duration, today
+from pendulum import duration, today
 #classes próprias
 from src.geoex import Geoex
 from src.config import configs

@@ -9,6 +9,9 @@ class GoogleSheets:
 
 
     def le_planilha(self, url, aba, intervalo=None, render_option='UNFORMATTED_VALUE', dtype=None):
+        """
+            Obtem dados de planilha
+        """
         try:
             sh = self.gs_service.open_by_url(url)
         except:
@@ -84,3 +87,21 @@ class GoogleSheets:
             return True
         except Exception as e:
             return e
+        
+    def limpa_intervalo(self, url, aba, range):
+        """
+            Limpa intervalo
+        """
+        try:
+            sh = self.gs_service.open_by_url(url)
+        except:
+            sh = self.gs_service.open_by_key(url)
+        
+        try:
+            ws = sh.worksheet(aba)
+            ws.batch_clear(range)
+            return True
+        except Exception as e:
+            return e
+
+

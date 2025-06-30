@@ -1,29 +1,132 @@
+#airflow
 from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator
+#bibliotecas
+import pandas as pd
+from time import sleep
 from datetime import datetime
-from pendulum import timezone, duration, today
+from pendulum import duration, today, timezone
+#classes próprias
+from src.geoex import Geoex
 from src.bots_ccm import Bots
+from src.config import configs
+from src.google_sheets import GoogleSheets
 
-bot = Bots()
+unidades = ['BRUMADO', 'CONQUISTA', 'BARREIRAS', 'IRECE', 'JEQUIE', 'IBOTIRAMA', 'LAPA', 'GUANAMBI']
+BOT = Bots('cookie_ccm.json', 'jimmy.json')
+GEOEX = Geoex(cookie_file='cookie_ccm.json')
+GS_SERVICE = GoogleSheets(credentials='jimmy.json')
 
-def conquista():
-    bot.atualiza_aba_v2('OBRAS CONQUISTA')
-def barreiras():
-    bot.atualiza_aba_v2('OBRAS BARREIRAS')
-def irece():
-    bot.atualiza_aba_v2('OBRAS IRECE')
-def brumado():
-    bot.atualiza_aba_v2('OBRAS BRUMADO')
-def jequie():
-    bot.atualiza_aba_v2('OBRAS JEQUIE')
-def ibotirama():
-    bot.atualiza_aba_v2('OBRAS IBOTIRAMA')
-def lapa():
-    bot.atualiza_aba_v2('OBRAS LAPA')
-def guanambi():
-    bot.atualiza_aba_v2('OBRAS GUANAMBI')
+def pesquisa_geoex(projeto, atesto):
+    body = {
+        'id': projeto
+    }
 
-br_tz = timezone("Brazil/East")
+    try:
+        r = BOT.fazer_requisicao(BOT.url_geo, body)
+    except Exception as e:
+        print('Não foi possível acessar a página do Geoex.')
+        print(e)
+        return 'erro'
+    
+    if r['Content'] != None:
+        id_projeto = r['Content']['ProjetoId']
+
+        url = 'ConsultarProjeto/Postagem/Itens'
+        body = {
+            "ProjetoId": id_projeto,
+            "Search": atesto,
+            "Rejeitadas": True,
+            "Arquivadas": False,
+            "Paginacao": {
+            "TotalPorPagina": "10",
+            "Pagina": "1"
+            }
+        }
+
+        r = BOT.fazer_requisicao(url, body)
+    
+        if r['Content']['Items'] == []:
+            print('ID',atesto,'não pertence ao projeto',projeto + '.')
+            return 'erro'
+        else:
+            status_id = r['Content']['Items'][0]['Status']
+
+            if status_id == "Rejeitado":
+                status_id = "Rejeitado"
+            elif status_id == "Postado":
+                status_id = atesto
+            elif status_id != "Rejeitado":
+                if status_id != "Postado":
+                    status_id = "OK"
+            else:
+                status_id = status_id
+            
+            return status_id
+    elif r['IsUnauthorized']:
+        print(r)
+        raise Exception('Cookie inválido! Não autorizado')
+    else:
+        print(r)
+        raise Exception('Erro não identificado')
+
+def atualiza_aba_v2(aba):
+    while True:
+        try:
+            v5 = GS_SERVICE.le_planilha(configs.id_planilha_postagemV5, aba)
+            break
+        except Exception as e:
+            print(e)
+
+    projetos = v5['PROJETO']
+    colunas = ['ATESTO CAVA', 'ATESTO SUCATA', 'ATESTO LINHA VIVA', 'ATESTO EXCEDENTE', 'ATESTO FUNDAÇÃO', 'ARRASTAMENTO', 'ABERTURA DE FAIXA', 'ATESTO PODA']
+    status_ids = [[] for _ in range(len(colunas))]
+
+    for i, coluna in enumerate(colunas):
+        sleep(2)
+        atestos = v5[coluna]
+        for projeto, atesto in zip(projetos, atestos):
+            if atesto.startswith('PM'):
+                status = pesquisa_geoex(projeto, atesto)
+                if status != 'erro':
+                    status_ids[i].append([status])
+                else:
+                    status_ids[i].append([atesto])
+            else:
+                status_ids[i].append([atesto])
+                status = atesto
+            
+            print(f'{coluna} {projetos[projetos == projeto].index.tolist()[0]+1}/{projetos.shape[0]} - projeto: {projeto}, atesto: {atesto}, status: {status}')
+
+    for i, coluna in enumerate(colunas):
+        v5[coluna] = status_ids[i]
+
+    intervalos = ['U2:U','V2:V','W2:W','Y2:Y','Z2:Z','AA2:AA','AB2:AB','AE2:AE']
+    while True:
+        try:
+            df = pd.DataFrame(status_ids, columns=colunas)
+            for i,j in zip(colunas,intervalos):
+                GS_SERVICE.escreve_planilha(configs.id_planilha_postagemV5, aba, df[i], j, 'USER_ENTERED')
+            break
+        except Exception as e:
+            print(e)
+
+def atualiza_data_v2():
+    spreadsheetId = '18-AoLupeaUIOdkW89o6SLK6Z9d8X0dKXgdjft_daMBk'
+    range_name = 'D2:D2'
+    aba = 'Atestos pendentes'
+    br_tz = timezone("Brazil/East")
+    hora = datetime.now(br_tz).strftime("%d/%m/%Y %H:%M")
+
+    try:
+        df = pd.DataFrame([hora], columns=['hora'])
+        GS_SERVICE.escreve_planilha(spreadsheetId, aba, df, range_name, 'USER_ENTERED')
+        print(f"Data atualizada.")
+    except Exception as err:
+        print(err)
+
+    print("Status dos atesto atualizados!\n")
+
 
 default_args = {
     'depends_on_past' : False,
@@ -43,50 +146,21 @@ with DAG('v2_atesto',
         max_active_runs = 1,
         tags = ['obra', 'geoex'],
         catchup = False) as dag:
-
-    conquista = PythonOperator(
-        task_id='conquista',
-        python_callable=conquista
-    )
     
-    barreiras = PythonOperator(
-        task_id='barreiras',
-        python_callable=barreiras
-    )
-    
-    irece = PythonOperator(
-        task_id='irece',
-        python_callable=irece
-    )
-    
-    brumado = PythonOperator(
-        task_id='brumado',
-        python_callable=brumado
-    )
-    
-    jequie = PythonOperator(
-        task_id='jequie',
-        python_callable=jequie
-    )
-    
-    ibotirama = PythonOperator(
-        task_id='ibotirama',
-        python_callable=ibotirama
-    )
-    
-    lapa = PythonOperator(
-        task_id='lapa',
-        python_callable=lapa
-    )
-    
-    guanambi = PythonOperator(
-        task_id='guanambi',
-        python_callable=guanambi
-    )
+    tarefas = []
+    for nome in unidades:
+        task = PythonOperator(
+            task_id=f"{nome.lower()}",
+            python_callable=atualiza_aba_v2,
+            op_args=[f'OBRAS {nome}']
+        )
+        tarefas.append(task)
     
     atualiza_data = PythonOperator(
         task_id='atualiza_data',
-        python_callable=bot.atualiza_data_v2
+        python_callable=atualiza_data_v2
     )
     
-    brumado>>conquista>>barreiras>>irece>>jequie>>ibotirama>>lapa>>guanambi>>atualiza_data
+    for prev, next_ in zip(tarefas, tarefas[1:]):
+        prev >> next_
+    tarefas[-1]>>atualiza_data
