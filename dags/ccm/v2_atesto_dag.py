@@ -77,6 +77,7 @@ def atualiza_aba_v2(aba):
             break
         except Exception as e:
             print(e)
+            sleep(30)
 
     projetos = v5['PROJETO']
     colunas = ['ATESTO CAVA', 'ATESTO SUCATA', 'ATESTO LINHA VIVA', 'ATESTO EXCEDENTE', 'ATESTO FUNDAÇÃO', 'ARRASTAMENTO', 'ABERTURA DE FAIXA', 'ATESTO PODA']
@@ -111,6 +112,7 @@ def atualiza_aba_v2(aba):
             break
         except Exception as e:
             print(e)
+            sleep(30)
 
 def atualiza_data_v2():
     spreadsheetId = '18-AoLupeaUIOdkW89o6SLK6Z9d8X0dKXgdjft_daMBk'
@@ -119,12 +121,15 @@ def atualiza_data_v2():
     br_tz = timezone("Brazil/East")
     hora = datetime.now(br_tz).strftime("%d/%m/%Y %H:%M")
 
-    try:
-        df = pd.DataFrame([hora], columns=['hora'])
-        GS_SERVICE.escreve_planilha(spreadsheetId, aba, df, range_name, 'USER_ENTERED')
-        print(f"Data atualizada.")
-    except Exception as err:
-        print(err)
+    while True:
+        try:
+            df = pd.DataFrame([hora], columns=['hora'])
+            GS_SERVICE.escreve_planilha(spreadsheetId, aba, df, range_name, 'USER_ENTERED')
+            print(f"Data atualizada.")
+            break
+        except Exception as err:
+            print(err)
+            sleep(30)
 
     print("Status dos atesto atualizados!\n")
 

@@ -38,50 +38,52 @@ def consulta_projeto(projeto):
         return datazps09
 
 def atualiza_zps09():
-        aba = 'Auxiliar (transporte)'
+    aba = 'Auxiliar (transporte)'
 
-        while True:
-            try:
-                sheet = GS_SERVICE.le_planilha(configs.id_planilha_postagemV5, aba)
-                break
-            except Exception as e:
-                print(e)
+    while True:
+        try:
+            sheet = GS_SERVICE.le_planilha(configs.id_planilha_postagemV5, aba)
+            break
+        except Exception as e:
+            print(e)
+            sleep(30)
 
-        valores = [[],[],[],[]]
+    valores = [[],[],[],[]]
 
-        print('Atualizando ZPS09')
+    print('Atualizando ZPS09')
 
-        tamanho = sheet.shape[0]
-        
-        for i,j in enumerate(sheet['PROJETO']):
-            if j=="":
-                valores.append([''])
-                zps09 = ''
+    tamanho = sheet.shape[0]
+    
+    for i,j in enumerate(sheet['PROJETO']):
+        if j=="":
+            valores.append([''])
+            zps09 = ''
+        else:
+            if sheet['DATA ZPS09'][i]!='':
+                valores.append([])
+                zps09=f'{sheet['DATA ZPS09'][i]} (existente)'
             else:
-                if sheet['DATA ZPS09'][i]!='':
-                    valores.append([])
-                    zps09=f'{sheet['DATA ZPS09'][i]} (existente)'
-                else:
-                    try:
-                        zps09 = consulta_projeto(j)
-                        valores.append([zps09])
-                        sleep(1)
-                    except Exception as e:
-                        print(f'Erro no projeto {j}')
-                        traceback.print_exc()
-                        raise e
-            
-            print(f'{str(i+1)}/{str(tamanho)} - {j}: {zps09}')
+                try:
+                    zps09 = consulta_projeto(j)
+                    valores.append([zps09])
+                    sleep(1)
+                except Exception as e:
+                    print(f'Erro no projeto {j}')
+                    traceback.print_exc()
+                    raise e
+        
+        print(f'{str(i+1)}/{str(tamanho)} - {j}: {zps09}')
 
-        while True:
-            try:
-                df = pd.DataFrame(valores, columns=['ZPS09'])
-                GS_SERVICE.escreve_planilha(configs.id_planilha_postagemV5, aba, df, 'E2', 'USER_ENTERED')
-                break
-            except Exception as e:
-                print(e)
+    while True:
+        try:
+            df = pd.DataFrame(valores, columns=['ZPS09'])
+            GS_SERVICE.escreve_planilha(configs.id_planilha_postagemV5, aba, df, 'E2', 'USER_ENTERED')
+            break
+        except Exception as e:
+            print(e)
+            sleep(30)
 
-        print('ZPS09 atualizada!')
+    print('ZPS09 atualizada!')
 
 default_args = {
     'depends_on_past' : False,

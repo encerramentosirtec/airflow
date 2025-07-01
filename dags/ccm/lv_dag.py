@@ -21,6 +21,7 @@ def lv_geral():
             break
         except Exception as e:
             print(e)
+            sleep(5)
 
     lv = lv[lv['PROJETO']!='']
     lv['PROJETO'] = lv['PROJETO'].str.strip()
@@ -78,6 +79,7 @@ def lv_geral():
             break
         except Exception as e:
             print(e)
+            sleep(30)
 
 default_args = {
     'depends_on_past' : False,

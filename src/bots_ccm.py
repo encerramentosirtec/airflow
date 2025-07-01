@@ -372,6 +372,7 @@ class Bots:
                 break
             except Exception as e:
                 print(e)
+                sleep(30)
 
 
     # V5
