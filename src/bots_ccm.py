@@ -7,12 +7,8 @@ from time import sleep
 from src.geoex import Geoex
 from pendulum import timezone
 from datetime import datetime
-from gspread import authorize
 from src.config import configs
 from src.geoex import Geoex, GeoexHook
-from googleapiclient.discovery import build
-from google.oauth2.service_account import Credentials
-from oauth2client.service_account import ServiceAccountCredentials
 
 class Bots:
 
@@ -66,6 +62,7 @@ class Bots:
         
         if resposta["IsUnauthorized"] or resposta['StatusCode']==403:
             print('Cookie Inválido')
+            print(resposta)
             raise TypeError('Cookie Inválido')
         
         return resposta
