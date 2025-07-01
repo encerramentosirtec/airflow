@@ -40,6 +40,7 @@ def consulta_solicitacao(projeto):
         projeto_id = r['data']['ProjetoId']
     elif r['status_code'] == 400:
         print('Projeto sem contrato')
+        return '','',''
     else:
         raise Exception(
             f"""
