@@ -12,6 +12,8 @@ class Geoex(GeoexHook):
         with open(os.path.join(self.PATH, f'assets/auth_geoex/{cookie_file}'), 'r') as f:
             self.cookie = json.load(f)
 
+        super().__init__(self.cookie)
+
 
     def consultar_arquivos(self, projeto_id):
         id_pastas = {

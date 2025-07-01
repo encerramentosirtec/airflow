@@ -1,23 +1,24 @@
+#airflow
 from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator
-import pandas as pd
-from pendulum import today, duration
-from time import sleep
-import os
-import sys
-
-PATH = os.getenv('AIRFLOW_HOME')
-os.chdir(PATH)
-sys.path.insert(0, PATH)
-
-
+#bibliotecas
+'''import os
+import sys'''
 import spreadsheets
-
+import pandas as pd
+from time import sleep
+from pendulum import today, duration
+#classes próprias
 from src.geoex import Geoex
-GEOEX = Geoex(cookie_file='cookie_hugo.json')
-
 from src.google_sheets import GoogleSheets
+
+'''PATH = os.getenv('AIRFLOW_HOME')
+os.chdir(PATH)
+sys.path.insert(0, PATH)'''
+
+GEOEX = Geoex(cookie_file='cookie_hugo.json')
 GS_SERVICE = GoogleSheets(credentials='causal_scarab.json') # Inicia o serviço do google sheets
+
 endpoint_reserva = 'ConsultarProjetoSolicitacaoReserva/Itens'
 reservas_ids = {
     1: 'CRIADO',
@@ -50,8 +51,8 @@ def consulta_solicitacao(projeto):
         
     try:
         body = {'ProjetoId': projeto_id,
-            'Rejeitadas': False,
-            'Paginacao': {'TotalPorPagina': "10", 'Pagina': "1"}}
+                'Rejeitadas': False,
+                'Paginacao': {'TotalPorPagina': "10", 'Pagina': "1"}}
     except Exception as e:
         print(projeto, r['Message'], r['StatusCode'], r['Content'])
         raise e
