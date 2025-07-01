@@ -30,7 +30,6 @@ reservas_ids = {
     148 : 'ATENDIDO'
 }
 
-
 def consulta_solicitacao(projeto):
     status = ['']
     serial = ['']
@@ -39,10 +38,12 @@ def consulta_solicitacao(projeto):
     r = GEOEX.consultar_projeto(projeto)
     if r['sucess']:
         projeto_id = r['data']['ProjetoId']
+    elif r['status_code'] == 400:
+        print('Projeto sem contrato')
     else:
         raise Exception(
             f"""
-            Falha consurtar projeto.
+            Falha consultar projeto.
             Statuscode: { r['status_code'] }
             Message: { r['data'] }
             """
