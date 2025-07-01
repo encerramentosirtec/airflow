@@ -40,7 +40,7 @@ def consulta_solicitacao(projeto):
         projeto_id = r['data']['ProjetoId']
     elif r['status_code'] == 400:
         print('Projeto sem contrato')
-        return '','',''
+        return status, serial, reserva
     else:
         raise Exception(
             f"""
@@ -105,8 +105,10 @@ def atualiza_solicitacoes():
         print(f'{i+1}/{sheet.shape[0]}: {projeto}, {status}, {serial}, {reserva}')
     
 
+    aba = 'Solicitações'
     df = pd.DataFrame(valores, columns=titulo)
-    GS_SERVICE.escreve_planilha(spreadsheets.SOLICITACOES_RESERVA, aba='Solicitações', df=df, input_option='USER_ENTERED')
+    GS_SERVICE.limpa_intervalo(spreadsheets.SOLICITACOES_RESERVA, aba, 'A2:D')
+    GS_SERVICE.escreve_planilha(spreadsheets.SOLICITACOES_RESERVA, aba, df=df, range='A2:D', input_option='USER_ENTERED')
 
 
 

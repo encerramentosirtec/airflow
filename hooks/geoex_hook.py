@@ -46,7 +46,8 @@ class GeoexHook(HttpHook):
                 try:
                     print(f'Status code: {response.status_code}')
                 except:
-                    print(f'Status code: {response}')
+                    print(e)
+                    continue
                 raise e
 
         return response
