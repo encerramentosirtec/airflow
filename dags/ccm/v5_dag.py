@@ -1,29 +1,10 @@
 from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator
-from datetime import datetime
-from pendulum import timezone, duration, today
+from pendulum import duration, today
 from src.bots_ccm import Bots
 
 bot = Bots(cred_file='global_brook.json')
-
-def conquista():
-    bot.atualiza_pasta_v5('OBRAS CONQUISTA')
-def barreiras():
-    bot.atualiza_pasta_v5('OBRAS BARREIRAS')
-def irece():
-    bot.atualiza_pasta_v5('OBRAS IRECE')
-def brumado():
-    bot.atualiza_pasta_v5('OBRAS BRUMADO')
-def jequie():
-    bot.atualiza_pasta_v5('OBRAS JEQUIE')
-def ibotirama():
-    bot.atualiza_pasta_v5('OBRAS IBOTIRAMA')
-def lapa():
-    bot.atualiza_pasta_v5('OBRAS LAPA')
-def guanambi():
-    bot.atualiza_pasta_v5('OBRAS GUANAMBI')
-
-br_tz = timezone("Brazil/East")
+unidades = ['BRUMADO', 'CONQUISTA', 'BARREIRAS', 'IRECE', 'JEQUIE', 'IBOTIRAMA', 'LAPA', 'GUANAMBI']
 
 default_args = {
     'depends_on_past' : False,
@@ -44,45 +25,15 @@ with DAG('v5',
         tags = ['obra', 'geoex'],
         catchup = False) as dag:
     
-    conquista = PythonOperator(
-        task_id='conquista',
-        python_callable=conquista
-    )
+    tarefas = []
+    for nome in unidades:
+        task = PythonOperator(
+            task_id=f"{nome.lower()}",
+            python_callable=bot.atualiza_pasta_v5,
+            op_args=[f'OBRAS {nome}']
+        )
+        tarefas.append(task)
     
-    barreiras = PythonOperator(
-        task_id='barreiras',
-        python_callable=barreiras
-    )
-    
-    irece = PythonOperator(
-        task_id='irece',
-        python_callable=irece
-    )
-    
-    brumado = PythonOperator(
-        task_id='brumado',
-        python_callable=brumado
-    )
-    
-    jequie = PythonOperator(
-        task_id='jequie',
-        python_callable=jequie
-    )
-    
-    ibotirama = PythonOperator(
-        task_id='ibotirama',
-        python_callable=ibotirama
-    )
-    
-    lapa = PythonOperator(
-        task_id='lapa',
-        python_callable=lapa
-    )
-    
-    guanambi = PythonOperator(
-        task_id='guanambi',
-        python_callable=guanambi
-    )
-    
-    brumado>>conquista>>barreiras>>irece>>jequie>>ibotirama>>lapa>>guanambi
+    for prev, next_ in zip(tarefas, tarefas[1:]):
+        prev >> next_
     

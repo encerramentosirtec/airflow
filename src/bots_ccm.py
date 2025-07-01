@@ -30,6 +30,7 @@ class Bots:
         self.url_encerramento = 'ConsultarProjeto/EncerramentoOnline'
 
         self.statuspastaid = {
+            0 : 'NÃO ENVIADO',
             1 : 'CRIADO',
             6 : 'CANCELADO',
             30 : 'ACEITO',
