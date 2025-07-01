@@ -1,16 +1,9 @@
 from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator
-from pendulum import timezone, duration, today
+from pendulum import duration, today
 from src.bots_ccm import Bots
-import sys
-import os
 
-br_tz = timezone("Brazil/East")
-
-PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../..")
-os.chdir(PATH)
-sys.path.insert(0, PATH)
-bot = Bots()
+bot = Bots(cred_file='global_brook.json')
 
 default_args = {
     'depends_on_past' : False,

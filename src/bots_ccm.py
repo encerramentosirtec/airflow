@@ -322,6 +322,8 @@ class Bots:
                                 unidade = 'ITAPETINGA'
                             elif unidade in livramento:
                                 unidade = 'LIVRAMENTO'
+                            elif unidade in brumado:
+                                unidade = 'BRUMADO'
                             else:
                                 unidade = unidade
                     except:
