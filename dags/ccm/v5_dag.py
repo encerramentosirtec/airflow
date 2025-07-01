@@ -4,7 +4,7 @@ from datetime import datetime
 from pendulum import timezone, duration, today
 from src.bots_ccm import Bots
 
-bot = Bots()
+bot = Bots(cred_file='global_brook.json')
 
 def conquista():
     bot.atualiza_pasta_v5('OBRAS CONQUISTA')

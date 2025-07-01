@@ -13,7 +13,7 @@ from src.config import configs
 from src.google_sheets import GoogleSheets
 
 GEOEX = Geoex(cookie_file='cookie_ccm.json')
-GS_SERVICE = GoogleSheets(credentials='causal_scarab.json')
+GS_SERVICE = GoogleSheets(credentials='global_brook.json')
 
 def consulta_projeto(projeto):
         datazps09 = ''
