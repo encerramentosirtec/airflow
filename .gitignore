@@ -8,6 +8,7 @@ simple_auth_manager_passwords.json.generated
 downloads
 *.csv
 *.XLS
+*.xlsx
 *.json
 src/config.py
 astro
@@ -34,3 +35,4 @@ dags/exampledag.py
 upgrade-test* 
 testes.ipynb
 *.png
+*.svg
