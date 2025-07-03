@@ -265,11 +265,11 @@ def elabora_email():
         <body>
             <p><b>Relatório de pendências Coelba</b></p>
 
-            <p>Este relatório disponibiliza informações referentes as pendências dos projetos de manutenção que temos em tratativa atualmente, a fim de melhorar a troca de informações entre Sirtec e Coelba.<br>
-            Ele será enviado diariamente para termos informação em tempo real.</p>
+            <p>Este relatório disponibiliza informações referentes as pendências dos projetos de manutenção que temos em tratativa atualmente.<br>
+             A fim de melhorar a troca de informações entre Sirtec e Coelba, ele será enviado diariamente para termos informação em tempo real.</p>
 
             <p><b>1. Pendências de validação</b></p>
-            <p>Relação das pastas OCs que possuem pendência de validação da pasta ou validação de HRO ou conciliação do projeto</p>
+            <p>Relação de OCs que possuem pendência de validação da pasta ou validação de HRO ou conciliação do projeto</p>
             <p><img src="cid:img_0" "> <img src="cid:img_1" "></p><br>
             <p><b>2. Pendências de finalização de cadastro</b></p>
             <p>Relação das pastas OCs que possuem pendência de finalização de PRJ ou UAR</p>
