@@ -1,6 +1,7 @@
-from airflow import DAG
-#from airflow.providers.standard.operators.python import PythonOperator
-from airflow.operators.python import PythonOperator
+#from airflow.models.dag import DAG
+from airflow.sdk import DAG
+#from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 from datetime import datetime
 import json
 import numpy as np

@@ -1,5 +1,7 @@
-from airflow.models.dag import DAG
-from airflow.operators.python import PythonOperator
+#from airflow.models.dag import DAG
+from airflow.sdk import DAG
+#from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 from pendulum import duration, today
 from src.bots_ccm import Bots
 

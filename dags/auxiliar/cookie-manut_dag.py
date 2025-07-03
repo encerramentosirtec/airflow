@@ -1,7 +1,7 @@
-from airflow.models.dag import DAG
-#from airflow.sdk import DAG
-from airflow.operators.python import PythonOperator
-#from airflow.providers.standard.operators.python import PythonOperator
+#from airflow.models.dag import DAG
+from airflow.sdk import DAG
+#from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 from src.bot_telegram import Bots
 from pendulum import today, duration
 

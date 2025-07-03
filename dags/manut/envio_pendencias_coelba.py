@@ -9,7 +9,9 @@ PATH = os.getenv('AIRFLOW_HOME')
 os.chdir(PATH)
 sys.path.insert(0, PATH)
 
-from airflow import DAG
+#from airflow.models.dag import DAG
+from airflow.sdk import DAG
+#from airflow.operators.python import PythonOperator
 from airflow.providers.standard.operators.python import PythonOperator
 import pandas as pd
 import matplotlib.pyplot as plt
