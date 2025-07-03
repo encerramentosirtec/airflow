@@ -93,7 +93,7 @@ class Bots:
         headers = {'Content-Type': 'application/json'}
         
         response = requests.post(
-            f"http://host.docker.internal:8080/api/v2/dags/{dag_id}/dagRuns",
+            f"http://localhost:8080/api/v2/dags/{dag_id}/dagRuns",
             headers=headers,
             json={
                 'logical_date': datetime.now().astimezone().isoformat()
