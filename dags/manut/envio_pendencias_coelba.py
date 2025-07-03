@@ -13,10 +13,12 @@ from airflow.providers.standard.operators.python import PythonOperator
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from email.mime.application import MIMEApplication
+from email.mime.image import MIMEImage
 
 
 import spreadsheets as sh
-
+from src.email import enviaEmail
 
 from src.google_sheets import GoogleSheets
 GS_SERVICE = GoogleSheets('causal_scarab.json')
@@ -104,7 +106,7 @@ def cria_grafico_valores(titulo, df):
     )
     plt.subplots_adjust(bottom=0.25)  # Ajusta padding da parte inferior do gráfico
     plt.tight_layout()
-    plt.savefig(os.path.join(PATH, f'assets/figures/{titulo}.svg'), format='svg', bbox_inches="tight")
+    plt.savefig(os.path.join(PATH, f'assets/figures/{titulo}.png'), format='png', bbox_inches="tight")
 
     return
 
@@ -139,10 +141,10 @@ def define_pendencias_validacao():
         "(`Status pasta Geoex` == 'CRIADO' or "
         "`Status pasta Geoex` == 'VALIDDO') and "
         "(`Estágio da pasta` == 'K. Pendente eliminar reserva lixo (Coelba - NPPM)' or "
-        "`Estágio da pasta` == 'N. Pendente de validação do HUB (Coelba - UTD)' or "
         "`Estágio da pasta` == 'L. Pendente de energização do projeto no SAP. (Coelba - NPPM)' or "
-        "`Estágio da pasta` == 'P. Pasta enviada, pendente validação da pasta (Coelba - UTD)' or "
-        "`Estágio da pasta` == 'M. Pendente postagem da pasta (Sirtec - Fechamento)')"
+        "`Estágio da pasta` == 'N. Pendente de validação do HUB (Coelba - UTD)' or "
+        "`Estágio da pasta` == 'O. Pendente de conciliação (Coelba - UTD)' or "
+        "`Estágio da pasta` == 'P. Pasta enviada, pendente validação da pasta (Coelba - UTD)')"
     )
 
     pendencias_validacao = PLANILHA_POSTAGEM.query(query)[['UTD', 'Projeto', 'OC/PMS', 'Data de envio da pasta', 'Status Héktor', 'ID HRO', 'Status HRO', 'ID envio de pasta', 'Status pasta Geoex', 'Valor total']]
@@ -204,7 +206,7 @@ def define_pendencias_validacao():
 
     plt.title("Médias de dias pendentes de validação", loc='left', fontweight='bold')
     plt.tight_layout()
-    plt.savefig(os.path.join(PATH, f'assets/figures/Prazos.svg'), format='svg', bbox_inches="tight")
+    plt.savefig(os.path.join(PATH, f'assets/figures/Prazos.png'), format='png', bbox_inches="tight")
 
 
 
@@ -220,7 +222,31 @@ def elabora_email():
     """
 
 
-
 if __name__ == '__main__':
-    define_pendencias_validacao()
-    define_pendencias_cadastro()
+    # define_pendencias_validacao()
+    # define_pendencias_cadastro()
+
+
+    enviar_para = ["hugo.viana@sirtec.com.br"]
+
+    anexos=[]
+
+    imagens=['assets/figures/Prazos.png']
+
+    corpo= f"""
+    
+        <html lang="pt-BR">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body>
+            <p>Teste</p>
+            <p><img src="cid:img_0" "></p><br>
+        </body>
+        </html>
+        
+        """
+        
+    
+    enviaEmail("teste", "teste", enviar_para, anexos, imagens_corpo_email=imagens)
