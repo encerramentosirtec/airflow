@@ -1,18 +1,18 @@
-pendulum==3.1.0
-gspread==6.2.1
-google-api-python-client==1.12.11
-oauth2client==4.1.3
-pandas==2.3.0
-numpy==2.3.0
-cloudscraper==1.2.71
-seaborn==0.13.2
-matplotlib==3.10.3
-babel==2.17.0
-telebot==0.0.5
-#apache-airflow==3.0.2
-#apache-airflow-providers-google==8.0.0
-#apache-airflow-providers-standard>=0.0.1
-#apache-airflow-providers-http==5.3.0
+pendulum>=3.1.0
+gspread>=6.2.1
+google-api-python-client>=1.12.11
+oauth2client>=4.1.3
+pandas>=2.3.0
+numpy>=2.3.0
+cloudscraper>=1.2.71
+seaborn>=0.13.2
+matplotlib>=3.10.3
+babel>=2.17.0
+telebot>=0.0.5
+apache-airflow>=3.0.2
+apache-airflow-providers-google>=8.0.0
+apache-airflow-providers-standard>=0.0.1
+apache-airflow-providers-http>=5.3.0
 
 # Instalar o airflow com comando: pip install "apache-airflow==3.0.2" "apache-airflow-providers-google==8.0.0"
 # winget install -e --id Astronomer.Astro
