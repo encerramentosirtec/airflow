@@ -10,8 +10,8 @@ from src.bots_ccm import Bots
 from src.config import configs
 from src.google_sheets import GoogleSheets
 
-BOT = Bots('cookie_ccm.json', 'causal_scarab.json')
-GS_SERVICE = GoogleSheets(credentials='causal_scarab.json')
+BOT = Bots('cookie_ccm.json', 'global_brook.json')
+GS_SERVICE = GoogleSheets(credentials='global_brook.json')
 
 def lv_geral():
     aba = 'LV GERAL'
