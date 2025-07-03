@@ -214,16 +214,35 @@ def teste_consistencia():
         Faz verificação nos dados buscando alguma inconsistência para não enviar e-mail com informações incorretas.
     """
 
+    if PLANILHA_POSTAGEM['Valor total'].sum() == 0:
+        return True
+    
+    
+
     
 def elabora_email():
     """
         Função para anexar os arquivos, definir o texto e enviar o email.
     """
 
+    print('Calculando valores...')
     define_pendencias_validacao()
     define_pendencias_cadastro()
 
+    print('Levantando e-mails...')
+    contatos = GS_SERVICE.le_planilha(sh.CONTATOS, 'Contatos')
+    
+    # contatos_coelba = contatos.query("(Operação == 'Salvador' or Operação == 'Barreiras' or Operação == 'Luiz Eduardo Magalhães' or Operação == 'Ibotirama' or Operação == 'Bom Jesus da Lapa' or Operação == 'Santa Maria da Vitória' or Operação == 'Guanambi' or Operação == 'Vitória da Conquista' or Operação == 'Jequié' or Operação == 'Itapetinga' or Operação == 'Brumado' or Operação == 'Livramento') and (Setor == 'UTD' or Setor == 'UTEP' or Setor == 'NPPM') and (Função == 'Técnico' or Função == 'Supervisor' or Função == 'Engenheiro' or Função == 'Gerente') and (Empresa == 'Coelba')")['E-mail'].to_list()
+
+    contatos_coelba = contatos.query("(Empresa == 'Coelba') and (Operação != 'Irecê')")['E-mail'].tolist()
+    
+    contatos_sirtec = contatos.query("(Empresa == 'Sirtec') and ( (Setor == 'Encerramento' and  (Subsetor == 'Manut' or Função == 'Gerente')) or (Setor == 'Operação' and Operação != 'Irecê') ) ")['E-mail'].to_list()
+
+    todos_contatos = contatos_sirtec + contatos_coelba
+
+
     enviar_para = ["hugo.viana@sirtec.com.br"]
+    # enviar_para = todos_contatos
 
     anexos=[
         'assets/planilhas/OCs pendentes de finalização do cadastro.xlsx',
@@ -249,10 +268,10 @@ def elabora_email():
             <p>Este relatório disponibiliza informações referentes as pendências dos projetos de manutenção que temos em tratativa atualmente, a fim de melhorar a troca de informações entre Sirtec e Coelba.<br>
             Ele será enviado diariamente para termos informação em tempo real.</p>
 
-            <p>1. Pendências de validação</p>
+            <p><b>1. Pendências de validação</b></p>
             <p>Relação das pastas OCs que possuem pendência de validação da pasta ou validação de HRO ou conciliação do projeto</p>
             <p><img src="cid:img_0" "> <img src="cid:img_1" "></p><br>
-            <p>2. Pendências de finalização de cadastro</p>
+            <p><b>2. Pendências de finalização de cadastro</b></p>
             <p>Relação das pastas OCs que possuem pendência de finalização de PRJ ou UAR</p>
             <p><img src="cid:img_2" "><br>
             <p>Segue anexo as bases com as OCs em questão</p>
@@ -262,7 +281,7 @@ def elabora_email():
         
         """
         
-    
+    print('Elaborando e enviando e-mail...')
     enviaEmail("Relatório pendencias - Manutenção Sirtec", corpo, enviar_para, anexos, imagens_corpo_email=imagens)
 
 
