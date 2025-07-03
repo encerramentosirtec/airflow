@@ -12,6 +12,15 @@ PATH = os.getenv('AIRFLOW_HOME')
 os.chdir(PATH)
 sys.path.insert(0, PATH)
 
+ASSINATURA = """
+            <br>
+            <p style="font-family:Arial; font-size:12px; color:#444;">
+            Atenciosamente,<br>
+            <strong>Setor encerramento de obras e serviços</strong><br>
+            <img src="cid:assinatura">
+            </p>
+        """
+
 def enviaEmail(assunto, corpo_email, enviar_para, anexos, imagens_corpo_email=None, copiar=None, copia_oculta=None):
         
         """
@@ -33,7 +42,7 @@ def enviaEmail(assunto, corpo_email, enviar_para, anexos, imagens_corpo_email=No
         remetente = "encerramento.obraseservicos@sirtec.com.br"
 
 
-        # Elabora a mensagem
+        ### Elabora a mensagem
         msg = MIMEMultipart('related')
         msg['Subject'] = assunto
         msg['From'] = remetente
@@ -52,33 +61,34 @@ def enviaEmail(assunto, corpo_email, enviar_para, anexos, imagens_corpo_email=No
         msg_alternative = MIMEMultipart('alternative')
         msg.attach(msg_alternative)
 
-        msg_alternative.attach(MIMEText(corpo_email, "html"))
+        corpo_completo = f"{corpo_email}{ASSINATURA}"
+        msg_alternative.attach(MIMEText(corpo_completo, "html"))
+        
+        # Inclui imagems no corpo do e-mail
+        for i, img_path in enumerate(imagens_corpo_email):
+            with open(os.path.join(PATH, img_path), 'rb') as img:
+                msg_img = MIMEImage(img.read())
+                msg_img.add_header('Content-ID', f'<img_{i}>')
+                msg_img.add_header('Content-Disposition', 'inline', filename=os.path.basename(os.path.join(PATH,img_path)))
+                msg.attach(msg_img)
 
-        if imagens_corpo_email:
-            for i, img_path in enumerate(imagens_corpo_email):
-                print(f'<img_{i}>')
-                print(os.path.join(PATH, img_path))
-
-                with open(os.path.join(PATH, img_path), 'rb') as img:
-                    msg_img = MIMEImage(img.read())
-                    msg_img.add_header('Content-ID', f'<img_0>')
-                    msg_img.add_header('Content-Disposition', 'inline', filename=os.path.basename(os.path.join(PATH,img_path)))
-                    msg.attach(msg_img)
-
-
+        # Inclui imagem da assinatura
+        with open(os.path.join(PATH, 'assets/figures/assinatura_email.png'), 'rb') as img:
+            msg_img = MIMEImage(img.read())
+            msg_img.add_header('Content-ID', f'<assinatura>')
+            msg_img.add_header('Content-Disposition', 'inline', filename=os.path.basename(os.path.join(PATH, 'assets/figures/assinatura_email.png')))
+            msg.attach(msg_img)
 
         # Adiciona anexos
-        for anexo in anexos:
-            path = Path(anexo)
-            if path.exists():
-                with open(path, 'rb') as f:
-                    file_data = f.read()
-                    msg.add_attachment(
-                        file_data,
-                        maintype='application',
-                        subtype='octet-stream',
-                        filename=path.name
-                    )
+        for anexo_path in anexos:
+            with open(os.path.join(PATH, anexo_path), "rb") as fil:
+                part = MIMEApplication(
+                    fil.read(),
+                    Name=basename(os.path.join(PATH,anexo_path))
+                )
+
+            part['Content-Disposition'] = 'attachment; filename="%s"' % basename(os.path.join(PATH, anexo_path))
+            msg.attach(part)
 
 
         # Envia e-mail
@@ -87,4 +97,4 @@ def enviaEmail(assunto, corpo_email, enviar_para, anexos, imagens_corpo_email=No
             smtp.sendmail(remetente, destinatarios, msg.as_string())
 
 
-        return ('Sent')
+        print('Sent')

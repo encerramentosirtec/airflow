@@ -3,6 +3,7 @@ import os
 import seaborn as sns
 import numpy as np
 from datetime import datetime
+import pendulum
 
 PATH = os.getenv('AIRFLOW_HOME')
 os.chdir(PATH)
@@ -13,8 +14,6 @@ from airflow.providers.standard.operators.python import PythonOperator
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from email.mime.application import MIMEApplication
-from email.mime.image import MIMEImage
 
 
 import spreadsheets as sh
@@ -206,7 +205,7 @@ def define_pendencias_validacao():
 
     plt.title("Médias de dias pendentes de validação", loc='left', fontweight='bold')
     plt.tight_layout()
-    plt.savefig(os.path.join(PATH, f'assets/figures/Prazos.png'), format='png', bbox_inches="tight")
+    plt.savefig(os.path.join(PATH, f'assets/figures/Prazos validação.png'), format='png', bbox_inches="tight")
 
 
 
@@ -221,17 +220,21 @@ def elabora_email():
         Função para anexar os arquivos, definir o texto e enviar o email.
     """
 
-
-if __name__ == '__main__':
-    # define_pendencias_validacao()
-    # define_pendencias_cadastro()
-
+    define_pendencias_validacao()
+    define_pendencias_cadastro()
 
     enviar_para = ["hugo.viana@sirtec.com.br"]
 
-    anexos=[]
+    anexos=[
+        'assets/planilhas/OCs pendentes de finalização do cadastro.xlsx',
+        'assets/planilhas/Pendências de validação.xlsx'
+    ]
 
-    imagens=['assets/figures/Prazos.png']
+    imagens=[
+        'assets/figures/Prazos validação.png', 
+        'assets/figures/Validações pendentes.png', 
+        'assets/figures/OCs pendentes de finalização do cadastro.png'
+    ]
 
     corpo= f"""
     
@@ -241,12 +244,58 @@ if __name__ == '__main__':
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
         </head>
         <body>
-            <p>Teste</p>
-            <p><img src="cid:img_0" "></p><br>
+            <p><b>Relatório de pendências Coelba</b></p>
+
+            <p>Este relatório disponibiliza informações referentes as pendências dos projetos de manutenção que temos em tratativa atualmente, a fim de melhorar a troca de informações entre Sirtec e Coelba.<br>
+            Ele será enviado diariamente para termos informação em tempo real.</p>
+
+            <p>1. Pendências de validação</p>
+            <p>Relação das pastas OCs que possuem pendência de validação da pasta ou validação de HRO ou conciliação do projeto</p>
+            <p><img src="cid:img_0" "> <img src="cid:img_1" "></p><br>
+            <p>2. Pendências de finalização de cadastro</p>
+            <p>Relação das pastas OCs que possuem pendência de finalização de PRJ ou UAR</p>
+            <p><img src="cid:img_2" "><br>
+            <p>Segue anexo as bases com as OCs em questão</p>
+
         </body>
         </html>
         
         """
         
     
-    enviaEmail("teste", "teste", enviar_para, anexos, imagens_corpo_email=imagens)
+    enviaEmail("Relatório pendencias - Manutenção Sirtec", corpo, enviar_para, anexos, imagens_corpo_email=imagens)
+
+
+
+
+if __name__ == '__main__':
+
+    elabora_email()
+    sys.exit()
+
+default_args = {
+    'depends_on_past' : False,
+    'email' : ['hugo.viana@sirtec.com.br'],
+    'email_on_failure' : True,
+    'email_on_retry' : False,
+    'owner' : 'hugo',
+    'retries' : 3,
+    'retry_delay' : pendulum.duration(seconds=5)
+}
+
+with DAG(
+    'envia_email_pendencias_manut',
+    schedule='0 10 * * 1-5',
+    start_date=pendulum.today('America/Sao_Paulo'),
+    catchup=False,
+    max_active_runs = 1,
+    tags=['manut', 'email'],
+    default_args=default_args
+):
+    
+    envia_email = PythonOperator(
+        task_id='envia_email_pendencias',
+        python_callable=elabora_email
+    )
+
+    envia_email

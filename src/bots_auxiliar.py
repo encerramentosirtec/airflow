@@ -409,6 +409,9 @@ class Bots_aux():
                 msg_img.add_header('Content-ID', f'<grafico>')
                 message.attach(msg_img)
 
+
+
+
         with open(os.path.join(self.PATH,'downloads/rejeicoes.csv'), "rb") as fil:
             part = MIMEApplication(
                 fil.read(),
@@ -417,6 +420,10 @@ class Bots_aux():
         # After the file is closed
         part['Content-Disposition'] = 'attachment; filename="%s"' % basename(os.path.join(self.PATH,'downloads/rejeicoes.csv'))
         message.attach(part)
+        
+
+
+
         
         print('envia email')
         # Send the email
