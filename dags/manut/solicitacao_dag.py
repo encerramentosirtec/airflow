@@ -6,7 +6,7 @@ from airflow.providers.standard.operators.python import PythonOperator
 #bibliotecas
 '''import os
 import sys'''
-import src.spreadsheets
+import src.spreadsheets as spreadsheets
 import pandas as pd
 from time import sleep
 from pendulum import today, duration
