@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-import spreadsheets as sh
+import src.spreadsheets as sh
 from src.email import enviaEmail
 
 from src.google_sheets import GoogleSheets

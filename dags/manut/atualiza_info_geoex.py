@@ -13,7 +13,7 @@ PATH = os.getenv('AIRFLOW_HOME')
 os.chdir(PATH)
 sys.path.insert(0, PATH)
 
-import spreadsheets as sh
+import src.spreadsheets as sh
 
 
 from src.geoex import Geoex
