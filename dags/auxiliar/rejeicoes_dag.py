@@ -19,7 +19,7 @@ default_args = {
 
 with DAG('rejeicoes',
         default_args = default_args,
-        default_view="graph",
+        #default_view="graph",
         start_date=today('America/Sao_Paulo'),
         schedule = '0 8,11,14,17 * * 1-6',
         max_active_runs = 1,

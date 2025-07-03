@@ -192,7 +192,7 @@ with DAG(
     start_date=pendulum.today('America/Sao_Paulo'),
     catchup=False,
     default_args = default_args,
-    default_view="graph",
+    #default_view="graph",
     max_active_runs = 1,
     tags = ['manut', 'geoex']
 ):

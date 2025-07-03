@@ -19,7 +19,7 @@ default_args = {
 
 with DAG('bot-telegram',
         default_args = default_args,
-        default_view="graph",
+        #default_view="graph",
         start_date=today('America/Sao_Paulo'),
         schedule = None,
         max_active_runs = 1,

@@ -19,7 +19,7 @@ default_args = {
 
 with DAG('cookie-manut',
         default_args = default_args,
-        default_view="graph",
+        #default_view="graph",
         start_date=today('America/Sao_Paulo'),
         schedule = None,
         tags = ['manut', 'cookie', 'aux'],
