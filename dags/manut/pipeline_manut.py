@@ -16,7 +16,7 @@ PATH = os.getenv('AIRFLOW_HOME')
 os.chdir(PATH)
 sys.path.insert(0, PATH)
 
-import spreadsheets # Arquivo contendo link de todas as planilhas
+from src import spreadsheets # Arquivo contendo link de todas as planilhas
 
 from src.geoex import Geoex # Objeto para interagir com o Geoex
 GEOEX = Geoex(cookie_file='cookie_hugo.json')
