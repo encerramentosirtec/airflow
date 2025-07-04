@@ -90,7 +90,10 @@ class Bots:
         return cookie, gxsessao, gxbot, useragent
 
     def trigger_dag(self, dag_id):
-        headers = {'Content-Type': 'application/json'}
+        token = abre_json(os.path.join(self.PATH,'access_token.json'))
+        headers = {'Content-Type': 'application/json',
+                   'Authorization': f'Bearer {token['access_token']}'
+                    }
         
         response = requests.post(
             f"http://localhost:8080/api/v2/dags/{dag_id}/dagRuns",
