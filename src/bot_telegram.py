@@ -26,7 +26,7 @@ class Bots:
         #os.environ['NO_PROXY'] = '*'
         API_TOKEN = Variable.get("telegram_api_key")
         self.bot = telebot.TeleBot(API_TOKEN, threaded=False)
-        telebot.logger.setLevel(logging.DEBUG) # Outputs debug messages to console.
+        #telebot.logger.setLevel(logging.DEBUG) # Exibe log detalhado
 
         self.cookie, self.gxsessao, self.gxbot = '', '', ''
         self.data = abre_json(os.path.join(self.PATH, 'assets/auth_geoex/cookie_heli.json'))
