@@ -56,3 +56,53 @@ airflow dags trigger <dag_id>
 airflow tasks test <dag_id> <task_id> <execution_date>
 airflow dags pause <dag_id>
 ```
+
+## ⚙️ Configurar inicio automático
+
+Seter `.sh` como executável
+```
+sudo apt install tmux
+chmod +x ~/airflow/airflow_tunnel.sh
+./airflow_tmux_start.sh
+```
+
+### Criando serviço
+
+```
+sudo nano /etc/systemd/system/airflow_tunnel.service
+```
+
+```
+[Unit]
+Description=Airflow Standalone com Cloudflare Tunnel
+After=network.target
+
+[Service]
+Type=simple
+User=seu_usuario
+WorkingDirectory=/home/seu_usuario/airflow
+ExecStart=/home/seu_usuario/airflow/airflow_tunnel.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### Ativar e iniciar
+
+```
+sudo systemctl daemon-reload
+sudo systemctl enable airflow_tunnel.service
+sudo systemctl start airflow_tunnel.service
+```
+
+Ver logs:
+```
+journalctl -u airflow_tunnel.service -f
+```
+
+Parar o serviço completo:
+```
+sudo systemctl stop airflow_tunnel.service
+sudo systemctl disable airflow_tunnel.service
+```
