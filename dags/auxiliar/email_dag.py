@@ -188,7 +188,7 @@ with DAG('email-gpm',
         default_args = default_args,
         #default_view="graph",
         start_date=today('America/Sao_Paulo'),
-        schedule_interval = '0 12 * * 1-6',
+        schedule = '0 12 * * 1-6',
         max_active_runs = 1,
         tags = ['email', 'gpm'],
         catchup = False) as dag:
