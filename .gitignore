@@ -35,3 +35,6 @@ testes.ipynb
 airenv
 *.png
 *.svg
+tunnel.log
+tunnel_link.txt
+airflow.log
