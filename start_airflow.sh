@@ -8,4 +8,5 @@ LOG_FILE="$WORKDIR/airflow.log"
 source "$VENV"
 
 # Inicia o Airflow Standalone e salva o log
+cd "$WORKDIR"
 airflow standalone > "$LOG_FILE" 2>&1
