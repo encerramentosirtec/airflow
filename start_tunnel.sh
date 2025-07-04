@@ -5,17 +5,20 @@ VENV="$WORKDIR/airenv/bin/activate"
 LOG_FILE="$WORKDIR/tunnel.log"
 LINK_FILE="$WORKDIR/tunnel_link.txt"
 
-# Ativa o ambiente virtual (se existir)
+# Ativa o ambiente virtual
 source "$VENV"
 
 # Limpa arquivos antigos
 > "$LOG_FILE"
 > "$LINK_FILE"
 
-# Inicia o túnel em background e redireciona a saída
+# Inicia o cloudflared diretamente (sem &)
 cloudflared tunnel --url http://localhost:8080 > "$LOG_FILE" 2>&1 &
 
-# Aguarda a geração do link e salva no arquivo
+# Salva PID para referência futura
+TUNNEL_PID=$!
+
+# Aguarda o link ser gerado
 for i in {1..30}; do
     LINK=$(grep -o 'https://[^ ]*\.trycloudflare\.com' "$LOG_FILE" | head -n1)
     if [[ -n "$LINK" ]]; then
@@ -26,4 +29,5 @@ for i in {1..30}; do
     sleep 1
 done
 
-wait
+# Aguarda o cloudflared terminar (mantém o systemd ativo)
+wait $TUNNEL_PID
