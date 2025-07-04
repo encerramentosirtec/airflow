@@ -17,7 +17,7 @@ PATH = os.getenv('AIRFLOW_HOME')
 os.chdir(PATH)
 sys.path.insert(0, PATH)
 
-import src.spreadsheets as spreadsheets  # Arquivo contendo link de todas as planilhas
+import src.spreadsheets as sh  # Arquivo contendo link de todas as planilhas
 
 from src.geoex import Geoex # Objeto para interagir com o Geoex
 GEOEX = Geoex(cookie_file='cookie_hugo.json')
@@ -25,7 +25,7 @@ GEOEX = Geoex(cookie_file='cookie_hugo.json')
 from src.google_sheets import GoogleSheets # Objeto para interagir com as planilhas google
 GS_SERVICE = GoogleSheets(credentials='causal_scarab.json')
 
-ID_RELATORIOS = GS_SERVICE.le_planilha(url=spreadsheets.ID_RELATORIOS, aba='id_relatorios_geoex') # PLanilha contendo Id dos relatórios baixados no Geoex
+ID_RELATORIOS = GS_SERVICE.le_planilha(url=sh.ID_RELATORIOS, aba='id_relatorios_geoex') # PLanilha contendo Id dos relatórios baixados no Geoex
 
 
 
@@ -73,9 +73,9 @@ def atualizar_base_medicoes():
                 'VALOR_PREVISTO': 'sum'
             })
 
-            sucess = GS_SERVICE.sobrescreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='BASE_MEDIÇÕES', df=df_grouped)
+            sucess = GS_SERVICE.sobrescreve_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_MEDIÇÕES', df=df_grouped)
             if sucess:
-                GS_SERVICE.escreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Medições', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A4')
+                GS_SERVICE.escreve_planilha(url=sh.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Medições', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A4')
                             
             return {
                 'status': 'Ok',
@@ -138,9 +138,9 @@ def atualizar_base_hro():
             )
     
     # Atualização da base
-    sucess = GS_SERVICE.sobrescreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='BASE_HRO', df=df_att.fillna(""))
+    sucess = GS_SERVICE.sobrescreve_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_HRO', df=df_att.fillna(""))
     if sucess:
-        GS_SERVICE.escreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Base HRO', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A3')
+        GS_SERVICE.escreve_planilha(url=sh.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Base HRO', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A3')
 
 
     return {
@@ -190,9 +190,9 @@ def atualizar_base_envio_pastas_consulta():
             df['DATA_SOLICITACAO'] = pd.to_datetime(df['DATA_SOLICITACAO']).dt.strftime('%d/%m/%Y')
 
             # Atualização da base
-            sucess = GS_SERVICE.sobrescreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='BASE_ENVIO_PASTAS', df=df.fillna(""))
+            sucess = GS_SERVICE.sobrescreve_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_ENVIO_PASTAS', df=df.fillna(""))
             if sucess:
-                GS_SERVICE.escreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Envio de pastas', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A5')
+                GS_SERVICE.escreve_planilha(url=sh.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Envio de pastas', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A5')
 
         except Exception as e:
             raise
@@ -293,7 +293,7 @@ def atualizar_base_movimentacao():
         zmm370 = read_zmm370()
 
         # Leitura da base de controle dos materiais
-        controle_materiais = GS_SERVICE.le_planilha(url=spreadsheets.MANUT_FECHAMENTO, aba='Junção')
+        controle_materiais = GS_SERVICE.le_planilha(url=sh.MANUT_FECHAMENTO, aba='Junção')
         controle_materiais['Quantidade'] = controle_materiais['Quantidade'].replace('', 0)
         controle_materiais = controle_materiais.query("Quantidade != 0 and Código != '' and Projeto.str.startswith('B-') and Tipo == 'MATERIAL'")
         controle_materiais['Quantidade'] = controle_materiais['Quantidade'].astype(float)
@@ -320,13 +320,13 @@ def atualizar_base_movimentacao():
         })
 
         # Leitura da base do detalhamento dos materiais
-        detalhamento_materiais = GS_SERVICE.le_planilha(url=spreadsheets.MATERIAIS, aba='Materiais')
+        detalhamento_materiais = GS_SERVICE.le_planilha(url=sh.MATERIAIS, aba='Materiais')
         detalhamento_materiais = detalhamento_materiais[['Material', 'Descrição', 'Categoria']]
 
         # Faz a junção das bases
-        merge = controle_materiais.merge(cji3, on=['Projeto', 'Material'], suffixes=(' Aplicada', ' Movimentada'), how='outer').fillna(0)
-        merge = merge.merge(reservas_final1, how='outer', on=['Projeto', 'Material']).rename(columns={'Quantidade': 'Quantidade Disponível (221/921)'}).fillna(0)
-        merge = merge.merge(reservas_final2, how='outer', on=['Projeto', 'Material'], suffixes=[' (221/921)', ' (222/922)']).rename(columns={'Quantidade': 'Quantidade Disponível (222/922)'}).fillna(0)
+        merge = controle_materiais.merge(cji3, on=['Projeto', 'Material'], suffixes=(' Aplicada', ' Movimentada'), how='outer', validate='one_to_one').fillna(0)
+        merge = merge.merge(reservas_final1, how='outer', on=['Projeto', 'Material'], validate='one_to_one').rename(columns={'Quantidade': 'Quantidade Disponível (221/921)'}).fillna(0)
+        merge = merge.merge(reservas_final2, how='outer', on=['Projeto', 'Material'], suffixes=[' (221/921)', ' (222/922)'], validate='one_to_one').rename(columns={'Quantidade': 'Quantidade Disponível (222/922)'}).fillna(0)
         merge = merge.merge(detalhamento_materiais, on='Material', how='left', validate='many_to_one').fillna("Código não encontrado")
 
         # Cálculo das quantidades a retirar e a devolver
@@ -367,30 +367,11 @@ def atualizar_base_movimentacao():
         merge['Eliminar reserva lixo'] = merge.apply(lambda x: np.maximum(x['Quantidade Disponível (221/921)'] - x['Quantidade Retirar'],0) + np.maximum(x['Quantidade Disponível (222/922)'] - x['Quantidade Devolver'],0), axis=1)
         
 
-        # Adicionando coluna com os materiais já direcionados na V6
-        df_v6 = GS_SERVICE.le_planilha(url=spreadsheets.ALMOX_V6, aba='Consolidado', dtype=str)
-        reservas_em_aberto_v6 = df_v6.query("Setor == 'MANUT'")
-        v6_final_1 = reservas_em_aberto_v6.query("`Tipo de Mov.` == 221 or `Tipo de Mov.` == 921").groupby(['Projeto', 'Material'])['Qtd.'].sum()
-        v6_final_2 = reservas_em_aberto_v6.query("`Tipo de Mov.` == 222 or `Tipo de Mov.` == 922").groupby(['Projeto', 'Material'])['Qtd.'].sum()
-        merge.merge(v6_final_1, on=['Projeto', 'Material'], how='left')
-        merge.merge(v6_final_2, on=['Projeto', 'Material'], how='left', suffixes=[' direcionada na V6 (221/921)', ' direcionada na V6 (222/922)'])
-
-
-        # materiais_direcionados_v6_retirar = reservas_final1.merge(reservas_em_aberto_v6, left_on='Reserva', right_on='Reserva', how='left')
-        # materiais_direcionados_v6_retirar = materiais_direcionados_v6_retirar.query("Reserva.notna()").groupby(['Projeto', 'Material'], as_index=False).sum()[['Projeto', 'Material', 'Quantidade']]
-
-        # materiais_direcionados_v6_devolver = reservas_final2.merge(reservas_em_aberto_v6, left_on='Reserva', right_on='Reserva', how='left')
-        # materiais_direcionados_v6_devolver = materiais_direcionados_v6_devolver.query("Reserva.notna()").groupby(['Projeto', 'Material'], as_index=False).sum()
-        
-        # merge = merge.merge(materiais_direcionados_v6_retirar, on=['Projeto', 'Material'], how='left').fillna(0).rename(columns={'Quantidade': 'Quantidade direcionada na V6 (221/921)'})
-        # merge = merge.merge(materiais_direcionados_v6_devolver, on=['Projeto', 'Material'], how='left').fillna(0).rename(columns={'Quantidade': 'Quantidade direcionada na V6 (222/922)'})
-
-
 
         ### Define status das movimentações
 
         # Define os projetos com nenhum material aplicado como pendente de orçamento
-        soma_aplicada = merge.groupby('Projeto')['Quantidade Aplicada'].sum()
+        soma_aplicada = merge.groupby('Projeto')['Quantidade Aplicada'].apply(lambda x: x.abs().sum())
         merge['Status movimentação'] = merge['Projeto'].map(
                 lambda projeto: 'A. Orçamento pendente' if soma_aplicada.get(projeto, 0) <= 0 else None
             )
@@ -413,7 +394,8 @@ def atualizar_base_movimentacao():
         # Define as movimentações Ok
         merge.loc[merge['Status movimentação'].isnull(), 'Status movimentação'] = 'G. Movimentação ok'
 
-        projetos_postagem = GS_SERVICE.le_planilha(spreadsheets.MANUT_POSTAGEM, aba='Junção', intervalo='D:J')
+        projetos_postagem = GS_SERVICE.le_planilha(sh.MANUT_POSTAGEM, aba='Junção', intervalo='D:J')
+        projetos_postagem = projetos_postagem.groupby('Projeto')[['Projeto', 'Operação', 'Categoria de pagamento']].agg({'Operação':'first', 'Categoria de pagamento': 'first'})
         merge = merge.merge(projetos_postagem, on='Projeto', how='left')
         
 
@@ -423,23 +405,28 @@ def atualizar_base_movimentacao():
         merge.sort_values(by=['Projeto', 'Status movimentação'], ascending=[True, True], inplace=True)
         ordem_colunas = ['Categoria de pagamento', 'Operação', 'Projeto', 'Material', 'Descrição', 'Status movimentação', 'Quantidade Aplicada', 'Quantidade Movimentada', 'Quantidade Disponível (221/921)', 'Quantidade Disponível (222/922)', 'Quantidade Retirar', 'Quantidade Devolver',  'Criar reserva de retirada', 'Criar reserva de devolução', 'Eliminar reserva lixo', 'Estornar sucata', 'Reserva (221/921)', 'Reserva (222/922)']
         merge = merge[ordem_colunas].fillna("")
-
+        
         # Atualiza a base
-        sucess = GS_SERVICE.sobrescreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='BASE_MOVIMENTAÇÕES', df=merge)
+        sucess = GS_SERVICE.sobrescreve_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_MOVIMENTAÇÕES', df=merge)
         if sucess:
-            GS_SERVICE.escreve_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Movimentação de materiais', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A2')
+            GS_SERVICE.escreve_planilha(url=sh.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Movimentação de materiais', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A2')
 
-        return {
-            'status': 'Ok',
-            'message': f"[{  datetime.strftime(datetime.now(), format='%H:%M')  }] Base atualizada!"
-        }
+            return {
+                'status': 'Ok',
+                'message': f"[{  datetime.strftime(datetime.now(), format='%H:%M')  }] Base atualizada!"
+            }
+        else:
+            return{
+                'status': 'Fail',
+                'message': 'Falha na atualização!'
+            }
     
     except Exception as e:
         raise
 
 
 def criar_hros():
-    base = GS_SERVICE.le_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='Junção')
+    base = GS_SERVICE.le_planilha(url=sh.MANUT_POSTAGEM, aba='Junção')
 
     map_operacao_contrato = {
         'GUANAMBI': '4600079167',
@@ -487,7 +474,7 @@ def criar_hros():
 
 
 def criar_pastas():
-    df = GS_SERVICE.le_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='Junção')
+    df = GS_SERVICE.le_planilha(url=sh.MANUT_POSTAGEM, aba='Junção')
     projetos_criar_pasta = df[
         (df["Estágio da pasta"].str.endswith("Pendente postagem da pasta (Sirtec - Fechamento)")) &
         (df["Status pasta Geoex"] != "REJEITADO")
@@ -503,7 +490,7 @@ def criar_pastas():
 
 
 def aceitar_hros():
-    base_hro = GS_SERVICE.le_planilha(url=spreadsheets.MANUT_POSTAGEM, aba='BASE_HRO')
+    base_hro = GS_SERVICE.le_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_HRO')
     hros = base_hro.query("STATUS == 'ANALISADO'")['PROTOCOLO']
     for hro in hros:
         r = GEOEX.aceitar_hro(hro)
