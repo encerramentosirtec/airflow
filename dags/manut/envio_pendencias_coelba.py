@@ -243,6 +243,9 @@ def elabora_email():
     todos_contatos = contatos_sirtec + contatos_coelba
     todos_contatos.append('gestaoeps.coelba@neoenergia.com')
     todos_contatos.append('rodrigom@sirtec.com.br')
+    todos_contatos.append('adriana.sobral@neoenergia.com')
+    todos_contatos.append('leticia.silva@neoenergia.com')
+    todos_contatos.append('luciano.silva@neoenergia.com')
 
     # enviar_para = ["hugo.viana@sirtec.com.br"]
     enviar_para = todos_contatos
