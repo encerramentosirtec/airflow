@@ -241,7 +241,8 @@ def elabora_email():
     contatos_sirtec = contatos.query("(Empresa == 'Sirtec') and ( (Setor == 'Encerramento' and  (Subsetor == 'Manut' or Função == 'Gerente')) or (Setor == 'Operação' and Operação != 'Irecê') ) ")['E-mail'].to_list()
 
     todos_contatos = contatos_sirtec + contatos_coelba
-
+    todos_contatos.append('gestaoeps.coelba@neoenergia.com')
+    todos_contatos.append('rodrigom@sirtec.com.br')
 
     enviar_para = ["hugo.viana@sirtec.com.br"]
     # enviar_para = todos_contatos
