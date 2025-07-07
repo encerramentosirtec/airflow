@@ -244,8 +244,8 @@ def elabora_email():
     todos_contatos.append('gestaoeps.coelba@neoenergia.com')
     todos_contatos.append('rodrigom@sirtec.com.br')
 
-    enviar_para = ["hugo.viana@sirtec.com.br"]
-    # enviar_para = todos_contatos
+    # enviar_para = ["hugo.viana@sirtec.com.br"]
+    enviar_para = todos_contatos
 
     anexos=[
         'assets/planilhas/OCs pendentes de finalização do cadastro.xlsx',
