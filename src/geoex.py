@@ -14,6 +14,8 @@ class Geoex(GeoexHook):
 
         super().__init__(self.cookie)
 
+        self.hook = GeoexHook(self.cookie)
+
 
     def consultar_arquivos(self, projeto_id):
         id_pastas = {
@@ -52,7 +54,7 @@ class Geoex(GeoexHook):
 
         
         while True:
-            r = GeoexHook(self.cookie).run('POST', endpoint, json=json)
+            r = self.hook.run('POST', endpoint, json=json)
             
             if r.status_code == 200:
                 arquivos_015 = 0
@@ -90,7 +92,7 @@ class Geoex(GeoexHook):
         endpoint = 'Relatorio/Agendar'
         json = {"Relatorio": id_relatorio}
 
-        r = GeoexHook(self.cookie).run('POST', endpoint, json=json)
+        r = self.hook.run('POST', endpoint, json=json)
 
         if r.status_code == 200:
             id = r.json()['Content']
@@ -108,7 +110,7 @@ class Geoex(GeoexHook):
                     "Tipo": "Baixar",
                 }
 
-                r = GeoexHook(self.cookie).run('POST', endpoint, json=json)
+                r = self.hook.run('POST', endpoint, json=json)
                 
                 print('estagio 1', r)
 
@@ -139,7 +141,7 @@ class Geoex(GeoexHook):
                     "Tipo": "Baixar",
                 }
 
-                r = GeoexHook(self.cookie).run('POST', endpoint, json=json)
+                r = self.hook.run('POST', endpoint, json=json)
 
                 print('estagio 2', r.json())
 
@@ -163,7 +165,7 @@ class Geoex(GeoexHook):
         # Verifique se o diretório existe
         os.makedirs(os.path.dirname(full_path), exist_ok=True)
 
-        csv = GeoexHook(self.cookie).run('GET', arquivo)
+        csv = self.hook.run('GET', arquivo)
         with open(full_path, 'wb') as f:
             f.write(csv.content)
 
@@ -176,7 +178,7 @@ class Geoex(GeoexHook):
             'id': projeto
         }
 
-        r = GeoexHook(self.cookie).run('POST', endpoint, json=json)
+        r = self.hook.run('POST', endpoint, json=json)
 
         if r.status_code == 200:
             content = r.json()
@@ -199,7 +201,7 @@ class Geoex(GeoexHook):
             }
         }
 
-        r = GeoexHook(self.cookie).run('POST', endpoint, json=json)
+        r = self.hook.run('POST', endpoint, json=json)
     
         if r.status_code == 200:
             content = r.json()
@@ -218,7 +220,7 @@ class Geoex(GeoexHook):
                 "Serial": serial,
             }
 
-            r = GeoexHook(self.cookie).run('POST', endpoint, json=json)
+            r = self.hook.run('POST', endpoint, json=json)
             if r.status_code == 200:
                 content = r.json()
                 if content['StatusCode'] == 200:
@@ -316,7 +318,7 @@ class Geoex(GeoexHook):
                 ]
             }
             
-            r = GeoexHook(self.cookie).run('POST', endpoint, json=json)
+            r = self.hook.run('POST', endpoint, json=json)
 
             if r.status_code == 200:
                 content = r.json()
@@ -334,7 +336,7 @@ class Geoex(GeoexHook):
 
         endpoint = 'QARegistroOperacional/AtualizacaoEmMassa/EncerramentoOnlineOperacional/Salvar'
 
-        r = GeoexHook(self.cookie).run('POST', endpoint, files=files)
+        r = self.hook.run('POST', endpoint, files=files)
 
         if r.status_code == 200:
             content = r.json()
@@ -371,7 +373,7 @@ class Geoex(GeoexHook):
             "Serial": serial
         }
         
-        r = GeoexHook(self.cookie).run('POST', endpoint, json=json)
+        r = self.hook.run('POST', endpoint, json=json)
 
         if r.status_code == 200:
             content = r.json()

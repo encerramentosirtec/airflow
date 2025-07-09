@@ -94,6 +94,11 @@ def criar_linha_da_tabela_pastas_geoex(projeto):
         linha.append(infos_projeto['data']['Unidade'])
         linha.append(infos_projeto['data']['PosicaoInvestimentoIdExterno'])
 
+        if infos_projeto['data']['UsuarioResponsavel']:
+            linha.append(infos_projeto['data']['UsuarioResponsavel']['Nome'])
+        else:
+            linha.append('')
+
         return {'status_code': infos_projeto['status_code'], 'data': linha}
 
     else:
@@ -156,6 +161,7 @@ def atualiza_base():
                 'Grupo', 
                 'Unidade', 
                 'Id Investimento', 
+                'Responsável'
             ]
 
         df = pd.DataFrame(tabela, columns=colunas).fillna("")
