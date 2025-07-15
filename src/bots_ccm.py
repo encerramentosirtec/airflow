@@ -24,6 +24,8 @@ class Bots:
         self.GS_SERVICE = gspread.service_account(filename=os.path.join(os.getcwd(), f'assets/auth_google/{cred_file}'))
         self.br_tz = timezone("Brazil/East")
 
+        self.geoex_hook = GeoexHook(self.cookie)
+
         self.url_geo = 'Cadastro/ConsultarProjeto/Item'
         self.url_pasta = 'ConsultarProjeto/EnvioPasta/Itens'
         self.url_termo_geo = 'ConsultarProjeto/TermoGeo/Itens'
@@ -58,7 +60,7 @@ class Bots:
     def fazer_requisicao(self, url, body):
         resposta = ''
         
-        r = GeoexHook(self.cookie).run("POST", url, json=body)
+        r = self.geoex_hook.run("POST", url, json=body)
         resposta = r.json()
         
         if resposta["IsUnauthorized"] or resposta['StatusCode']==403:
