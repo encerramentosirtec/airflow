@@ -154,7 +154,8 @@ def atualizar_base_envio_pastas_consulta():
     # Consulta id do relatorio
     id_relatorio = ID_RELATORIOS.loc[1].ID
 
-    download = GEOEX.baixar_relatorio(id_relatorio)
+    # download = GEOEX.baixar_relatorio(id_relatorio)
+    download = {'sucess': True}
 
     if download['sucess']:
         try:
@@ -186,6 +187,9 @@ def atualizar_base_envio_pastas_consulta():
             df = df.sort_values(['DATA_SOLICITACAO'], ascending=False)
 
             df = df.drop_duplicates(subset='PROJETO')
+
+            df['ID_USUARIO_SOLICITANTE'] = df['USUARIO_SOLICITACAO'].str.extract(r'([a-zA-Z]{1,3}\d{6})')
+            df = df.query("ID_USUARIO_SOLICITANTE != 'ORC796500'")            
 
             df['DATA_SOLICITACAO'] = pd.to_datetime(df['DATA_SOLICITACAO']).dt.strftime('%d/%m/%Y')
 
@@ -499,7 +503,7 @@ def aceitar_hros():
 
 
 if __name__ == '__main__':
-    atualizar_base_movimentacao()
+    atualizar_base_envio_pastas_consulta()
     sys.exit()
 
 default_args = {
