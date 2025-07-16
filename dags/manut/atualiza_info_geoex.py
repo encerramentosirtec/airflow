@@ -127,10 +127,7 @@ def atualiza_base():
                     sleep(60)
                     continue
                 elif linha['status_code'] == 403:
-                    print( {
-                        'status': 'Erro',
-                        'message': "Atualizar autenticador."
-                    }  )
+                    raise Exception("Status 403: Atualizar autenticador.")
                 else:
                     tabela.append(linha['data'])
                     break
