@@ -154,8 +154,7 @@ def atualizar_base_envio_pastas_consulta():
     # Consulta id do relatorio
     id_relatorio = ID_RELATORIOS.loc[1].ID
 
-    # download = GEOEX.baixar_relatorio(id_relatorio)
-    download = {'sucess': True}
+    download = GEOEX.baixar_relatorio(id_relatorio)
 
     if download['sucess']:
         try:
