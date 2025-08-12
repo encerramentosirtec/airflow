@@ -59,7 +59,7 @@ class Bots_aux():
                         ('LUZ PARA TODOS', 'NOVAS LIGAÇÕES'): 'CCM',
                         ('LUZ PARA TODOS', 'REDES LPT'): 'CCM',
                         ('MANUT. SUBTRANSMISSÃO', 'MANUTENÇÃO SUB'): 'MANUT',
-                        ('ODS', 'ILUMINAÇÃO PUBLICA'): 'STC',
+                        ('ODS', 'ILUMINAÇÃO PUBLICA'): 'CCM',
                         ('ODS', 'INSTALAÇÃO PROVISÓRIA'): 'STC',
                         ('ODS', 'KIT COMERCIAL'): 'STC',
                         ('ODS', 'OUTROS'): 'STC',
