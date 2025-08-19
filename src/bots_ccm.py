@@ -120,7 +120,7 @@ class Bots:
                 espelho_CCM['Projeto'] = espelho_CCM['Projeto'].str.replace('B-', '')
                 espelho_CCM.columns = ['CARTEIRA', 'PROJETO', 'STATUS GERAL', 'UNIDADE', 'SUPERVISOR']#, 'MUNICÍPIO']
                 espelho_CCM = espelho_CCM.query("PROJETO != ''")
-                espelho_CCM = espelho_CCM['PROJETO'].drop_duplicates()
+                espelho_CCM = espelho_CCM.drop_duplicates(subset=['PROJETO'])
                 espelho_CCM = espelho_CCM.dropna()
                 #espelho_CCM = espelho_CCM[espelho_CCM['STATUS GERAL'].isin(['CONCLUÍDA', 'Concluída', 'CONCLUIDA', '-CONCLUIDA'])]
                 print('lendo espelho_CCM')
