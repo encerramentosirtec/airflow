@@ -145,7 +145,7 @@ class Bots:
         #print(obras_concluidas)
 
         obras_concluidas_formatado = []
-        espelho_formatado = []
+        
         for i in obras_concluidas:
             i = str(i)
             i = i.replace('B-', '').replace('/PIVO', '').replace('-PIVO', '').replace('/JUDICIAL', '').replace('Y-', '')
@@ -301,11 +301,7 @@ class Bots:
 
                 if not(status_pasta in status_aceitos) and str(i)!='B-1130987':
                     try:
-                        filtro = espelho_CCM["PROJETO"] == i
-                        if filtro.any():
-                            vl_projeto = espelho_CCM.loc[espelho_CCM["PROJETO"] == i, "VALOR"].values[0]
-                        else:
-                            vl_projeto = resposta['Content']['VlProjeto']
+                        vl_projeto = espelho_CCM.loc[espelho_CCM["PROJETO"] == str(i), "VALOR"].values[0]
                     except:
                         vl_projeto = ''
                     try:
