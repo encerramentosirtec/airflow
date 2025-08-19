@@ -116,15 +116,15 @@ class Bots:
                 #break
                 
                 espelho_CCM = self.le_planilha_google(configs.espelho_CCM, "Base de dados (Espelho)", 'B2:U')
-                espelho_CCM = espelho_CCM[['Dt. Energ. Geoex', 'Projeto', 'Status', 'Unidade', 'Supervisor ']]#, 'Município']]
+                espelho_CCM = espelho_CCM[['Dt. Energ. Geoex', 'Projeto', 'Status', 'Unidade', 'Supervisor ', 'R$ MO Considerado']]#, 'Município']]
                 espelho_CCM['Projeto'] = espelho_CCM['Projeto'].str.replace('B-', '')
-                espelho_CCM.columns = ['CARTEIRA', 'PROJETO', 'STATUS GERAL', 'UNIDADE', 'SUPERVISOR']#, 'MUNICÍPIO']
+                espelho_CCM.columns = ['CARTEIRA', 'PROJETO', 'STATUS GERAL', 'UNIDADE', 'SUPERVISOR', 'VALOR']#, 'MUNICÍPIO']
                 espelho_CCM = espelho_CCM.query("PROJETO != ''")
                 espelho_CCM = espelho_CCM.drop_duplicates(subset=['PROJETO'])
                 espelho_CCM = espelho_CCM.dropna()
                 #espelho_CCM = espelho_CCM[espelho_CCM['STATUS GERAL'].isin(['CONCLUÍDA', 'Concluída', 'CONCLUIDA', '-CONCLUIDA'])]
                 print('lendo espelho_CCM')
-                print(espelho_CCM)
+                #print(espelho_CCM)
                 break
             except Exception as e:
                 traceback.print_exc()
@@ -153,16 +153,20 @@ class Bots:
             i = int(i)
             obras_concluidas_formatado.append(i)
         
-        for i in espelho_CCM['PROJETO']:
+        for j,i in enumerate(espelho_CCM['PROJETO']):
+            print(i)
             i = str(i)
             i = i.replace('B-', '').replace('/PIVO', '').replace('-PIVO', '').replace('/JUDICIAL', '').replace('Y-', '')
 
-            i = int(i)
+            try:
+                i = int(i)
+            except:
+                espelho_CCM.drop(j)
             espelho_formatado.append(i)
 
         obras_concluidas = obras_concluidas_formatado
         espelho_CCM['PROJETO'] = espelho_formatado
-        espelho_CCM = espelho_CCM['PROJETO'].drop_duplicates()
+        espelho_CCM = espelho_CCM.drop_duplicates(subset=['PROJETO'])
 
         ####################### LENDO PLANILHA DO FECHAMENTO
         while True:
@@ -312,7 +316,7 @@ class Bots:
                     try:
                         filtro = espelho_CCM["PROJETO"] == i
                         if filtro.any():
-                            vl_projeto = espelho_CCM.loc[espelho_CCM["PROJETO"] == i, "PROJETO"].values[0]
+                            vl_projeto = espelho_CCM.loc[espelho_CCM["PROJETO"] == i, "VALOR"].values[0]
                         else:
                             vl_projeto = resposta['Content']['VlProjeto']
                     except:
