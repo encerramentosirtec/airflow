@@ -153,20 +153,7 @@ class Bots:
             i = int(i)
             obras_concluidas_formatado.append(i)
         
-        for j,i in enumerate(espelho_CCM['PROJETO']):
-            print(i)
-            i = str(i)
-            i = i.replace('B-', '').replace('/PIVO', '').replace('-PIVO', '').replace('/JUDICIAL', '').replace('Y-', '')
-
-            try:
-                i = int(i)
-            except:
-                espelho_CCM.drop(j)
-            espelho_formatado.append(i)
-
         obras_concluidas = obras_concluidas_formatado
-        espelho_CCM['PROJETO'] = espelho_formatado
-        espelho_CCM = espelho_CCM.drop_duplicates(subset=['PROJETO'])
 
         ####################### LENDO PLANILHA DO FECHAMENTO
         while True:
