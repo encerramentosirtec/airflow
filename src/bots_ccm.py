@@ -76,6 +76,7 @@ class Bots:
         ####################### LENDO CARTEIRAS ONLINE
         while True:
             try:
+                
                 carteira_g = self.le_planilha_google(configs.carteira_g, "Página1", 'A1:F')
                 carteira_g = carteira_g[['Dt. En. GEOEX', 'Projeto', 'Status Execução', 'Unidade', 'Supervisor', 'Município']]
                 carteira_g['Projeto'] = carteira_g['Projeto'].str.replace('B-', '')
@@ -112,6 +113,18 @@ class Bots:
                 diaC.columns = ['CARTEIRA', 'PROJETO', 'STATUS GERAL', 'UNIDADE', 'SUPERVISOR', 'MUNICÍPIO']
                 diaC = diaC[diaC['STATUS GERAL'].isin(['CONCLUÍDA', 'Concluída', 'CONCLUIDA', '-CONCLUIDA'])]
                 print('lendo diaC')
+                #break
+                
+                espelho_CCM = self.le_planilha_google(configs.espelho_CCM, "Base de dados (Espelho)", 'B2:U')
+                espelho_CCM = espelho_CCM[['Dt. Energ. Geoex', 'Projeto', 'Status', 'Unidade', 'Supervisor ']]#, 'Município']]
+                espelho_CCM['Projeto'] = espelho_CCM['Projeto'].str.replace('B-', '')
+                espelho_CCM.columns = ['CARTEIRA', 'PROJETO', 'STATUS GERAL', 'UNIDADE', 'SUPERVISOR']#, 'MUNICÍPIO']
+                espelho_CCM = espelho_CCM.query("PROJETO != ''")
+                espelho_CCM = espelho_CCM['PROJETO'].drop_duplicates()
+                espelho_CCM = espelho_CCM.dropna()
+                #espelho_CCM = espelho_CCM[espelho_CCM['STATUS GERAL'].isin(['CONCLUÍDA', 'Concluída', 'CONCLUIDA', '-CONCLUIDA'])]
+                print('lendo espelho_CCM')
+                print(espelho_CCM)
                 break
             except Exception as e:
                 traceback.print_exc()
@@ -132,14 +145,24 @@ class Bots:
         #print(obras_concluidas)
 
         obras_concluidas_formatado = []
+        espelho_formatado = []
         for i in obras_concluidas:
             i = str(i)
             i = i.replace('B-', '').replace('/PIVO', '').replace('-PIVO', '').replace('/JUDICIAL', '').replace('Y-', '')
 
             i = int(i)
             obras_concluidas_formatado.append(i)
+        
+        for i in espelho_CCM['PROJETO']:
+            i = str(i)
+            i = i.replace('B-', '').replace('/PIVO', '').replace('-PIVO', '').replace('/JUDICIAL', '').replace('Y-', '')
+
+            i = int(i)
+            espelho_formatado.append(i)
 
         obras_concluidas = obras_concluidas_formatado
+        espelho_CCM['PROJETO'] = espelho_formatado
+        espelho_CCM = espelho_CCM['PROJETO'].drop_duplicates()
 
         ####################### LENDO PLANILHA DO FECHAMENTO
         while True:
@@ -287,7 +310,11 @@ class Bots:
 
                 if not(status_pasta in status_aceitos) and str(i)!='B-1130987':
                     try:
-                        vl_projeto = resposta['Content']['VlProjeto']
+                        filtro = espelho_CCM["PROJETO"] == i
+                        if filtro.any():
+                            vl_projeto = espelho_CCM.loc[espelho_CCM["PROJETO"] == i, "PROJETO"].values[0]
+                        else:
+                            vl_projeto = resposta['Content']['VlProjeto']
                     except:
                         vl_projeto = ''
                     try:
