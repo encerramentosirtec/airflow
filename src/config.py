@@ -36,6 +36,7 @@ class configs:
     carteira_g = '1kldnvIS_w2X_N_DvOU7vDjxLrr45-ZMpYNeRjidpF0c'
     carteira_CCM = '1JcwCZQ-xZvHjbRfMlB-Je7MELSz388vSECTKHHZGL9g'
     diaC = '1JcwCZQ-xZvHjbRfMlB-Je7MELSz388vSECTKHHZGL9g'
+    espelho_CCM = '1sTPEI6kLfqTFVRelm96reKp_SPtgRWqH5VGabAd72WE'
 
     # Avaço GPM
     id_planilha_planejamento_conquista = '1hIaJaiPm2JNl7ogPcAu8-172flUK2uLaDPs3hyeMQ6g'
