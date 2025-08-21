@@ -114,7 +114,10 @@ def enviaEmail():
                             "ednelson.braga@sirtec.com.br",
                             
                             "tainan.rodrigues@sirtec.com.br",
-                            "cesar.jung@sirtec.com.br",]
+                            "cesar.jung@sirtec.com.br",
+                            "valdemar.silva@sirtec.com.br",
+                            "felipe.costa@sirtec.com.br"
+                        ]
 
     # HTML content with an image embedded
     html = f"""<html lang="pt-BR">
