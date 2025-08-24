@@ -1,1 +1,1 @@
-from . import bot_telegram, bots_auxiliar, bots_ccm, bots_manut, bots_stc, config, email, geoex, google_sheets, spreadsheets
+from . import bot_telegram, bots_auxiliar, bots_ccm, bots_manut, bots_stc, config, envia_email, geoex, google_sheets, spreadsheets

@@ -1,6 +1,4 @@
-#from airflow.models.dag import DAG
 from airflow.sdk import DAG
-#from airflow.operators.python import PythonOperator
 from airflow.providers.standard.operators.python import PythonOperator
 import pandas as pd
 from datetime import datetime
@@ -112,7 +110,7 @@ def criar_linha_da_tabela_pastas_geoex(projeto):
 
 def atualiza_base():
     try:
-        planilha_online = GS_SERVICE.le_planilha(sh.MANUT_POSTAGEM, aba='Junção')
+        planilha_online = GS_SERVICE.le_planilha(sh.MANUT_POSTAGEM, aba='Ocorrências')
         projetos = planilha_online['Projeto'].unique()
 
         tabela = list()
@@ -191,7 +189,7 @@ default_args = {
 
 with DAG(
     'atualiza_base_geoex_manut',
-    schedule = '0 6,12 * * 1-6',
+    schedule = '*/120 6-22 * * *',
     start_date=pendulum.today('America/Sao_Paulo'),
     catchup=False,
     default_args = default_args,

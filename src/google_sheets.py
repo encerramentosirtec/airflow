@@ -10,7 +10,7 @@ class GoogleSheets:
 
     def le_planilha(self, url, aba, intervalo=None, render_option='UNFORMATTED_VALUE', dtype=None):
         """
-            Obtem dados de planilha
+            Obtém dados de planilha.
         """
         try:
             sh = self.gs_service.open_by_url(url)
@@ -40,7 +40,7 @@ class GoogleSheets:
 
     def escreve_planilha(self, url, aba, df, range, input_option=''):
         """
-            Atualiza planilha em local definido com os valores de um dataframe
+            Atualiza planilha, em local definido, com os valores de um dataframe.
         """
         try:
             sh = self.gs_service.open_by_url(url)
@@ -58,7 +58,7 @@ class GoogleSheets:
 
     def atualiza_planilha(self, url, aba, df, input_option=''):
         """
-            Adiciona valores ao final da planilha
+            Adiciona valores ao final da planilha.
         """
         try:
             sh = self.gs_service.open_by_url(url)
@@ -75,7 +75,7 @@ class GoogleSheets:
 
     def sobrescreve_planilha(self, url, aba, df, input_option=''):
         """
-            Limpa e atualiza a planilha
+            Limpa e atualiza a planilha por completo.
         """
         try:
             sh = self.gs_service.open_by_url(url)
@@ -93,7 +93,7 @@ class GoogleSheets:
         
     def limpa_intervalo(self, url, aba, range):
         """
-            Limpa intervalo
+            Limpa intervalo determinado.
         """
         try:
             sh = self.gs_service.open_by_url(url)
