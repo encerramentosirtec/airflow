@@ -19,7 +19,7 @@ import seaborn as sns
 
 
 import src.spreadsheets as sh
-from src.email import enviaEmail
+from src.envia_email import enviaEmail
 
 from src.google_sheets import GoogleSheets
 GS_SERVICE = GoogleSheets('causal_scarab.json')

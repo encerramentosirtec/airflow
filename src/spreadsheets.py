@@ -1,8 +1,8 @@
 
 #### LINK PLANILHAS
 
-MANUT_POSTAGEM = 'https://docs.google.com/spreadsheets/d/1wb7jj5wQM_61-yQruIn4UGI9KrQH4CL__W-X0MPcif0'
-# MANUT_POSTAGEM = 'https://docs.google.com/spreadsheets/d/1CcVqctnXFYRIMU4ensbEFqV5LiXJRNu6RflFRBwsJMc'  # Planilha de testes
+MANUT_POSTAGEM = 'https://docs.google.com/spreadsheets/d/1w9a3IysiwVwQLkr8X0wKPFDmO_5YpYqglz5Cjq-Bm3E/edit?usp=sharing'
+# MANUT_POSTAGEM = 'https://docs.google.com/spreadsheets/d/1w9a3IysiwVwQLkr8X0wKPFDmO_5YpYqglz5Cjq-Bm3E/edit?gid=2096900891#gid=2096900891'  # Planilha de testes
 
 MANUT_FECHAMENTO = 'https://docs.google.com/spreadsheets/d/1QqO9eRly4n1GPuIvi-oBean1RkSOLl8A0UyL3uS2Lr4'
 
