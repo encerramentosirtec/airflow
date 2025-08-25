@@ -116,9 +116,9 @@ class Bots:
                 #break
                 
                 espelho_CCM = self.le_planilha_google(configs.espelho_CCM, "Base de dados (Espelho)", 'B2:U')
-                espelho_CCM = espelho_CCM[['Dt. Energ. Geoex', 'Projeto', 'Status', 'Unidade', 'Supervisor ', 'R$ MO Considerado']]#, 'Município']]
+                espelho_CCM = espelho_CCM[['Dt. Energ. Geoex', 'Projeto', 'Unidade', 'Supervisor ', 'R$ MO Considerado']]#, 'Município']]
                 espelho_CCM['Projeto'] = espelho_CCM['Projeto'].str.replace('B-', '')
-                espelho_CCM.columns = ['CARTEIRA', 'PROJETO', 'STATUS GERAL', 'UNIDADE', 'SUPERVISOR', 'VALOR']#, 'MUNICÍPIO']
+                espelho_CCM.columns = ['CARTEIRA', 'PROJETO', 'UNIDADE', 'SUPERVISOR', 'VALOR']#, 'MUNICÍPIO']
                 espelho_CCM = espelho_CCM.query("PROJETO != ''")
                 espelho_CCM = espelho_CCM.drop_duplicates(subset=['PROJETO'])
                 espelho_CCM = espelho_CCM.dropna()
