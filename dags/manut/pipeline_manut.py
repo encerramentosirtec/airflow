@@ -25,6 +25,9 @@ GEOEX = Geoex(cookie_file='cookie_hugo.json')
 from src.google_sheets import GoogleSheets # Objeto para interagir com as planilhas google
 GS_SERVICE = GoogleSheets(credentials='causal_scarab.json')
 
+from src.google_drive import GoogleDrive
+DRIVE = GoogleDrive()
+
 ID_RELATORIOS = GS_SERVICE.le_planilha(url=sh.ID_RELATORIOS, aba='id_relatorios_geoex') # PLanilha contendo Id dos relatórios baixados no Geoex
 
 
@@ -71,7 +74,7 @@ def atualizar_base_medicoes():
                 'STATUS AJUSTADO': 'first',
                 'ID_MEDIÇÃO': 'first',
                 'VALOR_PREVISTO': 'sum'
-            })
+            }).sort_values(by='STATUS AJUSTADO', ascending=False)
 
             sucess = GS_SERVICE.sobrescreve_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_MEDIÇÕES', df=df_grouped)
             if sucess:
@@ -109,18 +112,42 @@ def atualizar_base_hro():
                     os.path.join(PATH, 'downloads/Geoex - Processos com HRO - Consulta.csv'),
                     encoding='ISO-8859-1',
                     sep=';',
-                    parse_dates=['DT_ENVIO'],
                     dayfirst=True
                 )
 
                 # Sequência de tratamento dos dados
-                df['PROJETO'] = df['PROJETO'].str.replace('Y-', 'B-') # NUMERO.1 é a antiga coluna PROJETO
-                df.query("STATUS != 'CANCELADO'")
-                df = df.sort_values('DT_ENVIO', ascending=False)
-                df.drop_duplicates('PROCESSO', inplace=True) # NUMERO é a a antiga coluna PROCESSO
-                df['DT_ENVIO'] = df['DT_ENVIO'].astype(str)
+                map_status_hro = {
+                    'ACEITO': 'A. Aceito',
+                    'ANALISADO': 'B. Analisado',
+                    'EM ANÁLISE': 'C. Em análise',
+                    'ANÁLISE CANCELADA': 'D. Análise cancelada',
+                    'VALIDADO': 'E. Validado',
+                    'VALIDANDO': 'F. Validando',
+                    'VALIDAÇÃO CANCELADA': 'G. Validação cancelada',
+                    'ENVIADO': 'H. Enviado',
+                    'CRIADO': 'I. Criado',
+                    'ENVIO CANCELADO': 'J. Envio cancelado',
+                    'REJEITADO': 'K. Rejeitado',
+                    'EXPURGADO': 'L. Expurgado',
+                    'CANCELADO': 'M. Cancelado',
+                }
 
-                print(df)
+                map_status_medicao = {
+                    'MPC': 'A. Pedido lançado',
+                    'MVD': 'B. Validada',
+                    'MEA': 'C. Atestada',
+                    'MPA': 'D. Postada',
+                    'MRJ': 'E. Rejeitada'
+                }
+                
+                df['PROJETO'] = df['PROJETO'].str.replace('Y-', 'B-')
+                df['ID'] = df['PROJETO'] + df['PROCESSO']
+                df['STATUS_HIERARQUICO'] = df['STATUS'].map(map_status_hro)
+                df['STATUS_MEDICAO_HIERARQUICO'] = df['STATUS.1'].map(map_status_medicao)
+
+
+                # df = df.sort_values('STATUS_HIERARQUICO', ascending=True)
+                # df.drop_duplicates('PROCESSO', inplace=True)
 
                 # atualizar df_att com os valores de df
                 df_att = pd.concat([df_att, df], ignore_index=True)
@@ -138,9 +165,10 @@ def atualizar_base_hro():
             )
     
     # Atualização da base
+    df_att.sort_values(by='STATUS_HIERARQUICO', inplace=True, ascending=True)
     sucess = GS_SERVICE.sobrescreve_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_HRO', df=df_att.fillna(""))
     if sucess:
-        GS_SERVICE.escreve_planilha(url=sh.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Base HRO', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A3')
+        GS_SERVICE.escreve_planilha(url=sh.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Base HRO', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A3', input_option='USER_ENTERED')
 
 
     return {
@@ -392,13 +420,13 @@ def atualizar_base_movimentacao():
         merge.loc[ ((merge['Categoria'] == 'SUCATA') | (merge['Categoria'] == 'RECUP')) & merge['Status movimentação'].isnull() & ( merge['Estornar sucata'] > 0 ), 'Status movimentação'] = 'E. Pendente de estornar sucata'
 
         # Define reservas lixo
-        merge.loc[merge['Status movimentação'].isnull() & (merge['Eliminar reserva lixo'] > 0) & ((merge['Quantidade Retirar'] == 0) & (merge['Quantidade Devolver'] == 0) ), 'Status movimentação'] = 'F. Pendente eliminar reservas lixo'
+        # merge.loc[merge['Status movimentação'].isnull() & (merge['Eliminar reserva lixo'] > 0) & ((merge['Quantidade Retirar'] == 0) & (merge['Quantidade Devolver'] == 0) ), 'Status movimentação'] = 'F. Pendente eliminar reservas lixo'
 
         # Define as movimentações Ok
         merge.loc[merge['Status movimentação'].isnull(), 'Status movimentação'] = 'G. Movimentação ok'
 
-        projetos_postagem = GS_SERVICE.le_planilha(sh.MANUT_POSTAGEM, aba='Junção', intervalo='D:J')
-        projetos_postagem = projetos_postagem.groupby('Projeto')[['Projeto', 'Operação', 'Categoria de pagamento']].agg({'Operação':'first', 'Categoria de pagamento': 'first'})
+        projetos_postagem = GS_SERVICE.le_planilha(sh.MANUT_POSTAGEM, aba='Ocorrências', intervalo='A:F')
+        projetos_postagem = projetos_postagem.groupby('Projeto')[['Projeto', 'UTD', 'Categoria de pagamento']].agg({'UTD':'first', 'Categoria de pagamento': 'first'})
         merge = merge.merge(projetos_postagem, on='Projeto', how='left')
         
 
@@ -406,7 +434,7 @@ def atualizar_base_movimentacao():
         
         # Reordenando as colunas
         merge.sort_values(by=['Projeto', 'Status movimentação'], ascending=[True, True], inplace=True)
-        ordem_colunas = ['Categoria de pagamento', 'Operação', 'Projeto', 'Material', 'Descrição', 'Status movimentação', 'Quantidade Aplicada', 'Quantidade Movimentada', 'Quantidade Disponível (221/921)', 'Quantidade Disponível (222/922)', 'Quantidade Retirar', 'Quantidade Devolver',  'Criar reserva de retirada', 'Criar reserva de devolução', 'Eliminar reserva lixo', 'Estornar sucata', 'Reserva (221/921)', 'Reserva (222/922)']
+        ordem_colunas = ['Categoria de pagamento', 'UTD', 'Projeto', 'Material', 'Descrição', 'Status movimentação', 'Quantidade Aplicada', 'Quantidade Movimentada', 'Quantidade Disponível (221/921)', 'Quantidade Disponível (222/922)', 'Quantidade Retirar', 'Quantidade Devolver',  'Criar reserva de retirada', 'Criar reserva de devolução', 'Eliminar reserva lixo', 'Estornar sucata', 'Reserva (221/921)', 'Reserva (222/922)']
         merge = merge[ordem_colunas].fillna("")
         
         # Atualiza a base
@@ -501,8 +529,45 @@ def aceitar_hros():
         print(r['data'])
 
 
+def atualizar_base_uar():
+    """
+        Atualiza a base de UAR
+    """
+    try:
+        # Baixa o arquivo do Google Drive
+        drive = GoogleDrive()
+        # drive.baixar_arquivo('uar_atualizado.txt')
+        # drive.baixar_arquivo('uar_ativo.txt')
+
+        # Lê o arquivo baixado
+        df_ativo = pd.read_csv(os.path.join(PATH, 'downloads/uar_ativo.txt'), sep='#', encoding='ISO-8859-1', skiprows=3, on_bad_lines='warn')
+        df_atualizado = pd.read_csv(os.path.join(PATH, 'downloads/uar_atualizado.txt'), sep='#', encoding='ISO-8859-1', skiprows=3, on_bad_lines='warn')
+
+        # Sequeência de tratamento dos dados
+        map_status = {
+            'DEVOLVIDO A OS': 'A. Devolvido',
+            'INFORMADO': 'B. Informado',  
+            'LIBERADO': 'C. Aprovado',
+            'FINALIZADO': 'D. Finalizado'
+        }
+
+        df = pd.concat([df_atualizado, df_ativo], ignore_index=True)
+        print(df.info())
+        df['STATUS_HIERARQUICO'] = df['STATUS'].map(map_status)
+        df.sort_values(by='STATUS_HIERARQUICO', ascending=True, inplace=True)
+        # df.drop_duplicates(subset='ID', inplace=True)
+
+        # Atualiza a planilha
+        GS_SERVICE.sobrescreve_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_UAR', df=df.fillna(''))
+
+    except Exception as e:
+        raise e
+
+
+
+
 if __name__ == '__main__':
-    atualizar_base_envio_pastas_consulta()
+    atualizar_base_hro()
     sys.exit()
 
 default_args = {
@@ -547,16 +612,6 @@ with DAG(
                             python_callable=atualizar_base_envio_pastas_consulta
                             )
 
-    cria_hros = PythonOperator(
-                    task_id='cria_hros',
-                    python_callable=criar_hros
-                )
-    
-
-    cria_pastas = PythonOperator(
-                    task_id='cria_pastas',
-                    python_callable=criar_pastas
-                )
 
     aceita_hros = PythonOperator(
                     task_id='aceita_hros',
@@ -565,15 +620,10 @@ with DAG(
 
 
 
-    atualiza_hro >> cria_hros
-    atualiza_medicoes >> cria_hros
-    atualiza_base_movimentacoes >> cria_hros
-    atualiza_pastas >> cria_hros
-
-    atualiza_hro >> cria_pastas
-    atualiza_medicoes >> cria_pastas
-    atualiza_base_movimentacoes >> cria_pastas
-    atualiza_pastas >> cria_pastas
+    atualiza_hro
+    atualiza_medicoes
+    atualiza_base_movimentacoes
+    atualiza_pastas
 
     atualiza_hro >> aceita_hros
 
