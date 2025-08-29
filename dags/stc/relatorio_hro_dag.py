@@ -22,6 +22,7 @@ with DAG('relatorio-hro',
         #default_view="graph",
         start_date=pendulum.today('America/Sao_Paulo'),
         schedule = '0 7-18 * * 1-6',
+        max_active_runs = 1,
         tags = ['stc', 'geoex'],
         catchup = False) as dag:
     
