@@ -368,7 +368,7 @@ class Bots:
                         municipio = ''
                     
                     projetos_pendente_asbuilt.append([unidade, i, titulo, vl_projeto, data_energ, supervisor, municipio])
-                    print(f'\n{status_pasta} - {i} - {unidade} - {municipio} - {titulo} - {data_energ} - {vl_projeto} - ({x}/{str(len(obras_concluidas_sem_pasta_no_fechamento))})')
+                    print(f'{status_pasta} - {i} - {unidade} - {municipio} - {titulo} - {data_energ} - {vl_projeto} - ({x}/{str(len(obras_concluidas_sem_pasta_no_fechamento))})')
                 else:
                     project_name = resposta['Content'].get('Titulo', '')
                     df.loc[len(df)] = [i, project_name, status_pasta]
