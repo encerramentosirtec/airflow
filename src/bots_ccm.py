@@ -122,7 +122,7 @@ class Bots:
                 espelho_CCM = espelho_CCM.query("PROJETO != ''")
                 espelho_CCM = espelho_CCM.drop_duplicates(subset=['PROJETO'])
                 espelho_CCM = espelho_CCM.dropna()
-                #espelho_CCM = espelho_CCM[espelho_CCM['STATUS GERAL'].isin(['CONCLUÍDA', 'Concluída', 'CONCLUIDA', '-CONCLUIDA'])]
+                espelho_CCM['PROJETO'] = pd.to_numeric(espelho_CCM['PROJETO'], errors='coerce')
                 print('lendo espelho_CCM')
                 #print(espelho_CCM)
                 break
@@ -301,7 +301,7 @@ class Bots:
 
                 if not(status_pasta in status_aceitos) and str(i)!='B-1130987':
                     try:
-                        vl_projeto = espelho_CCM.loc[espelho_CCM["PROJETO"] == str(i), "VALOR"].values[0]
+                        vl_projeto = espelho_CCM.loc[espelho_CCM["PROJETO"] == i, "VALOR"].values[0]
                     except:
                         vl_projeto = ''
                     try:
