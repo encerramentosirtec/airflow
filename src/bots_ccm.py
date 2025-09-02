@@ -116,13 +116,16 @@ class Bots:
                 #break
                 
                 espelho_CCM = self.le_planilha_google(configs.espelho_CCM, "Base de dados (Espelho)", 'B2:Y')
-                espelho_CCM = espelho_CCM[['Dt. Energ. Geoex', 'Projeto', 'Unidade', 'Supervisor ', 'R$ MO Considerado']]#, 'Município']]
+                espelho_CCM = espelho_CCM[['Dt. Energ. Geoex', 'Projeto', 'Status Carteira', 'Unidade', 'Supervisor ', 'R$ MO Considerado']]#, 'Município']]
                 espelho_CCM['Projeto'] = espelho_CCM['Projeto'].str.replace('B-', '')
-                espelho_CCM.columns = ['CARTEIRA', 'PROJETO', 'UNIDADE', 'SUPERVISOR', 'VALOR']#, 'MUNICÍPIO']
+                espelho_CCM.columns = ['CARTEIRA', 'PROJETO', 'STATUS GERAL', 'UNIDADE', 'SUPERVISOR', 'VALOR']#, 'MUNICÍPIO']
+                espelho_CCM = espelho_CCM[espelho_CCM['STATUS GERAL'].isin(['Concluída'])]
                 espelho_CCM = espelho_CCM.query("PROJETO != ''")
                 espelho_CCM = espelho_CCM.drop_duplicates(subset=['PROJETO'])
-                espelho_CCM = espelho_CCM.dropna()
                 espelho_CCM['PROJETO'] = pd.to_numeric(espelho_CCM['PROJETO'], errors='coerce')
+                espelho_CCM = espelho_CCM.dropna()
+                espelho_CCM['MUNICÍPIO'] = ['-'] * len(espelho_CCM)
+                subespelho = espelho_CCM[['CARTEIRA', 'PROJETO', 'STATUS GERAL', 'UNIDADE', 'SUPERVISOR', 'MUNICÍPIO']]
                 print('lendo espelho_CCM')
                 #print(espelho_CCM)
                 break
@@ -133,7 +136,7 @@ class Bots:
 
         
         #carteira_barreiras, 
-        carteira_geral = pd.concat([carteira_g, carteira_barreiras, carteira_CCM, diaC], ignore_index = True)
+        carteira_geral = pd.concat([carteira_g, carteira_barreiras, carteira_CCM, diaC, subespelho], ignore_index = True)
         carteira_geral['STATUS GERAL'] = carteira_geral['STATUS GERAL'].str.replace(' ', '')
         obras_concluidas_completo = carteira_geral
 
@@ -147,10 +150,12 @@ class Bots:
         obras_concluidas_formatado = []
         
         for i in obras_concluidas:
-            i = str(i)
-            i = i.replace('B-', '').replace('/PIVO', '').replace('-PIVO', '').replace('/JUDICIAL', '').replace('Y-', '')
-
-            i = int(i)
+            try:
+                i = int(i)
+            except Exception as e:
+                i = str(i)
+                i = i.replace('B-', '').replace('/PIVO', '').replace('-PIVO', '').replace('/JUDICIAL', '').replace('Y-', '')
+                i = int(i)
             obras_concluidas_formatado.append(i)
         
         obras_concluidas = obras_concluidas_formatado
@@ -274,11 +279,13 @@ class Bots:
         x = 1
         for i in obras_concluidas_sem_pasta_no_fechamento:
             if i in df['external_id'].values:
-                print(f'Projeto já existe, pulando: {i} - ({x}/{str(len(obras_concluidas_sem_pasta_no_fechamento))})')
+                #print(f'Projeto já existe, pulando: {i} - ({x}/{str(len(obras_concluidas_sem_pasta_no_fechamento))})')
                 x += 1
                 continue
-            
-            resposta = self.fazer_requisicao(url=self.url_geo, body={'id': str(i)})
+            try:
+                resposta = self.fazer_requisicao(url=self.url_geo, body={'id': str(i)})
+            except Exception as e:
+                raise e
             
             try:
                 id_projeto = resposta['Content']['ProjetoId']
@@ -365,7 +372,7 @@ class Bots:
                 else:
                     project_name = resposta['Content'].get('Titulo', '')
                     df.loc[len(df)] = [i, project_name, status_pasta]
-                    print(f'\n{status_pasta} - {i} - ({x}/{str(len(obras_concluidas_sem_pasta_no_fechamento))})')
+                    #print(f'\n{status_pasta} - {i} - ({x}/{str(len(obras_concluidas_sem_pasta_no_fechamento))})')
             except Exception as e:
                 print('\nsem acesso ao projeto ', i)
                 print(resposta)
