@@ -50,7 +50,7 @@ def read_cji3():
                         'Textobrevematerial': 'Descrição'
                     })
     cji3 = cji3[['Projeto', 'Material', 'Quantidade']]
-    cji3['Material'] = cji3['Material'].astype(int)
+    cji3['Material'] = cji3['Material'].fillna(0).astype(int)
     cji3 = cji3.query("Quantidade != 0")
     
 
@@ -230,6 +230,10 @@ def atualizar_base_movimentacao():
         raise
 
 
+
+# if __name__ == '__main__':
+#     atualizar_base_movimentacao()
+    
 
 default_args = {
     'depends_on_past' : False,
