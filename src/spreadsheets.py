@@ -17,3 +17,5 @@ BASE_MOV_MATERIAIS = 'https://docs.google.com/spreadsheets/d/1iX87gud0Q8DJIyntlI
 SOLICITACOES_RESERVA = 'https://docs.google.com/spreadsheets/d/1JFfnQaw-llIvPUp7J03jeNCugE56an7XkOXBxoQmE2k'
 
 CONTATOS = 'https://docs.google.com/spreadsheets/d/10wWgiV9_i9nljInqxXjFOmbRa3zPpS2iG4HWwoT2_Eg'
+
+PEDIDOS = 'https://docs.google.com/spreadsheets/d/1ADph291rbSWTN4pB6wpF1zs26delz58a_vWMlq_uffc'
