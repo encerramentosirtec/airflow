@@ -116,10 +116,10 @@ class Bots:
                 #break
                 
                 espelho_CCM = self.le_planilha_google(configs.espelho_CCM, "Base de dados (Espelho)", 'B2:Y')
-                espelho_CCM = espelho_CCM[['Dt. Energ. Geoex', 'Projeto', 'Status Carteira', 'Unidade', 'Supervisor ', 'R$ MO Considerado']]#, 'Município']]
+                espelho_CCM = espelho_CCM[['Dt. Energ. Geoex', 'Projeto', 'Status Execução', 'Unidade', 'Supervisor ', 'R$ MO Considerado']]#, 'Município']]
                 espelho_CCM['Projeto'] = espelho_CCM['Projeto'].str.replace('B-', '')
                 espelho_CCM.columns = ['CARTEIRA', 'PROJETO', 'STATUS GERAL', 'UNIDADE', 'SUPERVISOR', 'VALOR']#, 'MUNICÍPIO']
-                espelho_CCM = espelho_CCM[espelho_CCM['STATUS GERAL'].isin(['Concluída'])]
+                espelho_CCM = espelho_CCM[espelho_CCM['STATUS GERAL'].isin(['CONCLUÍDA']) | espelho_CCM['STATUS GERAL'].isin(carteira_g['PROJETO'])]
                 espelho_CCM = espelho_CCM.query("PROJETO != ''")
                 espelho_CCM = espelho_CCM.drop_duplicates(subset=['PROJETO'])
                 espelho_CCM['PROJETO'] = pd.to_numeric(espelho_CCM['PROJETO'], errors='coerce')
@@ -308,8 +308,9 @@ class Bots:
 
                 if not(status_pasta in status_aceitos) and str(i)!='B-1130987':
                     try:
-                        vl_projeto = espelho_CCM.loc[espelho_CCM["PROJETO"] == i, "VALOR"].values[0]
+                        vl_projeto = espelho_CCM.loc[espelho_CCM["PROJETO"] == int(i), "VALOR"].values[0]
                     except:
+                        print(i, type(i))
                         vl_projeto = ''
                     try:
                         titulo = resposta['Content']['Titulo']
