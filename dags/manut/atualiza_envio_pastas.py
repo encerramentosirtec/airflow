@@ -111,7 +111,7 @@ default_args = {
 
 with DAG(
     'atualiza_envio_pastas',
-    schedule='*/30 6-22 * * *',
+    schedule='*/25 6-22 * * *',
     start_date=pendulum.today('America/Sao_Paulo'),
     catchup=False,
     default_args = default_args,
