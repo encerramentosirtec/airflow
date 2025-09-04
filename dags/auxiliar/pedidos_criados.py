@@ -55,7 +55,7 @@ if __name__ == '__main__':
 with DAG(
     dag_id='atualiza_pedidos_criados',
     tags=['auxiliar'],
-    shcedule='*/40 6-22 * * 1-6',
+    schedule='*/40 6-22 * * 1-6',
     start_date=pendulum.today('America/Sao_Paulo')
 ):
     
