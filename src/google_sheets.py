@@ -73,7 +73,7 @@ class GoogleSheets:
             print(e)
             return e
 
-    def sobrescreve_planilha(self, url, aba, df, input_option=''):
+    def sobrescreve_planilha(self, url, aba, df, input_option='USER_ENTERED'):
         """
             Limpa e atualiza a planilha por completo.
         """

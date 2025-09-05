@@ -87,6 +87,8 @@ def atualizar_base_medicoes():
             """
         )
      
+if __name__ == "__main__":
+    atualizar_base_medicoes()
 
 
 default_args = {
