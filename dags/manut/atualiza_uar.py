@@ -28,8 +28,8 @@ def atualizar_base_uar():
     try:
         # Baixa o arquivo do Google Drive
         drive = GoogleDrive()
-        # drive.baixar_arquivo('uar_atualizado.txt')
-        # drive.baixar_arquivo('uar_ativo.txt')
+        drive.baixar_arquivo('uar_atualizado.txt')
+        drive.baixar_arquivo('uar_ativo.txt')
 
         # Lê o arquivo baixado
         df_ativo = pd.read_csv(os.path.join(PATH, 'downloads/uar_ativo.txt'), sep='#', encoding='ISO-8859-1', skiprows=3, on_bad_lines='warn')
