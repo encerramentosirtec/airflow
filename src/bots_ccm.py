@@ -113,12 +113,11 @@ class Bots:
                 diaC.columns = ['CARTEIRA', 'PROJETO', 'STATUS GERAL', 'UNIDADE', 'SUPERVISOR', 'MUNICÍPIO']
                 diaC = diaC[diaC['STATUS GERAL'].isin(['CONCLUÍDA', 'Concluída', 'CONCLUIDA', '-CONCLUIDA'])]
                 print('lendo diaC')
-                #break
                 
                 espelho_CCM = self.le_planilha_google(configs.espelho_CCM, "Base de dados (Espelho)", 'B2:Y')
-                espelho_CCM = espelho_CCM[['Dt. Energ. Geoex', 'Projeto', 'Status Execução', 'Unidade', 'Supervisor ', 'R$ MO Considerado']]#, 'Município']]
+                espelho_CCM = espelho_CCM[['Dt. En. GEOEX', 'Projeto', 'Status Execucao', 'UNIDADE', 'Supervisor', 'Valor Considerado']]
                 espelho_CCM['Projeto'] = espelho_CCM['Projeto'].str.replace('B-', '')
-                espelho_CCM.columns = ['CARTEIRA', 'PROJETO', 'STATUS GERAL', 'UNIDADE', 'SUPERVISOR', 'VALOR']#, 'MUNICÍPIO']
+                espelho_CCM.columns = ['CARTEIRA', 'PROJETO', 'STATUS GERAL', 'UNIDADE', 'SUPERVISOR', 'VALOR']
                 espelho_CCM = espelho_CCM[espelho_CCM['STATUS GERAL'].isin(['CONCLUÍDA']) | espelho_CCM['PROJETO'].isin(carteira_g['PROJETO'])]
                 espelho_CCM = espelho_CCM.query("PROJETO != ''")
                 espelho_CCM = espelho_CCM.drop_duplicates(subset=['PROJETO'])
@@ -127,7 +126,6 @@ class Bots:
                 espelho_CCM['MUNICÍPIO'] = ['-'] * len(espelho_CCM)
                 subespelho = espelho_CCM[['CARTEIRA', 'PROJETO', 'STATUS GERAL', 'UNIDADE', 'SUPERVISOR', 'MUNICÍPIO']]
                 print('lendo espelho_CCM')
-                #print(espelho_CCM)
                 break
             except Exception as e:
                 traceback.print_exc()
