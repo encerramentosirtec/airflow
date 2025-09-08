@@ -202,6 +202,17 @@ class Bots:
                 msg = 'Dados inválidos.'
             self.bot.send_message(message.chat.id, msg)
 
+        @self.bot.message_handler(commands=['senha'])
+        def senha(message):
+            senha = abre_json(os.path.join(self.PATH, 'simple_auth_manager_passwords.json.generated'))
+            self.bot.send_message(message.chat.id, f'Login: admin\nSenha: {senha['admin']}')
+
+        @self.bot.message_handler(commands=['link'])
+        def senha(message):
+            with open(os.path.join(self.PATH, 'tunnel_link.txt'), 'r') as arquivo:
+                link = arquivo.read()
+            self.bot.send_message(message.chat.id, f'O link de acesso para o Airflow é {link}')
+
         @self.bot.message_handler(func=lambda message: True)
         def echo_message(message):
             self.bot.send_message(message.chat.id, 'Comando Inválido.')
