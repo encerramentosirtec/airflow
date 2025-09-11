@@ -35,9 +35,10 @@ def atualizar_base_medicoes():
 
     id_relatorio = ID_RELATORIOS.loc[0].ID
     download = GEOEX.baixar_relatorio(id_relatorio)
+
     if download['sucess']:
         try:
-            df = pd.read_csv(os.path.join(PATH, 'downloads/Geoex - Relatório - Acompanhamento - Detalhado.csv'), encoding='ISO-8859-1', sep=';', thousands='.', decimal=',', dtype='str')
+            df = pd.read_csv(os.path.join(PATH, 'downloads/Geoex - Relatório - Acompanhamento - Detalhado.csv'), encoding='ISO-8859-1', sep=';', thousands='.', decimal=',')
             
             # Filtrando o dataframe
             df = df[~df['TITULO'].str.startswith(('COBRANCA', 'LIGACAO', 'PERDAS')) & ~df['TITULO'].str.contains('SOLAR', na=False)]
@@ -55,7 +56,7 @@ def atualizar_base_medicoes():
             df['ID_MEDIÇÃO'] = df['PROJETO'] + df['OC/PMS'].astype(str)
 
             # Ordenando e removendo duplicatas
-            df = df.sort_values(by='STATUS AJUSTADO').drop_duplicates(subset='ID_MEDIÇÃO')
+            # df = df.sort_values(by='STATUS AJUSTADO').drop_duplicates(subset='ID_MEDIÇÃO')
 
             # Agrupando os dados
             df_grouped = df.groupby('ID', as_index=False).agg({
