@@ -23,6 +23,23 @@ GS_SERVICE = GoogleSheets(credentials='causal_scarab.json')
 ID_RELATORIOS = GS_SERVICE.le_planilha(url=sh.ID_RELATORIOS, aba='id_relatorios_geoex') # PLanilha contendo Id dos relatórios baixados no Geoex
 
 
+def baixar_arquivo_geoex():
+    id_relatorio = ID_RELATORIOS.loc[0].ID
+
+    download = GEOEX.baixar_relatorio(id_relatorio)
+
+    if download['sucess']:
+        print("Download realizado com sucesso!")
+    else:
+        raise Exception(
+            f"""
+            Falha ao baixar csv.
+            Statuscode: { download['status_code'] }
+            Message: { download['data'] }
+            """
+        )
+
+
 
 def atualizar_base_medicoes():
     map_status = {
@@ -33,60 +50,51 @@ def atualizar_base_medicoes():
         'MRJ': 'E. Rejeitada'
     }
 
-    id_relatorio = ID_RELATORIOS.loc[0].ID
-    download = GEOEX.baixar_relatorio(id_relatorio)
+    ### Leitura e tratamento dos dados
+    try:
+        df = pd.read_csv(os.path.join(PATH, 'downloads/Geoex - Relatório - Acompanhamento - Detalhado.csv'), encoding='ISO-8859-1', sep=';', thousands='.', decimal=',')
+        
+        # Filtrando o dataframe
+        df = df[~df['TITULO'].str.startswith(('COBRANCA', 'LIGACAO', 'PERDAS')) & ~df['TITULO'].str.contains('SOLAR', na=False)]
 
-    if download['sucess']:
-        try:
-            df = pd.read_csv(os.path.join(PATH, 'downloads/Geoex - Relatório - Acompanhamento - Detalhado.csv'), encoding='ISO-8859-1', sep=';', thousands='.', decimal=',')
-            
-            # Filtrando o dataframe
-            df = df[~df['TITULO'].str.startswith(('COBRANCA', 'LIGACAO', 'PERDAS')) & ~df['TITULO'].str.contains('SOLAR', na=False)]
+        # Ajustando a coluna 'PROJETO'
+        df['PROJETO'] = df['PROJETO'].str.replace('Y-', 'B-', regex=False)
 
-            # Ajustando a coluna 'PROJETO'
-            df['PROJETO'] = df['PROJETO'].str.replace('Y-', 'B-', regex=False)
+        # Mapeando status
+        df['STATUS AJUSTADO'] = df['STATUS'].map(map_status)
 
-            # Mapeando status
-            df['STATUS AJUSTADO'] = df['STATUS'].map(map_status)
+        # Extraindo 'OC/PMS'
+        df['OC/PMS'] = df.apply(lambda x: re.search(r'\d{4}_\d{1,2}_\d+', x['TITULO']).group(0) if x['POSTAGEM'] == 'GX02 - MEDIÇÃO | HUB REGISTRO OPERACIONAL' and re.search(r'\d{4}_[1-9]\d*_\d+', x['TITULO']) else x['OCORRENCIA'], axis=1)
 
-            # Extraindo 'OC/PMS'
-            df['OC/PMS'] = df.apply(lambda x: re.search(r'\d{4}_\d{1,2}_\d+', x['TITULO']).group(0) if x['POSTAGEM'] == 'GX02 - MEDIÇÃO | HUB REGISTRO OPERACIONAL' and re.search(r'\d{4}_[1-9]\d*_\d+', x['TITULO']) else x['OCORRENCIA'], axis=1)
+        # Criando a coluna 'ID_MEDIÇÃO' 
+        df['ID_MEDIÇÃO'] = df['PROJETO'] + df['OC/PMS'].astype(str)
 
-            # Criando a coluna 'ID_MEDIÇÃO' 
-            df['ID_MEDIÇÃO'] = df['PROJETO'] + df['OC/PMS'].astype(str)
+        # Ordenando e removendo duplicatas
+        # df = df.sort_values(by='STATUS AJUSTADO').drop_duplicates(subset='ID_MEDIÇÃO')
 
-            # Ordenando e removendo duplicatas
-            # df = df.sort_values(by='STATUS AJUSTADO').drop_duplicates(subset='ID_MEDIÇÃO')
+        # Agrupando os dados
+        df_grouped = df.groupby('ID', as_index=False).agg({
+            'PROJETO': 'first',
+            'TITULO': 'first',
+            'OC/PMS': 'first',
+            'STATUS AJUSTADO': 'first',
+            'ID_MEDIÇÃO': 'first',
+            'VALOR_PREVISTO': 'sum'
+        }).sort_values(by='STATUS AJUSTADO', ascending=False)
 
-            # Agrupando os dados
-            df_grouped = df.groupby('ID', as_index=False).agg({
-                'PROJETO': 'first',
-                'TITULO': 'first',
-                'OC/PMS': 'first',
-                'STATUS AJUSTADO': 'first',
-                'ID_MEDIÇÃO': 'first',
-                'VALOR_PREVISTO': 'sum'
-            }).sort_values(by='STATUS AJUSTADO', ascending=False)
 
-            sucess = GS_SERVICE.sobrescreve_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_MEDIÇÕES', df=df_grouped)
-            if sucess:
-                GS_SERVICE.escreve_planilha(url=sh.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Medições', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A4')
-                            
-            return {
-                'status': 'Ok',
-                'message': f"[{  datetime.strftime(datetime.now(), format='%H:%M')  }] Base atualizada!"
-            }
-        except Exception as e:
-            raise e
-
-    else:
-        raise Exception(
-            f"""
-            Falha ao baixar csv.
-            Statuscode: { download['status_code'] }
-            Message: { download['data'] }
-            """
-        )
+        ### Atualização da base
+        sucess = GS_SERVICE.sobrescreve_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_MEDIÇÕES', df=df_grouped)
+        if sucess:
+            GS_SERVICE.escreve_planilha(url=sh.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Medições', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A4')
+                        
+        return {
+            'status': 'Ok',
+            'message': f"[{  datetime.strftime(datetime.now(), format='%H:%M')  }] Base atualizada!"
+        }
+    except Exception as e:
+        raise e
+    
      
 if __name__ == "__main__":
     atualizar_base_medicoes()
@@ -110,10 +118,15 @@ with DAG(
     start_date=pendulum.today('America/Sao_Paulo')
 ):
 
+    baixar_relatorio = PythonOperator(
+        task_id='baixar_relatorio',
+        python_callable=baixar_arquivo_geoex
+    )
+
     atualizar_medicoes = PythonOperator(
         task_id='atualizar_medicoes',
         python_callable=atualizar_base_medicoes,
 
     )
 
-    atualizar_medicoes
+    baixar_relatorio >> atualizar_medicoes

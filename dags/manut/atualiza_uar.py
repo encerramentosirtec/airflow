@@ -4,7 +4,6 @@ import os
 import pandas as pd
 import pendulum 
 import sys
-from time import sleep
 
 
 PATH = os.getenv('AIRFLOW_HOME')

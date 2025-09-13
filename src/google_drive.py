@@ -65,4 +65,7 @@ class GoogleDrive:
 
 if __name__ == '__main__':
     drive = GoogleDrive()
-    drive.baixar_arquivo('uar_atualizado.txt')
+    # d = drive.listar_arquivos("'1G02CK3TxGE4VN8ta5H283M8x_0GOEw2T' in parents")
+    d = drive.listar_arquivos()
+    print(d)
+

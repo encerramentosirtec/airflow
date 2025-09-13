@@ -1,16 +1,10 @@
-#from airflow.models.dag import DAG
 from airflow.sdk import DAG
-#from airflow.operators.python import PythonOperator
 from airflow.providers.standard.operators.python import PythonOperator
 from datetime import datetime
-import json
-import numpy as np
 import os
 import pandas as pd
 import pendulum 
-import re
 import sys
-from time import sleep
 
 
 PATH = os.getenv('AIRFLOW_HOME')
@@ -85,13 +79,16 @@ def atualizar_base():
 
 
     ### Atualização da base
-    try:
-        sucess = GS_SERVICE.sobrescreve_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_ENVIO_PASTAS', df=df.fillna(""))
-        if sucess:
-            GS_SERVICE.escreve_planilha(url=sh.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Envio de pastas', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A5')
-
-    except Exception as e:
-        raise
+    sucess = GS_SERVICE.sobrescreve_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_ENVIO_PASTAS', df=df.fillna(""))
+    if sucess:
+        GS_SERVICE.escreve_planilha(url=sh.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Envio de pastas', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A5')
+    else:
+        raise Exception(
+            f"""
+            Falha ao atualizar base.
+            "{ sucess }"
+            """
+        )
 
 
     return {
