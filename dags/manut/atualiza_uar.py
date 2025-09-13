@@ -99,7 +99,8 @@ with DAG(
     tags=['manut'],
     schedule='*/1 7-22 * * *',
     default_args=default_args,
-    start_date=pendulum.today('America/Sao_Paulo')
+    start_date=pendulum.today('America/Sao_Paulo'),
+    max_active_runs=1
 ):
 
     checar_alteracao_arquivos = ShortCircuitOperator(

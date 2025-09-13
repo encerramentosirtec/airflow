@@ -1,5 +1,5 @@
 from airflow.sdk import DAG
-from airflow.providers.standard.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator, ShortCircuitOperator
 from datetime import datetime
 import numpy as np
 import os
@@ -17,18 +17,47 @@ import src.spreadsheets as sh  # Arquivo contendo link de todas as planilhas
 from src.google_sheets import GoogleSheets # Objeto para interagir com as planilhas google
 GS_SERVICE = GoogleSheets(credentials='causal_scarab.json')
 
+from src.google_drive import GoogleDrive
+DRIVE = GoogleDrive()
+
+
+def verifica_alteracao_arquivos(**context):
+    ultima_execucao = context['prev_data_interval_start_success']
+    ultima_atualizacao = [x['modifiedTime'] for x in DRIVE.listar_arquivos() if x['name'] == 'movimentação de materiais'][0]
+
+    if ultima_execucao is None:
+        return True
+
+    datetime_ultima_atualizacao = pendulum.parse(ultima_atualizacao)
+    
+    print('Última atualização:', datetime_ultima_atualizacao)
+    print('Última execução:', ultima_execucao)
+
+    atualizar = datetime_ultima_atualizacao > ultima_execucao
+
+    if atualizar:
+        print("Arquivos foram atualizados. Iniciando atualização da base de movimentação de materiais.")
+    
+    return atualizar
+
+
+def baixar_arquivos_drive():
+    pasta_mov = DRIVE.buscar_pasta_por_nome('movimentação de materiais')
+    DRIVE.baixar_arquivo('cji3.xls', arquivo_id=pasta_mov)
+    DRIVE.baixar_arquivo('zmm370.xls', arquivo_id=pasta_mov)
+
 
 def read_cji3():
     try:
-        os.rename(os.path.join(PATH, 'assets/cji3.XLS'), os.path.join(PATH, 'assets/cji3.csv'))
+        os.rename(os.path.join(PATH, 'downloads/cji3.XLS'), os.path.join(PATH, 'downloads/cji3.csv'))
     except FileExistsError:
-        os.remove(os.path.join(PATH, 'assets/cji3.csv'))
-        os.rename(os.path.join(PATH, 'assets/cji3.XLS'), os.path.join(PATH, 'assets/cji3.csv'))
+        os.remove(os.path.join(PATH, 'downloads/cji3.csv'))
+        os.rename(os.path.join(PATH, 'downloads/cji3.XLS'), os.path.join(PATH, 'downloads/cji3.csv'))
     except FileNotFoundError:
         pass
 
     cji3 = pd.read_csv(
-        os.path.join(PATH, 'assets/cji3.csv'),
+        os.path.join(PATH, 'downloads/cji3.csv'),
         sep='\t',
         encoding='ISO-8859-1',
         skiprows=1,
@@ -58,15 +87,15 @@ def read_cji3():
 
 def read_zmm370():
     try:
-        os.rename(os.path.join(PATH, 'assets/zmm370.XLS'), os.path.join(PATH, 'assets/zmm370.csv'))
+        os.rename(os.path.join(PATH, 'downloads/zmm370.XLS'), os.path.join(PATH, 'downloads/zmm370.csv'))
     except FileExistsError:
-        os.remove(os.path.join(PATH, 'assets/zmm370.csv'))
-        os.rename(os.path.join(PATH, 'assets/zmm370.XLS'), os.path.join(PATH, 'assets/zmm370.csv'))
+        os.remove(os.path.join(PATH, 'downloads/zmm370.csv'))
+        os.rename(os.path.join(PATH, 'downloads/zmm370.XLS'), os.path.join(PATH, 'downloads/zmm370.csv'))
     except FileNotFoundError:
         pass
 
     zmm370 = pd.read_csv(
-        os.path.join(PATH, 'assets/zmm370.csv'),
+        os.path.join(PATH, 'downloads/zmm370.csv'),
         sep='\t',
         encoding='ISO-8859-1',
         skiprows=1,
@@ -231,8 +260,8 @@ def atualizar_base_movimentacao():
 
 
 
-# if __name__ == '__main__':
-#     atualizar_base_movimentacao()
+if __name__ == '__main__':
+    atualizar_base_movimentacao()
     
 
 default_args = {
@@ -248,15 +277,25 @@ default_args = {
 with DAG(
     dag_id='atualizar_mov_materiais',
     tags=['manut'],
-    schedule='*/60 6-22 * * *',
+    schedule='*/1 6-22 * * *',
     default_args=default_args,
-    start_date=pendulum.today('America/Sao_Paulo')
+    start_date=pendulum.today('America/Sao_Paulo'),
+    max_active_runs=1
 ):
+
+    checar_alteracao_arquivos = ShortCircuitOperator(
+        task_id='chcar_alteracao_arquivos',
+        python_callable=verifica_alteracao_arquivos
+    )
+
+    baixar_arquivos = PythonOperator(
+        task_id='baiar_arquivos',
+        python_callable=baixar_arquivos_drive
+    )
 
     atualizar_mov_materiais = PythonOperator(
         task_id='atualizar_mov_materiais',
         python_callable=atualizar_base_movimentacao,
-
     )
 
-    atualizar_mov_materiais
+    checar_alteracao_arquivos >> baixar_arquivos >> atualizar_mov_materiais
