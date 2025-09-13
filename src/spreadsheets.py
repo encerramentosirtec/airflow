@@ -19,3 +19,17 @@ SOLICITACOES_RESERVA = 'https://docs.google.com/spreadsheets/d/1JFfnQaw-llIvPUp7
 CONTATOS = 'https://docs.google.com/spreadsheets/d/10wWgiV9_i9nljInqxXjFOmbRa3zPpS2iG4HWwoT2_Eg'
 
 PEDIDOS = 'https://docs.google.com/spreadsheets/d/1ADph291rbSWTN4pB6wpF1zs26delz58a_vWMlq_uffc'
+
+BASE_MUNICIPIOS = "https://docs.google.com/spreadsheets/d/13bo5N0W3cvFyafpex-0wDGH_vYBKuc7RfpJY34eqo7s"
+
+
+#### Planilhas individuais - Postagem Manut
+
+MANUT_BARREIRAS = 'https://docs.google.com/spreadsheets/d/10BF-NnuBWSKw4cr4pzCxdrO78fOdBxunGFTlF1L7uZc/edit?gid=567606816#gid=567606816'
+MANUT_IBOTIRAMA = 'https://docs.google.com/spreadsheets/d/1re9OMgiymeW9LE2qAzDASHPu2m9cn3EMx1WeY3Qz_As/edit?gid=567606816#gid=567606816'
+MANUT_LAPA = 'https://docs.google.com/spreadsheets/d/1upMUp9wpdLdl8jfbEX66lBD0J9I-YAcCHOB8vySVWUw/edit?gid=567606816#gid=567606816'
+MANUT_GUANAMBI = 'https://docs.google.com/spreadsheets/d/1PvUmxFZ8VZuR3bPmlewOZcbGzqkZ8ogaXUDXBpiqe2Y/edit?gid=567606816#gid=567606816'
+MANUT_BRUMADO = 'https://docs.google.com/spreadsheets/d/1FXlSQHyAp5YPeqx9XJSNt4ifajTJqMe2ECgUSno3aM4/edit?gid=567606816#gid=567606816'
+MANUT_JEQUIE = 'https://docs.google.com/spreadsheets/d/1dQExqx-ANvXsdQyRqYcLccEoTMLjzYILDDVSN5MYL3Y/edit?gid=567606816#gid=567606816'
+MANUT_ITAPETINGA = 'https://docs.google.com/spreadsheets/d/1zLTat5mbe4zk0MIQwEJEy-MBj_JzsQDRyT88qQokjw0/edit?gid=1171562362#gid=1171562362'
+MANUT_CONQUISTA = 'https://docs.google.com/spreadsheets/d/1AT6elYNekylaYzoxfDxGSAPUeAO2n4dNkXmoz1rYO18/edit?gid=567606816#gid=567606816'
