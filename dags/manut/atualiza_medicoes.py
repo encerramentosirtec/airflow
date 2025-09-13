@@ -113,7 +113,7 @@ default_args = {
 with DAG(
     dag_id='atualizar_medicoes',
     tags=['manut', 'geoex'],
-    schedule='*/35 6-22 * * *',
+    schedule='*/30 6-22 * * *',
     default_args=default_args,
     start_date=pendulum.today('America/Sao_Paulo')
 ):

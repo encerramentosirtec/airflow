@@ -139,7 +139,7 @@ default_args = {
 with DAG(
     dag_id='atualizar_hro',
     tags=['manut', 'geoex'],
-    schedule='*/30 6-22 * * *',
+    schedule='*/40 6-22 * * *',
     default_args=default_args,
     start_date=pendulum.today('America/Sao_Paulo')
 ):
