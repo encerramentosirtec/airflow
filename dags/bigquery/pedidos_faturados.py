@@ -14,9 +14,9 @@ os.chdir(PATH)
 sys.path.insert(0, PATH)
 
 from src.google_sheets import GoogleSheets
-GSPREAD = GoogleSheets('sirtec-bot.json')
+GSPREAD = GoogleSheets(os.path.join(PATH, 'assets/auth_google/sirtec-bot.json'))
 
-CLIENT = bigquery.Client.from_service_account_json("sirtec-bot.json", project='sirtec-bot')
+CLIENT_BIGQUERY = bigquery.Client.from_service_account_json(os.path.join(PATH, 'assets/auth_google/sirtec-bot.json'), project='sirtec-bot')
 
 import src.spreadsheets as sh
 
@@ -39,11 +39,10 @@ def row_hash(row):
     return hashlib.md5(row_str.encode("utf-8")).hexdigest()
 
 def overwrite_to_bigquery(df: pd.DataFrame, table_id: str):
-    client = bigquery.Client.from_service_account_json("sirtec-bot.json")
     job_config = bigquery.LoadJobConfig(
         write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE  # sobrescreve a tabela
     )
-    job = client.load_table_from_dataframe(df, table_id, job_config=job_config)
+    job = CLIENT_BIGQUERY.load_table_from_dataframe(df, table_id, job_config=job_config)
     job.result()  # espera o job terminar
     print(f"{len(df)} linhas carregadas em {table_id} (sobrescrita).")
 
@@ -107,7 +106,7 @@ def atualiza_tabela_principal():
                 principal.`data_atualizacao` = staged.`data_atualizacao`
     """
 
-    CLIENT.query(merge_query).result()
+    CLIENT_BIGQUERY.query(merge_query).result()
     print(f"Tabela {TABELA_PRINCIPAL} atualizada.")
 
 
