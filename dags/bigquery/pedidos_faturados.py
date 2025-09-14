@@ -14,7 +14,7 @@ os.chdir(PATH)
 sys.path.insert(0, PATH)
 
 from src.google_sheets import GoogleSheets
-GSPREAD = GoogleSheets(os.path.join(PATH, 'assets/auth_google/sirtec-bot.json'))
+GSPREAD = GoogleSheets('sirtec-bot.json')
 
 CLIENT_BIGQUERY = bigquery.Client.from_service_account_json(os.path.join(PATH, 'assets/auth_google/sirtec-bot.json'), project='sirtec-bot')
 
