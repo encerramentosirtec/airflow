@@ -16,7 +16,7 @@ sys.path.insert(0, PATH)
 from src.google_sheets import GoogleSheets
 GSPREAD = GoogleSheets('sirtec-bot.json')
 
-CLIENT_BIGQUERY = bigquery.Client.from_service_account_json(os.path.join(PATH, 'assets/auth_google/sirtec-bot.json'), project='sirtec-bot')
+CLIENT_BIGQUERY = bigquery.Client.from_service_account_json(os.path.join(PATH, 'assets/auth_google/sirtec-bot.json'))
 
 import src.spreadsheets as sh
 
@@ -106,7 +106,11 @@ def atualiza_tabela_principal():
                 principal.`data_atualizacao` = staged.`data_atualizacao`
     """
 
-    CLIENT_BIGQUERY.query(merge_query).result()
+    job = CLIENT_BIGQUERY.query(merge_query).result()
+    print("ID do Job:", job.job_id)
+    print("Bytes processados:", job.total_bytes_processed)
+    print("Linhas afetadas:", job.num_dml_affected_rows)
+
     print(f"Tabela {TABELA_PRINCIPAL} atualizada.")
 
 
