@@ -1,5 +1,6 @@
 from airflow.sdk import DAG
 from airflow.providers.standard.operators.python import PythonOperator
+from google.cloud import bigquery
 from datetime import datetime
 import os
 import pandas as pd
@@ -21,11 +22,15 @@ GS_SERVICE = GoogleSheets(credentials='causal_scarab.json')
 
 ID_RELATORIOS = GS_SERVICE.le_planilha(url=sh.ID_RELATORIOS, aba='id_relatorios_geoex') # PLanilha contendo Id dos relatórios baixados no Geoex
 
+CLIENT_BIGQUERY = bigquery.Client.from_service_account_json(os.path.join(PATH, 'assets/auth_google/sirtec-bot.json'))
+
+from src.config import configs as cfg
+LOG_TABLE = cfg.log_table
 
 def baixar_arquivo_geoex():
     id_relatorios = []
-    id_relatorios.append([ID_RELATORIOS.loc[3].ID, 'Geoex - Processos com HRO - Consulta - Ocorrências.csv'])
-    id_relatorios.append([ID_RELATORIOS.loc[5].ID, 'Geoex - Processos com HRO - Consulta - Projeto filho.csv'])
+    id_relatorios.append([ID_RELATORIOS.loc[3].ID, 'Geoex - Processos com HRO - Consulta - Ocorrências'])
+    id_relatorios.append([ID_RELATORIOS.loc[5].ID, 'Geoex - Processos com HRO - Consulta - Projeto filho'])
 
     for id in id_relatorios:
         download = GEOEX.baixar_relatorio(id[0], name=id[1], file_path='downloads/hros')
@@ -42,7 +47,8 @@ def baixar_arquivo_geoex():
         
 
 def atualizar_base_hro():
-
+    df_att = pd.DataFrame()
+    
     ### Leitura e tratamento dos dados
     arquivos = glob.glob(os.path.join(PATH, 'downloads/hros/*.csv'))
     for arquivo in arquivos:
@@ -89,28 +95,26 @@ def atualizar_base_hro():
         # atualizar df_att com os valores de df
         df_att = pd.concat([df_att, df], ignore_index=True)
 
-        
     
     ### Atualização da base
     df_att.sort_values(by='STATUS_HIERARQUICO', inplace=True, ascending=True)
     sucess = GS_SERVICE.sobrescreve_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_HRO', df=df_att.fillna(""))
     if sucess:
-        GS_SERVICE.escreve_planilha(url=sh.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Base HRO', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A3', input_option='USER_ENTERED')
-    else:
-        raise Exception(
-            f"""
-            Falha ao atualizar base.
-            "{ sucess }
-            """
-        )
-
+        print("Base atualizada com sucesso!")
+        
     return {
         'status': 'Ok',
         'message': f"[{  datetime.strftime(datetime.now(), format='%H:%M')  }] Base atualizada!"
     }
 
 
-
+def log_atualização():
+    query = f"""
+        INSERT INTO `{LOG_TABLE}` (dag_id, data_atualizacao, tabela_atualizada)
+        VALUES ('atualizar_hro', CURRENT_TIMESTAMP(), 'BASE_HRO')
+    """
+    CLIENT_BIGQUERY.query(query).result()
+    print("Log de atualização inserido.")
 
 
 def aceitar_hros():
@@ -122,6 +126,10 @@ def aceitar_hros():
         print(r['data'])
 
 
+
+if __name__ == '__main__':
+    # baixar_arquivo_geoex()
+    atualizar_base_hro()
 
 
 
@@ -161,4 +169,11 @@ with DAG(
 
     )
 
+    log_atualizacao = PythonOperator(
+        task_id="log_execution",
+        python_callable=log_atualização,
+        trigger_rule="all_success",  # só roda se TODAS upstream tiverem sucesso
+    )
+
     baixar_relatorio >> atualizar_hro >> aceitar_hro
+    baixar_relatorio >> atualizar_hro >> log_atualizacao

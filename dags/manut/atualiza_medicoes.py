@@ -1,5 +1,6 @@
 from airflow.sdk import DAG
 from airflow.providers.standard.operators.python import PythonOperator
+from google.cloud import bigquery
 from datetime import datetime
 import os
 import pandas as pd
@@ -21,6 +22,11 @@ from src.google_sheets import GoogleSheets # Objeto para interagir com as planil
 GS_SERVICE = GoogleSheets(credentials='causal_scarab.json')
 
 ID_RELATORIOS = GS_SERVICE.le_planilha(url=sh.ID_RELATORIOS, aba='id_relatorios_geoex') # PLanilha contendo Id dos relatórios baixados no Geoex
+
+CLIENT_BIGQUERY = bigquery.Client.from_service_account_json(os.path.join(PATH, 'assets/auth_google/sirtec-bot.json'))
+
+from src.config import configs as cfg
+LOG_TABLE = cfg.log_table
 
 
 def baixar_arquivo_geoex():
@@ -95,7 +101,16 @@ def atualizar_base_medicoes():
     except Exception as e:
         raise e
     
+
+def log_atualização():
+        query = f"""
+            INSERT INTO `{LOG_TABLE}` (dag_id, data_atualizacao, tabela_atualizada)
+            VALUES ('atualizar_medicoes', CURRENT_TIMESTAMP(), 'BASE_MEDICOES')
+        """
+        CLIENT_BIGQUERY.query(query).result()
+        print("Log de atualização inserido.")
      
+
 if __name__ == "__main__":
     atualizar_base_medicoes()
 
@@ -129,4 +144,10 @@ with DAG(
 
     )
 
-    baixar_relatorio >> atualizar_medicoes
+    log_atualizacao = PythonOperator(
+        task_id="log_execution",
+        python_callable=log_atualização,
+        trigger_rule="all_success",  # só roda se TODAS upstream tiverem sucesso
+    )
+
+    baixar_relatorio >> atualizar_medicoes >> log_atualizacao
