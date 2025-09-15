@@ -59,6 +59,9 @@ def atualiza_tabela_staged():
         'Unidade': 'unidade',
         'Vr Solic': 'valor'
     })
+
+    df_pedidos = df_pedidos.query("not num_pedido.isna()")
+
     df_pedidos_grouped = df_pedidos.groupby('num_pedido', as_index=False)[['data', 'setor', 'unidade', 'valor']].agg({
         'data': 'first',
         'unidade': 'first',
@@ -66,7 +69,7 @@ def atualiza_tabela_staged():
         'valor': 'sum'
     })
 
-    df_pedidos_grouped['data'] = df_pedidos['data'].apply(lambda x: excel_date_to_text(x))
+    df_pedidos_grouped['data'] = df_pedidos_grouped['data'].apply(lambda x: excel_date_to_text(x))
     df_pedidos_grouped['data'] = pd.to_datetime(df_pedidos_grouped['data'], format='%d/%m/%Y')
 
     df_pedidos_grouped['ciclo'] = '8'
