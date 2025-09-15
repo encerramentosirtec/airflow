@@ -23,22 +23,25 @@ DRIVE = GoogleDrive()
 
 def verifica_alteracao_arquivos(**context):
     ultima_execucao = context['prev_data_interval_start_success']
-    ultima_atualizacao = [x['modifiedTime'] for x in DRIVE.listar_arquivos() if x['name'] == 'movimentação de materiais'][0]
 
-    if ultima_execucao is None:
-        return True
+    pasta = DRIVE.buscar_pasta_por_nome('movimentação de materiais')
+    query = f"'{pasta}' in parents"
+    ultima_atualizacao = [x['modifiedTime'] for x in DRIVE.listar_arquivos(query)]
+    datetime_ultima_atualizacao = [pendulum.parse(x) for x in ultima_atualizacao]
 
-    datetime_ultima_atualizacao = pendulum.parse(ultima_atualizacao)
-    
-    print('Última atualização:', datetime_ultima_atualizacao)
-    print('Última execução:', ultima_execucao)
+    # print(ultima_atualizacao)
+    # print(datetime_ultima_atualizacao)
 
-    atualizar = datetime_ultima_atualizacao > ultima_execucao
+    if not ultima_atualizacao:
+        return False
 
-    if atualizar:
-        print("Arquivos foram atualizados. Iniciando atualização da base de movimentação de materiais.")
-    
-    return atualizar
+    # Conferir se as datas de atualização são maiores que a última execução
+    for data in datetime_ultima_atualizacao:
+        if ultima_execucao is None or data > ultima_execucao:
+            print("Arquivos foram atualizados. Iniciando atualização da base de movimentação de materiais.")
+            return True
+        else:
+            return False
 
 
 def baixar_arquivos_drive():
@@ -261,7 +264,8 @@ def atualizar_base_movimentacao():
 
 
 if __name__ == '__main__':
-    atualizar_base_movimentacao()
+    fake_context = {'prev_data_interval_start_success': pendulum.datetime(2024, 8, 20, 12, 0, 0, tz='America/Sao_Paulo')}
+    verifica_alteracao_arquivos(**fake_context)
     
 
 default_args = {
