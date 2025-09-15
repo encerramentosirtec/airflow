@@ -152,4 +152,4 @@ with DAG(
         trigger_rule="all_success",  # só roda se TODAS upstream tiverem sucesso
     )
 
-    checar_alteracao_arquivos >> atualiza_uar
+    checar_alteracao_arquivos >> atualiza_uar >> log_atualizacao
