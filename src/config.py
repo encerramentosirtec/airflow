@@ -3,7 +3,8 @@ class configs:
     login_gpm = 'bob'
     senha_gpm = '808062023'
     cookie_frotalog = 'JSESSIONID=67AD735C8F718D0B5063185773C251A2'
-    
+    cookie_gpm = 'PHPSESSID=d67bp67o56cqad58jssmnlfah1'
+
     # Acesso banco de dados
     mysql_connection = {
         'user': 'root',
@@ -47,3 +48,7 @@ class configs:
     id_planilha_planejamento_barreiras = '1-xNWYwTWVl9w-eHYGgMzFiV2TPlDCx88y82HnL2wx4U'
     id_planilha_planejamento_ibotirama = '1Fo2obLTZObf33d2vA_1GbzPzxCU1egJdX9okIF06oDo'
     unidades = ['conquista', 'guanambi', 'jequié', 'irecê', 'lapa', 'barreiras', 'ibotirama']
+
+
+    # BigQuery
+    log_table = 'sirtec-472112.logs.log_atualizacoes_airflow'
