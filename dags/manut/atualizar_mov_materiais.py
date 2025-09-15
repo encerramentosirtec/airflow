@@ -312,7 +312,7 @@ with DAG(
     )
 
     baixar_arquivos = PythonOperator(
-        task_id='baiar_arquivos',
+        task_id='baixar_arquivos',
         python_callable=baixar_arquivos_drive
     )
 
