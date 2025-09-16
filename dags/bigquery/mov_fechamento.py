@@ -9,7 +9,6 @@ import numpy as np
 import sys
 import os
 
-os.environ['AIRFLOW_HOME'] = '/home/hugoviana/airflow_sirtec/airflow'
 PATH = os.getenv('AIRFLOW_HOME')
 
 os.chdir(PATH)
