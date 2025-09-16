@@ -128,6 +128,11 @@ with DAG(
         python_callable=atualizar_base
     )
 
+    log_atualizacao = PythonOperator(
+        task_id="log_execution",
+        python_callable=log_atualização,
+        trigger_rule="all_success",  # só roda se TODAS upstream tiverem sucesso
+    )
 
 
-    baixar_relatorio >> atualiza_pastas
+    baixar_relatorio >> atualiza_pastas >> log_atualizacao
