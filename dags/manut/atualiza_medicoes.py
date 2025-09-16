@@ -57,49 +57,41 @@ def atualizar_base_medicoes():
     }
 
     ### Leitura e tratamento dos dados
-    try:
-        df = pd.read_csv(os.path.join(PATH, 'downloads/Geoex - Relatório - Acompanhamento - Detalhado.csv'), encoding='ISO-8859-1', sep=';', thousands='.', decimal=',')
-        
-        # Filtrando o dataframe
-        df = df[~df['TITULO'].str.startswith(('COBRANCA', 'LIGACAO', 'PERDAS')) & ~df['TITULO'].str.contains('SOLAR', na=False)]
+    df = pd.read_csv(os.path.join(PATH, 'downloads/Geoex - Relatório - Acompanhamento - Detalhado.csv'), encoding='ISO-8859-1', sep=';', thousands='.', decimal=',')
+    
+    # Filtrando o dataframe
+    df = df[~df['TITULO'].str.startswith(('COBRANCA', 'LIGACAO', 'PERDAS')) & ~df['TITULO'].str.contains('SOLAR', na=False)]
 
-        # Ajustando a coluna 'PROJETO'
-        df['PROJETO'] = df['PROJETO'].str.replace('Y-', 'B-', regex=False)
+    # Ajustando a coluna 'PROJETO'
+    df['PROJETO'] = df['PROJETO'].str.replace('Y-', 'B-', regex=False)
 
-        # Mapeando status
-        df['STATUS AJUSTADO'] = df['STATUS'].map(map_status)
+    # Mapeando status
+    df['STATUS AJUSTADO'] = df['STATUS'].map(map_status)
 
-        # Extraindo 'OC/PMS'
-        df['OC/PMS'] = df.apply(lambda x: re.search(r'\d{4}_\d{1,2}_\d+', x['TITULO']).group(0) if x['POSTAGEM'] == 'GX02 - MEDIÇÃO | HUB REGISTRO OPERACIONAL' and re.search(r'\d{4}_[1-9]\d*_\d+', x['TITULO']) else x['OCORRENCIA'], axis=1)
+    # Extraindo 'OC/PMS'
+    df['OC/PMS'] = df.apply(lambda x: re.search(r'\d{4}_\d{1,2}_\d+', x['TITULO']).group(0) if x['POSTAGEM'] == 'GX02 - MEDIÇÃO | HUB REGISTRO OPERACIONAL' and re.search(r'\d{4}_[1-9]\d*_\d+', x['TITULO']) else x['OCORRENCIA'], axis=1)
 
-        # Criando a coluna 'ID_MEDIÇÃO' 
-        df['ID_MEDIÇÃO'] = df['PROJETO'] + df['OC/PMS'].astype(str)
+    # Criando a coluna 'ID_MEDIÇÃO' 
+    df['ID_MEDIÇÃO'] = df['PROJETO'] + df['OC/PMS'].astype(str)
 
-        # Ordenando e removendo duplicatas
-        # df = df.sort_values(by='STATUS AJUSTADO').drop_duplicates(subset='ID_MEDIÇÃO')
+    # Ordenando e removendo duplicatas
+    # df = df.sort_values(by='STATUS AJUSTADO').drop_duplicates(subset='ID_MEDIÇÃO')
 
-        # Agrupando os dados
-        df_grouped = df.groupby('ID', as_index=False).agg({
-            'PROJETO': 'first',
-            'TITULO': 'first',
-            'OC/PMS': 'first',
-            'STATUS AJUSTADO': 'first',
-            'ID_MEDIÇÃO': 'first',
-            'VALOR_PREVISTO': 'sum'
-        }).sort_values(by='STATUS AJUSTADO', ascending=False)
+    # Agrupando os dados
+    df_grouped = df.groupby('ID', as_index=False).agg({
+        'PROJETO': 'first',
+        'TITULO': 'first',
+        'OC/PMS': 'first',
+        'STATUS AJUSTADO': 'first',
+        'ID_MEDIÇÃO': 'first',
+        'VALOR_PREVISTO': 'sum'
+    }).sort_values(by='STATUS AJUSTADO', ascending=False)
 
 
-        ### Atualização da base
-        sucess = GS_SERVICE.sobrescreve_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_MEDIÇÕES', df=df_grouped)
-        if sucess:
-            GS_SERVICE.escreve_planilha(url=sh.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Medições', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A4')
-                        
-        return {
-            'status': 'Ok',
-            'message': f"[{  datetime.strftime(datetime.now(), format='%H:%M')  }] Base atualizada!"
-        }
-    except Exception as e:
-        raise e
+    ### Atualização da base
+    GS_SERVICE.sobrescreve_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_MEDIÇÕES', df=df_grouped)
+                    
+
     
 
 def log_atualização():
