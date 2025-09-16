@@ -89,7 +89,7 @@ def atualizar_base():
 def log_atualização():
     query = f"""
         INSERT INTO `{LOG_TABLE}` (dag_id, data_atualizacao, tabela_atualizada)
-        VALUES ('atualiza_uar', CURRENT_TIMESTAMP(), 'BASE_UAR')
+        VALUES ('atualiza_envio_pastas', CURRENT_TIMESTAMP(), 'BASE_ENVIO_PASTAS')
     """
     CLIENT_BIGQUERY.query(query).result()
     print("Log de atualização inserido.")
