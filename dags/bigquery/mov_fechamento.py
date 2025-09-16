@@ -22,8 +22,7 @@ CLIENT_BIGQUERY = bigquery.Client.from_service_account_json(os.path.join(PATH, '
 
 import src.spreadsheets as sh
 
-TABELA_STAGED = 'sirtec-472112.staged.staged_movimentacao_fechamento'
-TABELA_PRINCIPAL = 'sirtec-472112.logs.movimentacao_fechamento'
+TABELA_PRINCIPAL = 'sirtec-472112.logs.log_movimentacao_fechamento'
 
 
 
