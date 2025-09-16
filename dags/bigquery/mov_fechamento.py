@@ -115,7 +115,7 @@ def atualiza_tabela():
 
 
     # Converte colunas booleanas
-    df_mov_fechamento['mov_almox'] = df_mov_fechamento['mov_almox'].astype(bool)
+    df_mov_fechamento['mov_almox'] = df_mov_fechamento['mov_almox'].map({'True': True, 'False': False})
 
 
     # Cria coluna hash
