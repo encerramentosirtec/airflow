@@ -1,5 +1,6 @@
 from airflow.sdk import DAG
 from airflow.providers.standard.operators.python import PythonOperator
+from google.cloud import bigquery
 from datetime import datetime
 import os
 import pandas as pd
@@ -22,7 +23,10 @@ GS_SERVICE = GoogleSheets(credentials='causal_scarab.json')
 
 ID_RELATORIOS = GS_SERVICE.le_planilha(url=sh.ID_RELATORIOS, aba='id_relatorios_geoex') # PLanilha contendo Id dos relatórios baixados no Geoex
 
+CLIENT_BIGQUERY = bigquery.Client.from_service_account_json(os.path.join(PATH, 'assets/auth_google/sirtec-bot.json'))
 
+from src.config import configs as cfg
+LOG_TABLE = cfg.log_table
 
 def baixar_arquivo_geoex():
     # Consulta id do relatorio
@@ -79,24 +83,16 @@ def atualizar_base():
 
 
     ### Atualização da base
-    sucess = GS_SERVICE.sobrescreve_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_ENVIO_PASTAS', df=df.fillna(""))
-    if sucess:
-        GS_SERVICE.escreve_planilha(url=sh.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Envio de pastas', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A5')
-    else:
-        raise Exception(
-            f"""
-            Falha ao atualizar base.
-            "{ sucess }"
-            """
-        )
+    GS_SERVICE.sobrescreve_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_ENVIO_PASTAS', df=df.fillna(""))
 
 
-    return {
-        'status': 'Ok',
-        'message': f"[{  datetime.strftime(datetime.now(), format='%H:%M')  }] Base atualizada!"
-    }
-
-
+def log_atualização():
+    query = f"""
+        INSERT INTO `{LOG_TABLE}` (dag_id, data_atualizacao, tabela_atualizada)
+        VALUES ('atualiza_uar', CURRENT_TIMESTAMP(), 'BASE_UAR')
+    """
+    CLIENT_BIGQUERY.query(query).result()
+    print("Log de atualização inserido.")
 
 
 
