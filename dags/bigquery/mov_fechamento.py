@@ -22,7 +22,7 @@ CLIENT_BIGQUERY = bigquery.Client.from_service_account_json(os.path.join(PATH, '
 
 import src.spreadsheets as sh
 
-TABELA_STAGED = 'sirtec-472112.logs.staged_movimentacao_fechamento'
+TABELA_STAGED = 'sirtec-472112.staged.staged_movimentacao_fechamento'
 TABELA_PRINCIPAL = 'sirtec-472112.logs.movimentacao_fechamento'
 
 
@@ -57,9 +57,17 @@ def overwrite_to_bigquery(df: pd.DataFrame, table_id: str):
     print(f"{len(df)} linhas carregadas em {table_id} (sobrescrita).")
 
 
+def append_to_bigquery(df: pd.DataFrame, table_id: str):
+    job_config = bigquery.LoadJobConfig(
+        write_disposition=bigquery.WriteDisposition.WRITE_APPEND  # sobrescreve a tabela
+    )
+    job = CLIENT_BIGQUERY.load_table_from_dataframe(df, table_id, job_config=job_config)
+    job.result()  # espera o job terminar
+    print(f"{len(df)} linhas carregadas em {table_id} (concatenada).")
 
 
-def atualiza_tabela_staged():
+
+def atualiza_tabela():
     colunas = {
         'Unidade': 'unidade',
         'Setor': 'setor',
@@ -116,27 +124,7 @@ def atualiza_tabela_staged():
 
     # Registra data de atualização
     df_mov_fechamento['data_atualizacao'] = pendulum.now('America/Sao_Paulo')
-    overwrite_to_bigquery(df_mov_fechamento, 'sirtec-472112.logs.staged_movimentacao_fechamento')
-
-
-
-def atualiza_tabela_principal():
-    merge_query = f"""
-        MERGE `{TABELA_PRINCIPAL}` principal
-        USING `{TABELA_STAGED}` staged
-        ON principal.row_hash = staged.row_hash
-        WHEN NOT MATCHED THEN
-            INSERT ROW
-        """
-
-    job = CLIENT_BIGQUERY.query(merge_query).result()
-    print("ID do Job:", job.job_id)
-    print("Bytes processados:", job.total_bytes_processed)
-    print("Linhas afetadas:", job.num_dml_affected_rows)
-
-    print(f"Tabela {TABELA_PRINCIPAL} atualizada.")
-
-
+    append_to_bigquery(df_mov_fechamento, 'sirtec-472112.logs.movimentacao_fechamento')
 
 
 
@@ -157,15 +145,10 @@ with DAG(
     tags=['bigquery']
 ):
     
-    atualizar_staged = PythonOperator(
+    atualizar = PythonOperator(
         task_id='atualizar_staged',
-        python_callable=atualiza_tabela_staged
-    )
-
-    atualizar_principal = PythonOperator(
-        task_id='atualizar_principal',
-        python_callable=atualiza_tabela_principal
+        python_callable=atualiza_tabela
     )
 
 
-    atualizar_staged >> atualizar_principal
+    atualizar
