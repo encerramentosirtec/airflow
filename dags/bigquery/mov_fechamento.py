@@ -140,13 +140,13 @@ default_args = {
 
 with DAG(
     'atualiza_mov_fechamento',
-    schedule='*/60 6-23 * * 1-6',
+    schedule='@daily',
     start_date=pendulum.today('America/Sao_Paulo'),
     tags=['bigquery']
 ):
     
     atualizar = PythonOperator(
-        task_id='atualizar_staged',
+        task_id='atualizar',
         python_callable=atualiza_tabela
     )
 
