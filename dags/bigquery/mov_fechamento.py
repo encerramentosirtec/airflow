@@ -22,7 +22,7 @@ CLIENT_BIGQUERY = bigquery.Client.from_service_account_json(os.path.join(PATH, '
 
 import src.spreadsheets as sh
 
-TABELA_PRINCIPAL = 'sirtec-472112.logs.log_movimentacao_fechamento'
+TABELA = 'sirtec-472112.logs.log_movimentacao_fechamento'
 
 
 
@@ -123,7 +123,7 @@ def atualiza_tabela():
 
     # Registra data de atualização
     df_mov_fechamento['data_atualizacao'] = pendulum.now('America/Sao_Paulo')
-    append_to_bigquery(df_mov_fechamento, 'sirtec-472112.logs.movimentacao_fechamento')
+    append_to_bigquery(df_mov_fechamento, TABELA)
 
 
 
