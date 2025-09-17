@@ -163,11 +163,11 @@ class Bots:
         ####################### LENDO PLANILHA DO FECHAMENTO
         while True:
             try:
-                obras_recepcionadas_resolucao = self.le_planilha_google(configs.id_planilha_postagemV5, "Obras em resolução de problema")
+                '''obras_recepcionadas_resolucao = self.le_planilha_google(configs.id_planilha_postagemV5, "Obras em resolução de problema")
                 obras_recepcionadas_resolucao = obras_recepcionadas_resolucao.query("PROJETO != ''")
                 obras_recepcionadas_resolucao = obras_recepcionadas_resolucao['PROJETO']
                 print('obras_recepcionadas_resolucao')
-                sleep(5)
+                sleep(5)'''
 
                 obras_recepcionadas_vtc = self.le_planilha_google(configs.id_planilha_postagemV5, "OBRAS CONQUISTA")
                 obras_recepcionadas_vtc = obras_recepcionadas_vtc.query("PROJETO != ''")
@@ -228,7 +228,7 @@ class Bots:
             if i == 'PROJETO':
                 obras_recepcionadas_geral.drop(cont)
                 continue
-            i = i.replace(' ', '')
+            i = str(i).replace(' ', '')
             if ((i != None) and (i != '')):
                 obras_recepcionadas_geral[cont] = int(i[2:9])
             cont += 1
