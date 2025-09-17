@@ -160,14 +160,8 @@ def atualiza_base():
             ]
 
         df = pd.DataFrame(tabela, columns=colunas).fillna("")
-        sucess = GS_SERVICE.sobrescreve_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_GEOEX', df=df, input_option='USER_ENTERED')
-        if sucess:
-            GS_SERVICE.escreve_planilha(url=sh.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Projetos Geoex', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A6')
+        GS_SERVICE.sobrescreve_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_GEOEX', df=df, input_option='USER_ENTERED')
 
-        print( {
-            'status': 'Ok',
-            'message': f"[{  datetime.strftime(datetime.now(), format='%H:%M')  }] Informações das pastas atualizadas!"
-        }    )
 
     except Exception as e:
         raise
