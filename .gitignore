@@ -40,3 +40,5 @@ tunnel_link.txt
 airflow.log
 notebook.ipynb
 desktop.ini
+airflow.db-shm
+airflow.db-wal

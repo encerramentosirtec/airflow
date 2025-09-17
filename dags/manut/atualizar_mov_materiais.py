@@ -1,6 +1,7 @@
 from airflow.sdk import DAG
-from airflow.providers.standard.operators.python import PythonOperator
-from datetime import datetime
+from airflow.providers.standard.operators.python import PythonOperator, ShortCircuitOperator
+from airflow.utils.trigger_rule import TriggerRule
+from google.cloud import bigquery
 import numpy as np
 import os
 import pandas as pd
@@ -13,22 +14,75 @@ os.chdir(PATH)
 sys.path.insert(0, PATH)
 
 import src.spreadsheets as sh  # Arquivo contendo link de todas as planilhas
+from src.config import configs as cfg
 
 from src.google_sheets import GoogleSheets # Objeto para interagir com as planilhas google
 GS_SERVICE = GoogleSheets(credentials='causal_scarab.json')
 
+from src.google_drive import GoogleDrive
+DRIVE = GoogleDrive()
+
+CLIENT_BIGQUERY = bigquery.Client.from_service_account_json(os.path.join(PATH, 'assets/auth_google/sirtec-bot.json'))
+LOG_TABLE = cfg.log_table
+
+
+
+def verifica_alteracao_arquivos():
+    ### Consulta a última atualização dos arquivos no drive
+    pasta = DRIVE.buscar_pasta_por_nome('movimentação de materiais')
+    query = f"'{pasta}' in parents"
+    ultima_atualizacao_arquivo = [x['modifiedTime'] for x in DRIVE.listar_arquivos(query)]
+    datetime_ultima_atualizacao_arquivo = [pendulum.parse(x) for x in ultima_atualizacao_arquivo]
+
+    ### Consulta momento da última atualização da base
+    query = f"""
+        SELECT data_atualizacao
+        FROM `{LOG_TABLE}`
+        WHERE tabela_atualizada = 'BASE_MOVIMENTAÇÕES'
+        ORDER BY data_atualizacao DESC
+        LIMIT 1
+    """
+    job = CLIENT_BIGQUERY.query(query)
+    result = list(job.result())
+    if result:
+        ultima_atualizacao_base = pendulum.instance(result[0].data_atualizacao)
+
+    # Não segue com o processo se não houver arquivos na pasta
+    if not ultima_atualizacao_arquivo:
+        return False
+
+    print("Última atualização da base:", ultima_atualizacao_base)
+    print("Últimas atualizações dos arquivos:", ultima_atualizacao_arquivo)
+
+    # Conferir se as datas de atualização são maiores que a última execução
+    atualizar = False
+    for data_arquivo in datetime_ultima_atualizacao_arquivo:
+        if ultima_atualizacao_base is None or data_arquivo > ultima_atualizacao_base:
+            atualizar = True
+        else:
+            return False
+    
+    if atualizar:
+        print("Arquivos foram atualizados. Iniciando atualização da base de movimentação de materiais.")
+        return True
+
+def baixar_arquivos_drive():
+    pasta_mov = DRIVE.buscar_pasta_por_nome('movimentação de materiais')
+    DRIVE.baixar_arquivo('cji3.xls', arquivo_id=pasta_mov)
+    DRIVE.baixar_arquivo('zmm370.xls', arquivo_id=pasta_mov)
+
 
 def read_cji3():
     try:
-        os.rename(os.path.join(PATH, 'assets/cji3.XLS'), os.path.join(PATH, 'assets/cji3.csv'))
+        os.rename(os.path.join(PATH, 'downloads/cji3.XLS'), os.path.join(PATH, 'downloads/cji3.csv'))
     except FileExistsError:
-        os.remove(os.path.join(PATH, 'assets/cji3.csv'))
-        os.rename(os.path.join(PATH, 'assets/cji3.XLS'), os.path.join(PATH, 'assets/cji3.csv'))
+        os.remove(os.path.join(PATH, 'downloads/cji3.csv'))
+        os.rename(os.path.join(PATH, 'downloads/cji3.XLS'), os.path.join(PATH, 'downloads/cji3.csv'))
     except FileNotFoundError:
         pass
 
     cji3 = pd.read_csv(
-        os.path.join(PATH, 'assets/cji3.csv'),
+        os.path.join(PATH, 'downloads/cji3.csv'),
         sep='\t',
         encoding='ISO-8859-1',
         skiprows=1,
@@ -58,15 +112,15 @@ def read_cji3():
 
 def read_zmm370():
     try:
-        os.rename(os.path.join(PATH, 'assets/zmm370.XLS'), os.path.join(PATH, 'assets/zmm370.csv'))
+        os.rename(os.path.join(PATH, 'downloads/zmm370.XLS'), os.path.join(PATH, 'downloads/zmm370.csv'))
     except FileExistsError:
-        os.remove(os.path.join(PATH, 'assets/zmm370.csv'))
-        os.rename(os.path.join(PATH, 'assets/zmm370.XLS'), os.path.join(PATH, 'assets/zmm370.csv'))
+        os.remove(os.path.join(PATH, 'downloads/zmm370.csv'))
+        os.rename(os.path.join(PATH, 'downloads/zmm370.XLS'), os.path.join(PATH, 'downloads/zmm370.csv'))
     except FileNotFoundError:
         pass
 
     zmm370 = pd.read_csv(
-        os.path.join(PATH, 'assets/zmm370.csv'),
+        os.path.join(PATH, 'downloads/zmm370.csv'),
         sep='\t',
         encoding='ISO-8859-1',
         skiprows=1,
@@ -212,28 +266,26 @@ def atualizar_base_movimentacao():
         merge = merge[ordem_colunas].fillna("")
         
         # Atualiza a base
-        sucess = GS_SERVICE.sobrescreve_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_MOVIMENTAÇÕES', df=merge)
-        if sucess:
-            GS_SERVICE.escreve_planilha(url=sh.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Movimentação de materiais', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A2')
-
-            return {
-                'status': 'Ok',
-                'message': f"[{  datetime.strftime(datetime.now(), format='%H:%M')  }] Base atualizada!"
-            }
-        else:
-            return{
-                'status': 'Fail',
-                'message': 'Falha na atualização!'
-            }
+        GS_SERVICE.sobrescreve_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_MOVIMENTAÇÕES', df=merge)
     
     except Exception as e:
         raise
 
 
+def log_atualização():
+    query = f"""
+        INSERT INTO `{LOG_TABLE}` (dag_id, data_atualizacao, tabela_atualizada)
+        VALUES ('atualizar_mov_materiais', CURRENT_TIMESTAMP(), 'BASE_MOVIMENTAÇÕES')
+    """
+    CLIENT_BIGQUERY.query(query).result()
+    print("Log de atualização inserido.")
 
-# if __name__ == '__main__':
-#     atualizar_base_movimentacao()
-    
+
+
+if __name__ == '__main__':
+    # fake_context = {'prev_data_interval_start_success': pendulum.datetime(2024, 8, 20, 12, 0, 0, tz='America/Sao_Paulo')}
+    # verifica_alteracao_arquivos(**fake_context)
+    verifica_alteracao_arquivos()
 
 default_args = {
     'depends_on_past' : False,
@@ -248,15 +300,32 @@ default_args = {
 with DAG(
     dag_id='atualizar_mov_materiais',
     tags=['manut'],
-    schedule='*/60 6-22 * * *',
+    schedule='*/1 6-22 * * *',
     default_args=default_args,
-    start_date=pendulum.today('America/Sao_Paulo')
+    start_date=pendulum.today('America/Sao_Paulo'),
+    max_active_runs=1
 ):
+
+    checar_alteracao_arquivos = ShortCircuitOperator(
+        task_id='chcar_alteracao_arquivos',
+        python_callable=verifica_alteracao_arquivos
+    )
+
+    baixar_arquivos = PythonOperator(
+        task_id='baixar_arquivos',
+        python_callable=baixar_arquivos_drive
+    )
 
     atualizar_mov_materiais = PythonOperator(
         task_id='atualizar_mov_materiais',
         python_callable=atualizar_base_movimentacao,
-
     )
 
-    atualizar_mov_materiais
+    log_atualizacao = PythonOperator(
+        task_id="log_execution",
+        python_callable=log_atualização,
+        # provide_context=True,
+        trigger_rule="all_success",  # só roda se TODAS upstream tiverem sucesso
+    )
+
+    checar_alteracao_arquivos >> baixar_arquivos >> atualizar_mov_materiais >> log_atualizacao

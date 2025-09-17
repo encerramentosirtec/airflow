@@ -52,8 +52,7 @@ class GoogleSheets:
             ws.update(df.values.tolist(), range_name=range, value_input_option=input_option)
             return True
         except Exception as e:
-            print(e)
-            return e
+            raise e
 
 
     def atualiza_planilha(self, url, aba, df, input_option=''):
@@ -70,10 +69,9 @@ class GoogleSheets:
             ws.append_rows(df.values.tolist(), value_input_option=input_option)
             return True
         except Exception as e:
-            print(e)
-            return e
+            raise e
 
-    def sobrescreve_planilha(self, url, aba, df, input_option=''):
+    def sobrescreve_planilha(self, url, aba, df, input_option='USER_ENTERED'):
         """
             Limpa e atualiza a planilha por completo.
         """
@@ -88,8 +86,7 @@ class GoogleSheets:
             ws.update([df.columns.values.tolist()] + df.values.tolist(), value_input_option=input_option)
             return True
         except Exception as e:
-            print(e)
-            return e
+            raise e
         
     def limpa_intervalo(self, url, aba, range):
         """
@@ -105,7 +102,6 @@ class GoogleSheets:
             ws.batch_clear(range)
             return True
         except Exception as e:
-            print(e)
-            return e
+            raise e
 
 

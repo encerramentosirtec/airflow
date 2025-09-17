@@ -8,17 +8,36 @@ import os
 class GoogleDrive:
     def __init__(self):
         self.path = os.getenv('AIRFLOW_HOME')
-        self.creds = service_account.Credentials.from_service_account_file(os.path.join(self.path, 'assets/auth_google/causal_scarab.json'), scopes=['https://www.googleapis.com/auth/drive'])
-        self.service = build('drive', 'v3', credentials=self.creds)
-        self.folder_id = '13l2DJLNVtFZamWyNJ15eq9NlYKVgi4Ka'
+        self.creds = service_account.Credentials.from_service_account_file(
+            os.path.join(self.path, 'assets/auth_google/causal_scarab.json'),
+            scopes=['https://www.googleapis.com/auth/drive']
+        )
+        self.service = build('drive', 'v3', credentials=self.creds, cache_discovery=False)
+        self.root_folder = '13l2DJLNVtFZamWyNJ15eq9NlYKVgi4Ka'
 
     
+    def buscar_pasta_por_nome(self, nome, parent_id=None):
+        """
+        Retorna o ID de uma pasta pelo nome dentro da pasta raiz.
+        """
+        fid = parent_id or self.root_folder
+        query = f"'{fid}' in parents and mimeType='application/vnd.google-apps.folder' and name='{nome}'"
+        
+        results = self.service.files().list(q=query, fields="files(id, name)").execute()
+        pastas = results.get("files", [])
+
+        if not pastas:
+            raise FileNotFoundError(f"Pasta '{nome}' não encontrada dentro de {fid}.")
+        
+        return pastas[0]["id"]
+
+
     def listar_arquivos(self, query=None):
         """
         Lista arquivos no Google Drive com base em uma query opcional.
         """
         if query is None:
-            query = f"'{self.folder_id}' in parents"
+            query = f"'{self.root_folder}' in parents"
         
         results = self.service.files().list(
             q=query,
@@ -28,11 +47,13 @@ class GoogleDrive:
         return results.get('files', [])
     
     
-    def baixar_arquivo(self, nome_arquivo):
+    def baixar_arquivo(self, nome_arquivo, arquivo_id=None):
         """
         Baixa um arquivo da pasta pelo nome
         """
-        query = f"'{self.folder_id}' in parents and name='{nome_arquivo}'"
+
+        fid = arquivo_id or self.root_folder
+        query = f"'{fid}' in parents and name='{nome_arquivo}'"
         results = self.service.files().list(
             q=query,
             fields="files(id, name)"
@@ -65,4 +86,7 @@ class GoogleDrive:
 
 if __name__ == '__main__':
     drive = GoogleDrive()
-    drive.baixar_arquivo('uar_atualizado.txt')
+    # d = drive.listar_arquivos("'1G02CK3TxGE4VN8ta5H283M8x_0GOEw2T' in parents")
+    d = drive.listar_arquivos()
+    print(d)
+
