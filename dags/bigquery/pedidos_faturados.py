@@ -134,7 +134,7 @@ default_args = {
 
 with DAG(
     'atualiza_pedidos_faturados',
-    schedule='*/60 6-23 * * 1-6',
+    schedule='@daily',
     start_date=pendulum.today('America/Sao_Paulo'),
     tags=['bigquery']
 ):
