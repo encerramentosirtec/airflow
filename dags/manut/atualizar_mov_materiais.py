@@ -152,7 +152,7 @@ def atualizar_base_movimentacao():
         zmm370 = read_zmm370()
 
         # Leitura da base de controle dos materiais
-        controle_materiais = GS_SERVICE.le_planilha(url=sh.MANUT_FECHAMENTO, aba='Junção')
+        controle_materiais = GS_SERVICE.le_planilha(url=sh.MANUT_POSTAGEM, aba='Orçamentos')
         controle_materiais['Quantidade'] = controle_materiais['Quantidade'].replace('', 0)
         controle_materiais = controle_materiais.query("Quantidade != 0 and Código != '' and Projeto.str.startswith('B-') and Tipo == 'MATERIAL'")
         controle_materiais['Quantidade'] = controle_materiais['Quantidade'].astype(float)
@@ -285,7 +285,7 @@ def log_atualização():
 if __name__ == '__main__':
     # fake_context = {'prev_data_interval_start_success': pendulum.datetime(2024, 8, 20, 12, 0, 0, tz='America/Sao_Paulo')}
     # verifica_alteracao_arquivos(**fake_context)
-    verifica_alteracao_arquivos()
+    atualizar_base_movimentacao()
 
 default_args = {
     'depends_on_past' : False,

@@ -95,6 +95,9 @@ def log_atualização():
     print("Log de atualização inserido.")
 
 
+if __name__ == '__main__':
+    # baixar_arquivo_geoex()
+    atualizar_base()
 
 default_args = {
     'depends_on_past' : False,
