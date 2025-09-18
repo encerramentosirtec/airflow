@@ -18,7 +18,8 @@ from src.google_sheets import GoogleSheets
 
 GSPREAD = GoogleSheets('causal_scarab.json')
 
-CLIENT_BIGQUERY = bigquery.Client.from_service_account_json(os.path.join(PATH, 'assets/auth_google/sirtec-bot.json'))
+from src.bigquery import BigQuery
+CLIENT_BIGQUERY = BigQuery()
 
 import src.spreadsheets as sh
 
@@ -45,24 +46,6 @@ def row_hash(row):
     # concatena todos os valores da linha em uma string
     row_str = "|".join(str(v) for v in row.values)
     return hashlib.md5(row_str.encode("utf-8")).hexdigest()
-
-
-def overwrite_to_bigquery(df: pd.DataFrame, table_id: str):
-    job_config = bigquery.LoadJobConfig(
-        write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE  # sobrescreve a tabela
-    )
-    job = CLIENT_BIGQUERY.load_table_from_dataframe(df, table_id, job_config=job_config)
-    job.result()  # espera o job terminar
-    print(f"{len(df)} linhas carregadas em {table_id} (sobrescrita).")
-
-
-def append_to_bigquery(df: pd.DataFrame, table_id: str):
-    job_config = bigquery.LoadJobConfig(
-        write_disposition=bigquery.WriteDisposition.WRITE_APPEND  # sobrescreve a tabela
-    )
-    job = CLIENT_BIGQUERY.load_table_from_dataframe(df, table_id, job_config=job_config)
-    job.result()  # espera o job terminar
-    print(f"{len(df)} linhas carregadas em {table_id} (concatenada).")
 
 
 
@@ -123,7 +106,9 @@ def atualiza_tabela():
 
     # Registra data de atualização
     df_mov_fechamento['data_atualizacao'] = pendulum.now('America/Sao_Paulo')
-    append_to_bigquery(df_mov_fechamento, TABELA)
+
+    print(df_mov_fechamento.info())
+    CLIENT_BIGQUERY.append_to_bigquery(df_mov_fechamento, TABELA)
 
 
 
@@ -136,6 +121,9 @@ default_args = {
     'retries' : 0,
     'retry_delay' : pendulum.duration(seconds=30)
 }
+
+if __name__ == '__main__':
+    atualiza_tabela()
 
 with DAG(
     'atualiza_mov_fechamento',

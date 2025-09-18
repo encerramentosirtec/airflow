@@ -23,9 +23,6 @@ import src.spreadsheets as sh
 
 TABELA = 'sirtec-472112.logs.log_juncao_manut'
 
-DF = pd.DataFrame()
-
-
 
 
 def excel_date_to_text(excel_serial, fmt="%d/%m/%Y"):
@@ -49,7 +46,7 @@ def row_hash(row):
     return hashlib.md5(row_str.encode("utf-8")).hexdigest()
 
 
-def log_juncao():
+def atualiza_tabela():
 
     columns={
         'OC/PES': 'oc_pes',
@@ -76,41 +73,40 @@ def log_juncao():
     }
 
 
-    DF = GS_SERVICE.le_planilha(sh.MANUT_POSTAGEM, 'Ocorrências')
+    df_juncao = GS_SERVICE.le_planilha(sh.MANUT_POSTAGEM, 'Ocorrências')
 
 
     # Faz a seleção das colunas
-    DF = DF[list(columns.keys())].rename(columns=columns)
+    df_juncao = df_juncao[list(columns.keys())].rename(columns=columns)
 
     # Converte todas as colunas para string
-    DF = DF.astype(str)
+    df_juncao = df_juncao.astype(str)
 
     # Converte colunas para tipo de 
     colunas_data = ['data_servico', 'data_fechamento']
     for coluna in colunas_data:
-        DF[coluna] = pd.to_numeric(DF[coluna], errors='coerce')
+        df_juncao[coluna] = pd.to_numeric(df_juncao[coluna], errors='coerce')
 
-    DF[colunas_data] = DF[colunas_data].map(excel_date_to_text)
+    df_juncao[colunas_data] = df_juncao[colunas_data].map(excel_date_to_text)
 
     for coluna in colunas_data:
-        DF[coluna] = pd.to_datetime(DF[coluna], format='%d/%m/%Y', errors='coerce')
+        df_juncao[coluna] = pd.to_datetime(df_juncao[coluna], format='%d/%m/%Y', errors='coerce')
 
 
     # Converte colunas numericas
-    DF['valor_total'] = pd.to_numeric(DF['valor_total'], errors='coerce')
+    df_juncao['valor_total'] = pd.to_numeric(df_juncao['valor_total'], errors='coerce')
 
     
-    DF['row_hash'] = DF.apply(row_hash, axis=1)
-    DF['data_atualizacao'] = pendulum.now('America/Sao_Paulo')
+    df_juncao['row_hash'] = df_juncao.apply(row_hash, axis=1)
+    df_juncao['data_atualizacao'] = pendulum.now('America/Sao_Paulo')
 
+    print(df_juncao.info())
 
-
-def atualiza_tabela():
-    CLIENT_BIGQUERY.append_to_bigquery(DF, TABELA)
+    CLIENT_BIGQUERY.append_to_bigquery(df_juncao, TABELA)
+# def atualiza_tabela():
 
 
 if __name__ == '__main__':
-    log_juncao()
     atualiza_tabela()
 
 default_args = {
@@ -130,15 +126,10 @@ with DAG(
     tags=['bigquery']
 ):
 
-    coletar_dados = PythonOperator(
-        task_id='coleta_dados',
-        python_callable=log_juncao
-    )
-
     atualizar_tabela = PythonOperator(
-        task_id='atualiza_tabela',
+        task_id='coleta_dados',
         python_callable=atualiza_tabela
     )
 
 
-    coletar_dados >> atualizar_tabela
+    atualizar_tabela
