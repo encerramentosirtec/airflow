@@ -305,7 +305,7 @@ class Bots:
                 else:
                     status_pasta = statuspastaid.get(envio['HistoricoStatusId'],envio['HistoricoStatusId'])
 
-                if not(status_pasta in status_aceitos) and str(i)!='B-1130987':
+                if not(status_pasta in status_aceitos)and str(i)!='B-1063382':
                     try:
                         vl_projeto = espelho_CCM.loc[espelho_CCM["PROJETO"] == int(i), "VALOR"].values[0]
                     except:
