@@ -137,8 +137,7 @@ with DAG(
 
     atualizar_tabela = PythonOperator(
         task_id='atualiza_tabela',
-        schedule='@daily',
-        tags=['bigquery']
+        python_callable=atualiza_tabela
     )
 
 
