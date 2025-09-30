@@ -1,16 +1,11 @@
-#from airflow.models.dag import DAG
 from airflow.sdk import DAG
-#from airflow.operators.python import PythonOperator
 from airflow.providers.standard.operators.python import PythonOperator
+from google.cloud import bigquery
 from datetime import datetime
-import json
-import numpy as np
 import os
 import pandas as pd
 import pendulum 
-import re
 import sys
-from time import sleep
 
 
 PATH = os.getenv('AIRFLOW_HOME')
@@ -28,64 +23,19 @@ GS_SERVICE = GoogleSheets(credentials='causal_scarab.json')
 
 ID_RELATORIOS = GS_SERVICE.le_planilha(url=sh.ID_RELATORIOS, aba='id_relatorios_geoex') # PLanilha contendo Id dos relatórios baixados no Geoex
 
+CLIENT_BIGQUERY = bigquery.Client.from_service_account_json(os.path.join(PATH, 'assets/auth_google/sirtec-bot.json'))
 
+from src.config import configs as cfg
+LOG_TABLE = cfg.log_table
 
-
-def atualizar_base_envio_pastas_consulta():
+def baixar_arquivo_geoex():
     # Consulta id do relatorio
     id_relatorio = ID_RELATORIOS.loc[1].ID
 
     download = GEOEX.baixar_relatorio(id_relatorio)
 
     if download['sucess']:
-        try:
-            # Leitura dos dados
-            df = pd.read_csv(
-                os.path.join(PATH, 'downloads/Geoex - Acomp - Envio de pastas - Consulta.csv'),
-                encoding='ISO-8859-1',
-                sep=';',
-                parse_dates=['DATA_SOLICITACAO'], 
-                dayfirst=True
-            )
-
-            # Sequência de tratamento dos dados
-            df['PROJETO'] = df['PROJETO'].str.replace('Y-', 'B-')
-
-            data_corte = pd.Timestamp(day=1, month=1, year=2024)
-            df = df.query("DATA_SOLICITACAO > @data_corte")
-
-            # map_status_ajustado = {
-            #     'ACEITO COM RESTRIÇÕES': 'A. Aceita',
-            #     'ACEITO': 'A. Aceita',
-            #     'VALIDADO': 'B. Validada',
-            #     'CRIADO': 'C. Enviada',
-            #     'REJEITADO': 'D. Rejeitada',
-            #     'CANCELADO': 'E. Cancelada'
-            # }
-            # df['STATUS AJUSTADO'] = df['STATUS'].map(lambda x: map_status_ajustado[x])
-
-            df = df.sort_values(['DATA_SOLICITACAO'], ascending=False)
-
-            df = df.drop_duplicates(subset='PROJETO')
-
-            df['ID_USUARIO_SOLICITANTE'] = df['USUARIO_SOLICITACAO'].str.extract(r'([a-zA-Z]{1,3}\d{6})')
-            df = df.query("ID_USUARIO_SOLICITANTE != 'ORC796500'")            
-
-            df['DATA_SOLICITACAO'] = pd.to_datetime(df['DATA_SOLICITACAO']).dt.strftime('%d/%m/%Y')
-
-            # Atualização da base
-            sucess = GS_SERVICE.sobrescreve_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_ENVIO_PASTAS', df=df.fillna(""))
-            if sucess:
-                GS_SERVICE.escreve_planilha(url=sh.MANUT_POSTAGEM, aba='Atualizações', df=pd.DataFrame([['Envio de pastas', datetime.now().strftime("%d/%m/%Y, %H:%M")]]), range='A5')
-
-        except Exception as e:
-            raise
-
-        return {
-            'status': 'Ok',
-            'message': f"[{  datetime.strftime(datetime.now(), format='%H:%M')  }] Base atualizada!"
-        }
-    
+        print("Download realizado com sucesso!")
     else:
         raise Exception(
             f"""
@@ -96,7 +46,58 @@ def atualizar_base_envio_pastas_consulta():
         )
 
 
+def atualizar_base():
 
+    ### Leitura e tratamento dos dados
+    df = pd.read_csv(
+            os.path.join(PATH, 'downloads/Geoex - Acomp - Envio de pastas - Consulta.csv'),
+            encoding='ISO-8859-1',
+            sep=';',
+            parse_dates=['DATA_SOLICITACAO'], 
+            dayfirst=True
+        )
+    
+    df['PROJETO'] = df['PROJETO'].str.replace('Y-', 'B-')
+
+    data_corte = pd.Timestamp(day=1, month=4, year=2024)
+    df = df.query("DATA_SOLICITACAO > @data_corte")
+
+    # map_status_ajustado = {
+    #     'ACEITO COM RESTRIÇÕES': 'A. Aceita',
+    #     'ACEITO': 'A. Aceita',
+    #     'VALIDADO': 'B. Validada',
+    #     'CRIADO': 'C. Enviada',
+    #     'REJEITADO': 'D. Rejeitada',
+    #     'CANCELADO': 'E. Cancelada'
+    # }
+    # df['STATUS AJUSTADO'] = df['STATUS'].map(lambda x: map_status_ajustado[x])
+
+    df = df.sort_values(['DATA_SOLICITACAO'], ascending=False)
+
+    df = df.drop_duplicates(subset='PROJETO')
+
+    df['ID_USUARIO_SOLICITANTE'] = df['USUARIO_SOLICITACAO'].str.extract(r'([a-zA-Z]{1,3}\d{6})')
+    df = df.query("ID_USUARIO_SOLICITANTE != 'ORC796500'")
+
+    df['DATA_SOLICITACAO'] = pd.to_datetime(df['DATA_SOLICITACAO']).dt.strftime('%d/%m/%Y')
+
+
+    ### Atualização da base
+    GS_SERVICE.sobrescreve_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_ENVIO_PASTAS', df=df.fillna(""))
+
+
+def log_atualização():
+    query = f"""
+        INSERT INTO `{LOG_TABLE}` (dag_id, data_atualizacao, tabela_atualizada)
+        VALUES ('atualiza_envio_pastas', CURRENT_TIMESTAMP(), 'BASE_ENVIO_PASTAS')
+    """
+    CLIENT_BIGQUERY.query(query).result()
+    print("Log de atualização inserido.")
+
+
+if __name__ == '__main__':
+    # baixar_arquivo_geoex()
+    atualizar_base()
 
 default_args = {
     'depends_on_past' : False,
@@ -111,7 +112,7 @@ default_args = {
 
 with DAG(
     'atualiza_envio_pastas',
-    schedule='*/25 6-22 * * *',
+    schedule='*/20 6-22 * * *',
     start_date=pendulum.today('America/Sao_Paulo'),
     catchup=False,
     default_args = default_args,
@@ -120,10 +121,21 @@ with DAG(
     tags = ['manut', 'geoex']
 ):
     
-    
-    atualiza_pastas = PythonOperator(
-                            task_id='atualiza_pastas',
-                            python_callable=atualizar_base_envio_pastas_consulta
-                            )
+    baixar_relatorio = PythonOperator(
+        task_id='baixar_relatorio',
+        python_callable=baixar_arquivo_geoex
+    )
 
-    atualiza_pastas
+    atualiza_pastas = PythonOperator(
+        task_id='atualiza_pastas',
+        python_callable=atualizar_base
+    )
+
+    log_atualizacao = PythonOperator(
+        task_id="log_execution",
+        python_callable=log_atualização,
+        trigger_rule="all_success",  # só roda se TODAS upstream tiverem sucesso
+    )
+
+
+    baixar_relatorio >> atualiza_pastas >> log_atualizacao

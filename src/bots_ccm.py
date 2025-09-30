@@ -161,11 +161,11 @@ class Bots:
         ####################### LENDO PLANILHA DO FECHAMENTO
         while True:
             try:
-                obras_recepcionadas_resolucao = self.le_planilha_google(configs.id_planilha_postagemV5, "Obras em resolução de problema")
+                '''obras_recepcionadas_resolucao = self.le_planilha_google(configs.id_planilha_postagemV5, "Obras em resolução de problema")
                 obras_recepcionadas_resolucao = obras_recepcionadas_resolucao.query("PROJETO != ''")
                 obras_recepcionadas_resolucao = obras_recepcionadas_resolucao['PROJETO']
                 print('obras_recepcionadas_resolucao')
-                sleep(5)
+                sleep(5)'''
 
                 obras_recepcionadas_vtc = self.le_planilha_google(configs.id_planilha_postagemV5, "OBRAS CONQUISTA")
                 obras_recepcionadas_vtc = obras_recepcionadas_vtc.query("PROJETO != ''")
@@ -219,14 +219,15 @@ class Bots:
                 sleep(62)
                 pass
         
-        obras_recepcionadas_geral = pd.concat([obras_recepcionadas_resolucao, obras_recepcionadas_vtc, obras_recepcionadas_jeq , obras_recepcionadas_brr, obras_recepcionadas_gbi, obras_recepcionadas_bjl, obras_recepcionadas_ire, obras_recepcionadas_ibt, obras_recepcionadas_bru], ignore_index = True)
+        #obras_recepcionadas_geral = pd.concat([obras_recepcionadas_resolucao, obras_recepcionadas_vtc, obras_recepcionadas_jeq , obras_recepcionadas_brr, obras_recepcionadas_gbi, obras_recepcionadas_bjl, obras_recepcionadas_ire, obras_recepcionadas_ibt, obras_recepcionadas_bru], ignore_index = True)
+        obras_recepcionadas_geral = pd.concat([obras_recepcionadas_vtc, obras_recepcionadas_jeq , obras_recepcionadas_brr, obras_recepcionadas_gbi, obras_recepcionadas_bjl, obras_recepcionadas_ire, obras_recepcionadas_ibt, obras_recepcionadas_bru], ignore_index = True)
         
         cont = 0
         for i in obras_recepcionadas_geral:
             if i == 'PROJETO':
                 obras_recepcionadas_geral.drop(cont)
                 continue
-            i = i.replace(' ', '')
+            i = str(i).replace(' ', '')
             if ((i != None) and (i != '')):
                 obras_recepcionadas_geral[cont] = int(i[2:9])
             cont += 1
@@ -304,7 +305,7 @@ class Bots:
                 else:
                     status_pasta = statuspastaid.get(envio['HistoricoStatusId'],envio['HistoricoStatusId'])
 
-                if not(status_pasta in status_aceitos) and str(i)!='B-1130987':
+                if not(status_pasta in status_aceitos)and str(i)!='B-1063382':
                     try:
                         vl_projeto = espelho_CCM.loc[espelho_CCM["PROJETO"] == int(i), "VALOR"].values[0]
                     except:
