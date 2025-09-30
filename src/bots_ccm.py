@@ -240,7 +240,7 @@ class Bots:
         ####################### CONFERE QUAIS OBRAS JÁ ESTÃO NA PLANILHA DO FECHAMENTO
         cont = 0
         for cont, i in enumerate(obras_concluidas): 
-            if i in obras_recepcionadas_geral or int(i)=='1063382':
+            if i in obras_recepcionadas_geral or int(i)==1063382:
                 pass
             else:
                 obras_concluidas_sem_pasta_no_fechamento.append(obras_concluidas[cont])
