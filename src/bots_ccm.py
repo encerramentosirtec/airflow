@@ -118,7 +118,7 @@ class Bots:
                 espelho_CCM = espelho_CCM[['Dt. En. GEOEX', 'Projeto', 'Status Execucao', 'UNIDADE', 'Supervisor', 'Valor Considerado']]
                 espelho_CCM['Projeto'] = espelho_CCM['Projeto'].str.replace('B-', '')
                 espelho_CCM.columns = ['CARTEIRA', 'PROJETO', 'STATUS GERAL', 'UNIDADE', 'SUPERVISOR', 'VALOR']
-                espelho_CCM = espelho_CCM[espelho_CCM['STATUS GERAL'].isin(['CONCLUÍDA']) | espelho_CCM['PROJETO'].isin(carteira_g['PROJETO']) | ~espelho_CCM['STATUS GERAL'].isin(['CANCELADA'])]
+                espelho_CCM = espelho_CCM[espelho_CCM['STATUS GERAL'].isin(['CONCLUÍDA']) | espelho_CCM['PROJETO'].isin(carteira_g['PROJETO'])]
                 espelho_CCM = espelho_CCM.query("PROJETO != ''")
                 espelho_CCM = espelho_CCM.drop_duplicates(subset=['PROJETO'])
                 espelho_CCM['PROJETO'] = pd.to_numeric(espelho_CCM['PROJETO'], errors='coerce')
@@ -240,7 +240,7 @@ class Bots:
         ####################### CONFERE QUAIS OBRAS JÁ ESTÃO NA PLANILHA DO FECHAMENTO
         cont = 0
         for cont, i in enumerate(obras_concluidas): 
-            if i in obras_recepcionadas_geral:
+            if i in obras_recepcionadas_geral or espelho_CCM.loc[espelho_CCM["PROJETO"] == int(i), "STATUS GERAL"].values[0] != 'CANCELADA':
                 pass
             else:
                 obras_concluidas_sem_pasta_no_fechamento.append(obras_concluidas[cont])
@@ -305,7 +305,7 @@ class Bots:
                 else:
                     status_pasta = statuspastaid.get(envio['HistoricoStatusId'],envio['HistoricoStatusId'])
 
-                if not(status_pasta in status_aceitos)and str(i)!='B-1063382':
+                if not(status_pasta in status_aceitos):
                     try:
                         vl_projeto = espelho_CCM.loc[espelho_CCM["PROJETO"] == int(i), "VALOR"].values[0]
                     except:
