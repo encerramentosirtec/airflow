@@ -118,7 +118,7 @@ class Bots:
                 espelho_CCM = espelho_CCM[['Dt. En. GEOEX', 'Projeto', 'Status Execucao', 'UNIDADE', 'Supervisor', 'Valor Considerado']]
                 espelho_CCM['Projeto'] = espelho_CCM['Projeto'].str.replace('B-', '')
                 espelho_CCM.columns = ['CARTEIRA', 'PROJETO', 'STATUS GERAL', 'UNIDADE', 'SUPERVISOR', 'VALOR']
-                espelho_CCM = espelho_CCM[espelho_CCM['STATUS GERAL'].isin(['CONCLUÍDA']) | espelho_CCM['PROJETO'].isin(carteira_g['PROJETO'])]
+                espelho_CCM = espelho_CCM[espelho_CCM['STATUS GERAL'].isin(['CONCLUÍDA']) | espelho_CCM['PROJETO'].isin(carteira_g['PROJETO']) | ~espelho_CCM['STATUS GERAL'].isin(['CANCELADA'])]
                 espelho_CCM = espelho_CCM.query("PROJETO != ''")
                 espelho_CCM = espelho_CCM.drop_duplicates(subset=['PROJETO'])
                 espelho_CCM['PROJETO'] = pd.to_numeric(espelho_CCM['PROJETO'], errors='coerce')
