@@ -240,8 +240,7 @@ class Bots:
         ####################### CONFERE QUAIS OBRAS JÁ ESTÃO NA PLANILHA DO FECHAMENTO
         cont = 0
         for cont, i in enumerate(obras_concluidas): 
-            mask = espelho_CCM["PROJETO"] == int(i) if str(i).isdigit() else False
-            if (i in obras_recepcionadas_geral) or (mask.any() and espelho_CCM.loc[mask, "STATUS GERAL"].iloc[0] != "CANCELADA"):
+            if i in obras_recepcionadas_geral or int(i)=='1063382':
                 pass
             else:
                 obras_concluidas_sem_pasta_no_fechamento.append(obras_concluidas[cont])
