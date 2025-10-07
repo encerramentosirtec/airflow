@@ -128,6 +128,10 @@ class Bots:
                 print('lendo espelho_CCM')
                 break
             except Exception as e:
+                if isinstance(e, KeyError):
+                    # Se for um KeyError, relança a exceção para PARAR o programa
+                    print("\nERRO CRÍTICO: KeyError detectado. O programa será encerrado.")
+                    raise e
                 traceback.print_exc()
                 sleep(62)
                 pass
