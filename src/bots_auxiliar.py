@@ -45,10 +45,15 @@ class Bots_aux():
                         ('EQUIPAMENTOS', 'REGULADOR'): 'CCM',
                         ('EQUIPAMENTOS', 'RELIGADOR'): 'CCM',
                         ('EQUIPAMENTOS', 'SENSORES'): 'CCM',
+                        ('INCORPORAÇÃO DE REDES', 'INCORPORAÇÃO COM ÔNUS'): 'CCM',
+                        ('INCORPORAÇÃO DE REDES', 'INCORPORAÇÃO SEM ÔNUS'): 'CCM',
                         ('INTERVENÇÃO', 'CORRETIVA'): 'MANUT',
                         ('INTERVENÇÃO', 'CORRETIVA - PASSIVO'): 'MANUT',
+                        ('INTERVENÇÃO', 'CORRETIVA EM REDE'): 'MANUT',
+                        ('INTERVENÇÃO', 'CORRETIVA EM EQUIPAMENTO'): 'CCM',
                         ('INTERVENÇÃO', 'PREVENTIVA'): 'MANUT',
                         ('INTERVENÇÃO', 'PREVENTIVA - PASSIVO'): 'MANUT',
+                        ('INTERVENÇÃO', 'PREVENTIVA EM REDE'): 'MANUT',
                         ('INTERVENÇÃO', 'RAMAL CORRETIVA'): 'MANUT',
                         ('INTERVENÇÃO', 'SOLAR'): 'STC',
                         ('LUZ PARA TODOS', 'ALTERAÇÃO DE CARGA'): 'CCM',
@@ -56,12 +61,14 @@ class Bots_aux():
                         ('LUZ PARA TODOS', 'EXPANSÃO URBANA'): 'CCM',
                         ('LUZ PARA TODOS', 'KIT LPT'): 'CCM',
                         ('LUZ PARA TODOS', 'MEDIDOR LPT'): 'CCM',
-                        ('LUZ PARA TODOS', 'NOVAS LIGAÇÕES'): 'CCM',
+                        ('LUZ PARA TODOS', 'NOVAS LIGAÇÕES'): 'VERIFICAR',
                         ('LUZ PARA TODOS', 'REDES LPT'): 'CCM',
                         ('MANUT. SUBTRANSMISSÃO', 'MANUTENÇÃO SUB'): 'MANUT',
+                        ('MANUT. SUBTRANSMISSÃO', 'INTERVENÇÃO SE'): 'MANUT',
                         ('ODS', 'ILUMINAÇÃO PUBLICA'): 'CCM',
                         ('ODS', 'INSTALAÇÃO PROVISÓRIA'): 'STC',
                         ('ODS', 'KIT COMERCIAL'): 'STC',
+                        ('ODS', 'LIGAÇÃO CLANDESTINA'): 'CCM',
                         ('ODS', 'OUTROS'): 'STC',
                         ('ODS', 'PADRÃO LPT'): 'STC',
                         ('ODS', 'RELOCAÇÃO'): 'STC',
@@ -70,6 +77,7 @@ class Bots_aux():
                         ('REDE ESPECIAL', 'SUBTERRÂNEO'): 'CCM',
                         ('REDES', 'ALIMENTADOR'): 'CCM',
                         ('REDES', 'ALTERAÇÃO DE CARGA'): 'CCM',
+                        ('REDES', 'DESLOCAMENTO DE RD'): 'CCM',
                         ('REDES', 'DISTRIBUIÇÃO'): 'CCM',
                         ('REDES', 'EXPANSÃO RURAL'): 'CCM',
                         ('REDES', 'EXPANSÃO URBANA'): 'CCM',
@@ -156,7 +164,13 @@ class Bots_aux():
             )
     
     def obter_setor(self, row):
-        return self.setores.get((row['GRUPO'], row['SUB_GRUPO']), 'N/A')  # 'N/A' se não existir
+        setor = self.setores.get((row['GRUPO'], row['SUB_GRUPO']), 'N/A')  # 'N/A' se não existir
+        if setor == 'VERIFICAR':
+            if row['TITULO'][-2:] == 'FV' or row['TITULO'][-7:] == 'PTC-023':
+                setor = 'STC'
+            else:
+                setor = 'CCM'
+        return setor
     
     def plotar_grafico(self, df, x, y, z):
         sns.set_theme(style="whitegrid", palette="pastel")
