@@ -61,7 +61,7 @@ class Bots_aux():
                         ('LUZ PARA TODOS', 'EXPANSÃO URBANA'): 'CCM',
                         ('LUZ PARA TODOS', 'KIT LPT'): 'CCM',
                         ('LUZ PARA TODOS', 'MEDIDOR LPT'): 'CCM',
-                        ('LUZ PARA TODOS', 'NOVAS LIGAÇÕES'): 'VERIFICAR',
+                        ('LUZ PARA TODOS', 'NOVAS LIGAÇÕES'): 'CCM',
                         ('LUZ PARA TODOS', 'REDES LPT'): 'CCM',
                         ('MANUT. SUBTRANSMISSÃO', 'MANUTENÇÃO SUB'): 'MANUT',
                         ('MANUT. SUBTRANSMISSÃO', 'INTERVENÇÃO SE'): 'MANUT',
@@ -84,6 +84,7 @@ class Bots_aux():
                         ('REDES', 'INTERLIGAÇÃO'): 'CCM',
                         ('REDES', 'MELHORAMENTO'): 'CCM',
                         ('REDES', 'MELHORAMENTO BT'): 'CCM',
+                        ('REDES', 'NOVAS LIGAÇÕES'): 'VERIFICAR',
                         ('REDES', 'NÍVEL DE TENSÃO'): 'CCM',
                         ('REDES', 'RELOCAÇÃO'): 'CCM',
                         ('REDES', 'SOLAR'): 'STC'
