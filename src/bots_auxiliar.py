@@ -38,6 +38,7 @@ class Bots_aux():
                         ('COMERCIAL', 'NOVAS LIGAÇÕES'): 'STC',
                         ('COMERCIAL', 'PARECER TÉCNICO 023'): 'STC',
                         ('COMERCIAL', 'PERDAS'): 'STC',
+                        ('COMERCIAL', 'INADIMPLÊNCIA'): 'STC',
                         ('EQUIPAMENTOS', 'BANCO DE CAPACITOR'): 'CCM',
                         ('EQUIPAMENTOS', 'CAPACITOR'): 'CCM',
                         ('EQUIPAMENTOS', 'CHAVE'): 'CCM',

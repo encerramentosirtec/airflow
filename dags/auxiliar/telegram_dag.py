@@ -21,11 +21,7 @@ with DAG('bot-telegram',
         default_args = default_args,
         #default_view="graph",
         start_date=today('America/Sao_Paulo'),
-<<<<<<< HEAD
-        schedule = '*',
-=======
         schedule = '* * * * *',
->>>>>>> fbfd362a261750d45c30a20260b2a991eb05b465
         max_active_runs = 1,
         tags = ['manut', 'telegram', 'aux'],
         catchup = False) as dag:
