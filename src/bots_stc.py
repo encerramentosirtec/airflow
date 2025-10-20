@@ -111,8 +111,8 @@ class Bots:
                 datazps09 = datetime.datetime.fromisoformat(r['Content']['DtZps09']).date().strftime("%d/%m/%Y")
             if r['Content']['PosicaoInvestimento']!=None:
                 investimento = r['Content']['PosicaoInvestimento']
-            if r['Content']['ArquivoTipologia']!=None:
-                tipologia = r['Content']['ArquivoTipologia']['Nome']
+            if r['Content']['ProjetoGrupoItem']!=None:
+                tipologia = r['Content']['ProjetoGrupoItem']['NomeCompleto']
             if len(r['Content']['Contratos'])!=0:
                 contrato = r['Content']['Contratos'][0]['Numero']
 
