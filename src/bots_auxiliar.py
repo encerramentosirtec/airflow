@@ -220,6 +220,7 @@ class Bots_aux():
         valores = dict(zip(unidades['Projeto'], unidades['VALOR']))
         localidade = df['PROJETO'].map(mapa)
 
+        df = df[df['EMPRESA_ENV_PAST']=='SIRTEC/SINO']
         df = df[~df['PROJETO'].isin(self.projetos_solar)]
         
         df['VALOR'] = df['PROJETO'].map(valores)
