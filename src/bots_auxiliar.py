@@ -323,7 +323,6 @@ class Bots_aux():
 
         receiver_emails_test = ["heli.silva@sirtec.com.br"]
         receiver_emails = [
-            "claudinei.alves@sirtec.com.br",
             'adriele.jesus@sirtec.com.br',
             'allan.alves@sirtec.com.br',
             'anderson.almeida@sirtec.com.br',
