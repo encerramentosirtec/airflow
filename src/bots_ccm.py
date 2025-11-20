@@ -128,6 +128,10 @@ class Bots:
                 print('lendo espelho_CCM')
                 break
             except Exception as e:
+                if isinstance(e, KeyError):
+                    # Se for um KeyError, relança a exceção para PARAR o programa
+                    print("\nERRO CRÍTICO: KeyError detectado. O programa será encerrado.")
+                    raise e
                 traceback.print_exc()
                 sleep(62)
                 pass
@@ -240,7 +244,7 @@ class Bots:
         ####################### CONFERE QUAIS OBRAS JÁ ESTÃO NA PLANILHA DO FECHAMENTO
         cont = 0
         for cont, i in enumerate(obras_concluidas): 
-            if i in obras_recepcionadas_geral:
+            if i in obras_recepcionadas_geral or int(i)==1063382:
                 pass
             else:
                 obras_concluidas_sem_pasta_no_fechamento.append(obras_concluidas[cont])
@@ -305,7 +309,7 @@ class Bots:
                 else:
                     status_pasta = statuspastaid.get(envio['HistoricoStatusId'],envio['HistoricoStatusId'])
 
-                if not(status_pasta in status_aceitos)and str(i)!='B-1063382':
+                if not(status_pasta in status_aceitos):
                     try:
                         vl_projeto = espelho_CCM.loc[espelho_CCM["PROJETO"] == int(i), "VALOR"].values[0]
                     except:
