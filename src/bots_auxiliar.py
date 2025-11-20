@@ -315,7 +315,6 @@ class Bots_aux():
             'brenda.moreira@sirtec.com.br',
             'clara.santos@sirtec.com.br',
             'claudio.sousa@sirtec.com.br',
-            'crelson.santos@sirtec.com.br',
             'cristiane.neves@sirtec.com.br',
             'elisangela.barreto@sirtec.com.br',
             'evelyn.pereira@sirtec.com.br',
