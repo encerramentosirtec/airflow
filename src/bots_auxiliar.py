@@ -365,7 +365,9 @@ class Bots_aux():
             'thalia.rocha@sirtec.com.br',
             'stefani.costa@sirtec.com.br',
             'wanderson.silva@sirtec.com.br',
-            'uennede.cruz@sirtec.com.br'
+            'uennede.cruz@sirtec.com.br',
+            'anderson.correia@sirtec.com.br',
+            'willomar.santos@sirtec.com.br'
         ]
 
         # HTML content with an image embedded
