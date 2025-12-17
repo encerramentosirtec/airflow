@@ -344,7 +344,6 @@ class Bots_aux():
             'heli.silva@sirtec.com.br',
             'hugo.viana@sirtec.com.br',
             'janaina.reis@sirtec.com.br',
-            'joao.oliveira@sirtec.com.br',
             'joao.pereira@sirtec.com.br',
             'jose.asterio@sirtec.com.br',
             'josimeire.santana@sirtec.com.br',
