@@ -88,6 +88,7 @@ class Bots_aux():
                         ('REDES', 'NOVAS LIGAÇÕES'): 'VERIFICAR',
                         ('REDES', 'NÍVEL DE TENSÃO'): 'CCM',
                         ('REDES', 'RELOCAÇÃO'): 'CCM',
+                        ('REDES', 'RENOVAÇÃO DE REDE DE SEG'): 'CCM',
                         ('REDES', 'SOLAR'): 'STC'
                         }
         self.projetos_solar = [
@@ -449,3 +450,5 @@ class Bots_aux():
             server.sendmail(sender_email, receiver_emails, message.as_string())
 
         print('Sent')
+
+    # Relatório de Serviços do GPM
