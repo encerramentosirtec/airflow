@@ -278,6 +278,7 @@ class Bots:
         database = 'assets/db/db.csv'
 
         df = pd.read_csv(database)
+        excluidos = ['1193199', '1168391', '1222485', '1231902']
 
         x = 1
         for i in obras_concluidas_sem_pasta_no_fechamento:
@@ -311,7 +312,10 @@ class Bots:
 
                 if not(status_pasta in status_aceitos):
                     try:
-                        vl_projeto = espelho_CCM.loc[espelho_CCM["PROJETO"] == int(i), "VALOR"].values[0]
+                        if i in excluidos:
+                            vl_projeto = 0
+                        else:
+                            vl_projeto = espelho_CCM.loc[espelho_CCM["PROJETO"] == int(i), "VALOR"].values[0]
                     except:
                         print(i, type(i))
                         vl_projeto = ''
