@@ -3,11 +3,11 @@ from airflow.providers.standard.operators.bash import BashOperator
 from pendulum import today
 
 with DAG(
-    'executar_git_pull',
-    start_date=today('America/Sao_Paulo'),
-    schedule_interval=None,
-    tags = ['git', 'bash', 'aux'],
-    catchup=False ) as dag:
+        'executar_git_pull',
+        start_date=today('America/Sao_Paulo'),
+        schedule = None,
+        tags = ['git', 'bash', 'aux'],
+        catchup=False ) as dag:
 
     sync_repo = BashOperator(
         task_id='sync_repo',
