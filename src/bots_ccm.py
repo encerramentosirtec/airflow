@@ -313,7 +313,7 @@ class Bots:
                 if not(status_pasta in status_aceitos):
                     try:
                         if int(i) in excluidos:
-                            vl_projeto = 0
+                            vl_projeto = ''
                         else:
                             vl_projeto = espelho_CCM.loc[espelho_CCM["PROJETO"] == int(i), "VALOR"].values[0]
                     except:
