@@ -278,7 +278,7 @@ class Bots:
         database = 'assets/db/db.csv'
 
         df = pd.read_csv(database)
-        excluidos = [1193199, 1168391, 1222485, 1231902, 1183205, 1227488, 1228610, 1230135, 1231959, 0972378, 1156314]
+        excluidos = [1193199, 1168391, 1222485, 1231902, 1183205, 1227488, 1228610, 1230135, 1231959, 972378, 1156314]
 
         x = 1
         for i in obras_concluidas_sem_pasta_no_fechamento:
