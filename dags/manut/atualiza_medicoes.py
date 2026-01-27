@@ -74,9 +74,6 @@ def atualizar_base_medicoes():
     # Criando a coluna 'ID_MEDIÇÃO' 
     df['ID_MEDIÇÃO'] = df['PROJETO'] + df['OC/PMS'].astype(str)
 
-    # Ordenando e removendo duplicatas
-    # df = df.sort_values(by='STATUS AJUSTADO').drop_duplicates(subset='ID_MEDIÇÃO')
-
     # Agrupando os dados
     df_grouped = df.groupby('ID', as_index=False).agg({
         'PROJETO': 'first',
@@ -85,7 +82,7 @@ def atualizar_base_medicoes():
         'STATUS AJUSTADO': 'first',
         'ID_MEDIÇÃO': 'first',
         'VALOR_PREVISTO': 'sum'
-    }).sort_values(by='STATUS AJUSTADO', ascending=False)
+    }).sort_values(by='STATUS AJUSTADO', ascending=True)
 
 
     ### Atualização da base

@@ -15,7 +15,9 @@ class GeoexHook(HttpHook):
             'Cookie': self.cookie['cookie'],
             'Gxsessao': self.cookie['gxsessao'],
             'Gxbot': self.cookie['gxbot'],
-            'User-Agent': self.cookie['useragent']
+            'User-Agent': self.cookie['useragent'],
+            "Content-Type": "application/json",
+            "Accept": "application/json"
         }
         
         self.scraper = cloudscraper.create_scraper(delay=10, browser='chrome')
