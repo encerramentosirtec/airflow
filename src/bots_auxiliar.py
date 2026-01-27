@@ -38,6 +38,7 @@ class Bots_aux():
                         ('COMERCIAL', 'NOVAS LIGAÇÕES'): 'STC',
                         ('COMERCIAL', 'PARECER TÉCNICO 023'): 'STC',
                         ('COMERCIAL', 'PERDAS'): 'STC',
+                        ('COMERCIAL', 'INADIMPLÊNCIA'): 'STC',
                         ('EQUIPAMENTOS', 'BANCO DE CAPACITOR'): 'CCM',
                         ('EQUIPAMENTOS', 'CAPACITOR'): 'CCM',
                         ('EQUIPAMENTOS', 'CHAVE'): 'CCM',
@@ -45,10 +46,15 @@ class Bots_aux():
                         ('EQUIPAMENTOS', 'REGULADOR'): 'CCM',
                         ('EQUIPAMENTOS', 'RELIGADOR'): 'CCM',
                         ('EQUIPAMENTOS', 'SENSORES'): 'CCM',
+                        ('INCORPORAÇÃO DE REDES', 'INCORPORAÇÃO COM ÔNUS'): 'CCM',
+                        ('INCORPORAÇÃO DE REDES', 'INCORPORAÇÃO SEM ÔNUS'): 'CCM',
                         ('INTERVENÇÃO', 'CORRETIVA'): 'MANUT',
                         ('INTERVENÇÃO', 'CORRETIVA - PASSIVO'): 'MANUT',
+                        ('INTERVENÇÃO', 'CORRETIVA EM REDE'): 'MANUT',
+                        ('INTERVENÇÃO', 'CORRETIVA EM EQUIPAMENTO'): 'CCM',
                         ('INTERVENÇÃO', 'PREVENTIVA'): 'MANUT',
                         ('INTERVENÇÃO', 'PREVENTIVA - PASSIVO'): 'MANUT',
+                        ('INTERVENÇÃO', 'PREVENTIVA EM REDE'): 'MANUT',
                         ('INTERVENÇÃO', 'RAMAL CORRETIVA'): 'MANUT',
                         ('INTERVENÇÃO', 'SOLAR'): 'STC',
                         ('LUZ PARA TODOS', 'ALTERAÇÃO DE CARGA'): 'CCM',
@@ -59,9 +65,11 @@ class Bots_aux():
                         ('LUZ PARA TODOS', 'NOVAS LIGAÇÕES'): 'CCM',
                         ('LUZ PARA TODOS', 'REDES LPT'): 'CCM',
                         ('MANUT. SUBTRANSMISSÃO', 'MANUTENÇÃO SUB'): 'MANUT',
+                        ('MANUT. SUBTRANSMISSÃO', 'INTERVENÇÃO SE'): 'MANUT',
                         ('ODS', 'ILUMINAÇÃO PUBLICA'): 'CCM',
                         ('ODS', 'INSTALAÇÃO PROVISÓRIA'): 'STC',
                         ('ODS', 'KIT COMERCIAL'): 'STC',
+                        ('ODS', 'LIGAÇÃO CLANDESTINA'): 'CCM',
                         ('ODS', 'OUTROS'): 'STC',
                         ('ODS', 'PADRÃO LPT'): 'STC',
                         ('ODS', 'RELOCAÇÃO'): 'STC',
@@ -70,14 +78,17 @@ class Bots_aux():
                         ('REDE ESPECIAL', 'SUBTERRÂNEO'): 'CCM',
                         ('REDES', 'ALIMENTADOR'): 'CCM',
                         ('REDES', 'ALTERAÇÃO DE CARGA'): 'CCM',
+                        ('REDES', 'DESLOCAMENTO DE RD'): 'CCM',
                         ('REDES', 'DISTRIBUIÇÃO'): 'CCM',
                         ('REDES', 'EXPANSÃO RURAL'): 'CCM',
                         ('REDES', 'EXPANSÃO URBANA'): 'CCM',
                         ('REDES', 'INTERLIGAÇÃO'): 'CCM',
                         ('REDES', 'MELHORAMENTO'): 'CCM',
                         ('REDES', 'MELHORAMENTO BT'): 'CCM',
+                        ('REDES', 'NOVAS LIGAÇÕES'): 'VERIFICAR',
                         ('REDES', 'NÍVEL DE TENSÃO'): 'CCM',
                         ('REDES', 'RELOCAÇÃO'): 'CCM',
+                        ('REDES', 'RENOVAÇÃO DE REDE DE SEG'): 'CCM',
                         ('REDES', 'SOLAR'): 'STC'
                         }
         self.projetos_solar = [
@@ -156,7 +167,13 @@ class Bots_aux():
             )
     
     def obter_setor(self, row):
-        return self.setores.get((row['GRUPO'], row['SUB_GRUPO']), 'N/A')  # 'N/A' se não existir
+        setor = self.setores.get((row['GRUPO'], row['SUB_GRUPO']), 'N/A')  # 'N/A' se não existir
+        if setor == 'VERIFICAR':
+            if row['TITULO'][-2:] == 'FV' or row['TITULO'][-7:] == 'PTC-023':
+                setor = 'STC'
+            else:
+                setor = 'CCM'
+        return setor
     
     def plotar_grafico(self, df, x, y, z):
         sns.set_theme(style="whitegrid", palette="pastel")
@@ -204,6 +221,7 @@ class Bots_aux():
         valores = dict(zip(unidades['Projeto'], unidades['VALOR']))
         localidade = df['PROJETO'].map(mapa)
 
+        df = df[df['EMPRESA_ENV_PAST']=='SIRTEC/SINO']
         df = df[~df['PROJETO'].isin(self.projetos_solar)]
         
         df['VALOR'] = df['PROJETO'].map(valores)
@@ -306,7 +324,6 @@ class Bots_aux():
 
         receiver_emails_test = ["heli.silva@sirtec.com.br"]
         receiver_emails = [
-            "claudinei.alves@sirtec.com.br",
             'adriele.jesus@sirtec.com.br',
             'allan.alves@sirtec.com.br',
             'anderson.almeida@sirtec.com.br',
@@ -315,7 +332,6 @@ class Bots_aux():
             'brenda.moreira@sirtec.com.br',
             'clara.santos@sirtec.com.br',
             'claudio.sousa@sirtec.com.br',
-            'crelson.santos@sirtec.com.br',
             'cristiane.neves@sirtec.com.br',
             'elisangela.barreto@sirtec.com.br',
             'evelyn.pereira@sirtec.com.br',
@@ -329,7 +345,6 @@ class Bots_aux():
             'heli.silva@sirtec.com.br',
             'hugo.viana@sirtec.com.br',
             'janaina.reis@sirtec.com.br',
-            'joao.oliveira@sirtec.com.br',
             'joao.pereira@sirtec.com.br',
             'jose.asterio@sirtec.com.br',
             'josimeire.santana@sirtec.com.br',
@@ -350,7 +365,9 @@ class Bots_aux():
             'thalia.rocha@sirtec.com.br',
             'stefani.costa@sirtec.com.br',
             'wanderson.silva@sirtec.com.br',
-            'uennede.cruz@sirtec.com.br'
+            'uennede.cruz@sirtec.com.br',
+            'anderson.correia@sirtec.com.br',
+            'willomar.santos@sirtec.com.br'
         ]
 
         # HTML content with an image embedded
@@ -433,3 +450,5 @@ class Bots_aux():
             server.sendmail(sender_email, receiver_emails, message.as_string())
 
         print('Sent')
+
+    # Relatório de Serviços do GPM
