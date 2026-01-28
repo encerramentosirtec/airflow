@@ -52,8 +52,8 @@ def atualizar_base_medicoes():
         'MPC': 'A. Pedido lançado',
         'MVD': 'B. Validada',
         'MEA': 'C. Atestada',
-        'MRJ': 'D. Rejeitada',
-        'MPA': 'E. Postada',
+        'MPA': 'D. Postada',
+        'MRJ': 'E. Rejeitada',
     }
 
     ### Leitura e tratamento dos dados
