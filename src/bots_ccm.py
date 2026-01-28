@@ -278,11 +278,12 @@ class Bots:
         database = 'assets/db/db.csv'
 
         df = pd.read_csv(database)
-        excluidos = [1193199, 1168391, 1222485, 1231902, 1183205, 1227488, 1228610, 1230135, 1231959, 972378, 1156314]
+        zerados = [1193199, 1168391, 1222485, 1231902, 1183205, 1227488, 1228610, 1230135, 1231959, 972378, 1156314]
+        excluidos = [1130987]
 
         x = 1
         for i in obras_concluidas_sem_pasta_no_fechamento:
-            if i in df['external_id'].values:
+            if i in df['external_id'].values or int(i) in excluidos:
                 #print(f'Projeto já existe, pulando: {i} - ({x}/{str(len(obras_concluidas_sem_pasta_no_fechamento))})')
                 x += 1
                 continue
@@ -312,7 +313,7 @@ class Bots:
 
                 if not(status_pasta in status_aceitos):
                     try:
-                        if int(i) in excluidos:
+                        if int(i) in zerados:
                             vl_projeto = ''
                         else:
                             vl_projeto = espelho_CCM.loc[espelho_CCM["PROJETO"] == int(i), "VALOR"].values[0]
