@@ -82,7 +82,7 @@ def atualizar_base_medicoes():
         'STATUS AJUSTADO': 'first',
         'ID_MEDIÇÃO': 'first',
         'VALOR_PREVISTO': 'sum'
-    }).sort_values(by=['STATUS AJUSTADO', 'ID'], ascending=True)
+    }).sort_values(by=['STATUS AJUSTADO', 'ID'], ascending=[True, False])
 
 
     ### Atualização da base
