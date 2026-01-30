@@ -192,9 +192,15 @@ class Bots:
         
         df = pd.concat([df1, df2])
         
-        df['STATUS AJUSTADO'] = df['STATUS'].map(self.status_hro)
         print('ajustando status')
-        df['CICLO'] = df['TITULO'].apply(lambda x: x.split(' / ')[4]).map(self.meses)
+        df['STATUS AJUSTADO'] = df['STATUS'].map(self.status_hro)
+        
+        print('identificando ciclo')
+        mask_indice = df['TITULO'].str.count(' / ') >= 4
+        df = df[mask_indice].copy()
+        df['CICLO'] = df['TITULO'].str.split(' / ').str[4].map(self.meses)
+
+        #df['CICLO'] = df['TITULO'].apply(lambda x: x.split(' / ')[4]).map(self.meses)
 
         hros = '1o8byF41_AmcXFykW8IcyN7fZkUmRZpICiJWqlpbT82M'
         sh = self.GS_SERVICE.open_by_key(hros)
