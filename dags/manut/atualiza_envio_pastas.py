@@ -72,7 +72,7 @@ def atualizar_base():
     # }
     # df['STATUS AJUSTADO'] = df['STATUS'].map(lambda x: map_status_ajustado[x])
 
-    df = df.sort_values(['DATA_SOLICITACAO'], ascending=False)
+    df = df.sort_values(['PROTOCOLO', 'DATA_SOLICITACAO'], ascending=False)
 
     df = df.drop_duplicates(subset='PROJETO')
 
