@@ -87,6 +87,7 @@ class Bots_aux():
                         ('REDES', 'MELHORAMENTO BT'): 'CCM',
                         ('REDES', 'NOVAS LIGAÇÕES'): 'VERIFICAR',
                         ('REDES', 'NÍVEL DE TENSÃO'): 'CCM',
+                        ('REDES', 'RAMAL DE REDE'): 'CCM',
                         ('REDES', 'RELOCAÇÃO'): 'CCM',
                         ('REDES', 'RENOVAÇÃO DE REDE DE SEG'): 'CCM',
                         ('REDES', 'SOLAR'): 'STC'
