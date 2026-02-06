@@ -10,7 +10,7 @@ bot = Bots()
 default_args = {
     'depends_on_past' : False,
     'email' : ['heli.silva@sirtec.com.br'],
-    'email_on_failure' : False,
+    'email_on_failure' : True,
     'email_on_retry' : False,
     'owner' : 'stc',
     'retries' : 2,
