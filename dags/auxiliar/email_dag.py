@@ -147,7 +147,7 @@ def enviaEmail():
     # Create a multipart message and set headers
     message = MIMEMultipart()
     message["From"] = sender_email
-    message["To"] = ", ".join(receiver_emails)
+    message["To"] = ", ".join(receiver_emails_test)
     #message["Bcc"] = "heli.silva@sirtec.com.br"
     message["Subject"] = "Relatório de atendimentos com pendências no GPM"
 
@@ -174,7 +174,7 @@ def enviaEmail():
     with smtplib.SMTP_SSL(smtp_server, port) as server:
         #server.starttls()
         server.login(login, password)
-        server.sendmail(sender_email, receiver_emails, message.as_string())
+        server.sendmail(sender_email, receiver_emails_test, message.as_string())
 
     print('Sent')
 
@@ -183,7 +183,7 @@ default_args = {
     'depends_on_past' : False,
     'email' : ['heli.silva@sirtec.com.br'],
     'email_on_failure' : True,
-    'email_on_retry' : False,
+    #'email_on_retry' : False,
     'owner' : 'heli'
 }
 
