@@ -389,6 +389,7 @@ class Bots:
             except Exception as e:
                 print('\nsem acesso ao projeto ', i)
                 print(resposta)
+                print(resposta_pasta)
                 print(e)
 
             x += 1
