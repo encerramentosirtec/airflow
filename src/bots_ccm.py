@@ -290,6 +290,7 @@ class Bots:
             try:
                 resposta = self.fazer_requisicao(url=self.url_geo, body={'id': str(i)})
             except Exception as e:
+                print(i)
                 traceback.print_exc()
                 raise e
             
