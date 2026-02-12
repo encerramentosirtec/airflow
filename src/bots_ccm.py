@@ -290,6 +290,7 @@ class Bots:
             try:
                 resposta = self.fazer_requisicao(url=self.url_geo, body={'id': str(i)})
             except Exception as e:
+                traceback.print_exc()
                 raise e
             
             try:
@@ -318,19 +319,22 @@ class Bots:
                         else:
                             vl_projeto = espelho_CCM.loc[espelho_CCM["PROJETO"] == int(i), "VALOR"].values[0]
                     except Exception as e:
-                        print("erro buscando valor: ", i, type(i), e)
+                        print("erro buscando valor: ", i, type(i))
+                        traceback.print_exc()
                         vl_projeto = ''
                     try:
                         titulo = resposta['Content']['Titulo']
                     except Exception as e:
-                        print("erro buscando titulo: ", e)
+                        print("erro buscando titulo: ")
+                        traceback.print_exc()
                         titulo = ''
                     try:
                         data_energ = resposta['Content']['DtZps09'][0:10]
                         data_energ = datetime.strptime(data_energ, "%Y-%m-%d")
                         data_energ = data_energ.strftime("%d/%m/%y")
                     except Exception as e:
-                        print("erro buscando data de energização: ", e)
+                        print("erro buscando data de energização: ")
+                        traceback.print_exc()
                         data_energ = ''
                     
                     try: 
@@ -361,7 +365,8 @@ class Bots:
                             else:
                                 unidade = unidade
                     except Exception as e:
-                        print("erro buscando unidade: ", e)
+                        print("erro buscando unidade: ")
+                        traceback.print_exc()
                         unidade = ''
 
                     supervisor = obras_concluidas_completo.loc[obras_concluidas_completo['PROJETO'] == str(i)]['SUPERVISOR'].values
@@ -377,7 +382,8 @@ class Bots:
                         if not municipio:
                             municipio = ''
                     except Exception as e:
-                        print("erro buscando municipio: ", e)
+                        print("erro buscando municipio: ")
+                        traceback.print_exc()
                         municipio = ''
                     
                     projetos_pendente_asbuilt.append([unidade, i, titulo, vl_projeto, data_energ, supervisor, municipio])
@@ -390,7 +396,7 @@ class Bots:
                 print('\nsem acesso ao projeto ', i)
                 print(resposta)
                 print(resposta_pasta)
-                print(e)
+                traceback.print_exc()
 
             x += 1
 
