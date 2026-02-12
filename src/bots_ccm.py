@@ -297,7 +297,13 @@ class Bots:
                 id_projeto = resposta['Content']['ProjetoId']
                 body_pasta = {'ProjetoId': id_projeto}
                 
-                resposta_pasta = self.fazer_requisicao(url=self.url_pasta, body=body_pasta)
+                try:
+                    resposta_pasta = self.fazer_requisicao(url=self.url_pasta, body=body_pasta)
+                except Exception as e:
+                    print(i)
+                    traceback.print_exc()
+                    raise e
+                
                 conteudo_pasta = resposta_pasta['Content']['Envios']
                 envio = []
                 for j in conteudo_pasta:
