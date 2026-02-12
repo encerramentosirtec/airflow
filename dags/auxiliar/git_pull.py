@@ -3,7 +3,7 @@ from airflow.providers.standard.operators.bash import BashOperator
 from pendulum import today
 
 with DAG(
-        'executar_git_pull',
+        'git_pull',
         start_date=today('America/Sao_Paulo'),
         schedule = None,
         tags = ['git', 'bash', 'aux'],
