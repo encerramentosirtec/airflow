@@ -317,18 +317,20 @@ class Bots:
                             vl_projeto = ''
                         else:
                             vl_projeto = espelho_CCM.loc[espelho_CCM["PROJETO"] == int(i), "VALOR"].values[0]
-                    except:
-                        print(i, type(i))
+                    except Exception as e:
+                        print("erro buscando valor: ", i, type(i), e)
                         vl_projeto = ''
                     try:
                         titulo = resposta['Content']['Titulo']
-                    except:
+                    except Exception as e:
+                        print("erro buscando titulo: ", e)
                         titulo = ''
                     try:
                         data_energ = resposta['Content']['DtZps09'][0:10]
                         data_energ = datetime.strptime(data_energ, "%Y-%m-%d")
                         data_energ = data_energ.strftime("%d/%m/%y")
-                    except:
+                    except Exception as e:
+                        print("erro buscando data de energização: ", e)
                         data_energ = ''
                     
                     try: 
@@ -358,7 +360,8 @@ class Bots:
                                 unidade = 'BRUMADO'
                             else:
                                 unidade = unidade
-                    except:
+                    except Exception as e:
+                        print("erro buscando unidade: ", e)
                         unidade = ''
 
                     supervisor = obras_concluidas_completo.loc[obras_concluidas_completo['PROJETO'] == str(i)]['SUPERVISOR'].values
@@ -373,7 +376,8 @@ class Bots:
                         municipio = resposta['Content']['Municipio']
                         if not municipio:
                             municipio = ''
-                    except:
+                    except Exception as e:
+                        print("erro buscando municipio: ", e)
                         municipio = ''
                     
                     projetos_pendente_asbuilt.append([unidade, i, titulo, vl_projeto, data_energ, supervisor, municipio])
