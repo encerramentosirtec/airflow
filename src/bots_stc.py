@@ -24,7 +24,8 @@ class Bots:
 
         self.url_geo = 'Cadastro/ConsultarProjeto/Item'
         self.url_pasta = 'ConsultarProjeto/EnvioPasta/Itens'
-        self.planilha_solar = '12NMUcBYJQTedvejCpemui4iAT7s6u4U8wtGk4MFgkCs'
+        #self.planilha_solar = '12NMUcBYJQTedvejCpemui4iAT7s6u4U8wtGk4MFgkCs'
+        self.planilha_solar = '1ggBJ_4FFpi6Pwt-KbbbidBZjKQDM4LsoTxK9VZc-ntU'
         
         self.reservas_ids = {
             1: 'CRIADO',
