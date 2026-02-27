@@ -68,28 +68,18 @@ def atualizar_base_medicoes():
     # Mapeando status
     df['STATUS AJUSTADO'] = df['STATUS'].map(map_status)
 
-    # Extraindo 'OC/PMS'
-    # df['OC/PMS'] = df.apply(lambda x: re.search(r'\d{4}_\d{1,2}_\d+', x['TITULO']).group(0) if x['POSTAGEM'] == 'GX02 - MEDIÇÃO | HUB REGISTRO OPERACIONAL' and re.search(r'\d{4}_[1-9]\d*_\d+', x['TITULO']) else x['OCORRENCIA'], axis=1)
-
     # Criando coluna com OC ou OS
     df['OC'] = df.apply(lambda x: x['OCORRENCIA'] if pd.isna(x['ORDEM_SERVICO']) else x['ORDEM_SERVICO'], axis=1)
 
-
-    ##### INCLUIR NO AGRUPAMENTO O NUMERO DA OS #####
-
-    # Criando a coluna 'ID_MEDIÇÃO' 
-    df['ID_MEDIÇÃO'] = df['PROJETO'] + df['OC'].astype(str)
-
     # Agrupando os dados
-    df_grouped = df.groupby('ID', as_index=False).agg({
+    df_grouped = df.groupby(['ID', 'OC'], as_index=False).agg({
         'PROJETO': 'first',
         'TITULO': 'first',
-        'OC': 'first',
         'STATUS AJUSTADO': 'first',
-        'ID_MEDIÇÃO': 'first',
         'VALOR_PREVISTO': 'sum'
     }).sort_values(by=['STATUS AJUSTADO', 'ID'], ascending=[True, False])
 
+    df_grouped = df_grouped[['ID', 'PROJETO', 'TITULO', 'OC', 'STATUS AJUSTADO', 'VALOR_PREVISTO']]
 
     ### Atualização da base
     GS_SERVICE.sobrescreve_planilha(url=sh.MANUT_POSTAGEM, aba='BASE_MEDIÇÕES', df=df_grouped)
