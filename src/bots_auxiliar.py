@@ -39,6 +39,7 @@ class Bots_aux():
                         ('COMERCIAL', 'PARECER TÉCNICO 023'): 'STC',
                         ('COMERCIAL', 'PERDAS'): 'STC',
                         ('COMERCIAL', 'INADIMPLÊNCIA'): 'STC',
+                        ('COMERCIAL', 'RAMAL/MEDIDOR'): 'STC',
                         ('EQUIPAMENTOS', 'BANCO DE CAPACITOR'): 'CCM',
                         ('EQUIPAMENTOS', 'CAPACITOR'): 'CCM',
                         ('EQUIPAMENTOS', 'CHAVE'): 'CCM',
