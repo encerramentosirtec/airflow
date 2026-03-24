@@ -9,7 +9,8 @@ class GeoexHook(HttpHook):
         self.PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..') # Altera diretório raiz de execução do código
         self.cookie = cookie
 
-        self.base_url = 'https://geoex.com.br/api/'
+        #self.base_url = 'https://geoex.com.br/api/'
+        self.base_url = 'https://neoex.net.br/api/'
 
         self.header = {
             'Cookie': self.cookie['cookie'],
