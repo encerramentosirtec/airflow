@@ -209,6 +209,8 @@ class Bots_aux():
         plt.close() 
     
     def tratamento(self):
+        excluir = ['B-1204676', 'B-1012913', 'B-1038700', 'B-1034452', 'B-1169738', 'B-1169747', 'B-1220250', 'B-1218438', 'B-0845305', 'B-0940236']
+
         #lendo planilha online e arquivos csv
         print('lendo projetos')
         unidades = self.bot.le_planilha_google(self.planilha_rejeicoes, 'Projeto/UTD')
@@ -239,6 +241,8 @@ class Bots_aux():
         df = df[df['DATA_PENDENCIA'] >= data_filtro]
         
         #retira os projetos já enviados da relação
+        df = df[~df['PROJETO'].isin(excluir)]
+
         projetos = df[['PROJETO','SETOR','VALOR']].drop_duplicates()
         projetos['REPETICOES'] = 1
         def incrementar_repeticao(row):
