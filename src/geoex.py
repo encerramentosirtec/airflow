@@ -212,7 +212,7 @@ class Geoex(GeoexHook):
                         continue
                 else:
                     print(f'Relatório {i['nome']} ainda não disponível')
-                    return {'sucess': False, 'status_code': r.status_code, 'data': r.content}
+                    #return {'sucess': False, 'status_code': r.status_code, 'data': r.content}
                 
         r = self.hook.run('GET', endpoint=url, url=True)
 
