@@ -88,7 +88,7 @@ class Geoex(GeoexHook):
                 
 
 
-    def baixar_relatorio(self, id_relatorio, name = None, file_path = 'downloads'):
+    def baixar_relatorio_old(self, id_relatorio, name = None, file_path = 'downloads'):
         endpoint = 'Relatorio/Agendar'
         json = {"Relatorio": id_relatorio}
 
@@ -171,6 +171,65 @@ class Geoex(GeoexHook):
 
         return {'sucess': True}
     
+    def baixar_relatorio(self, id_relatorio, name = None, file_path = 'downloads'):
+        endpoint = 'Relatorio/Agendar'
+        json = {"Relatorio": id_relatorio}
+
+        r = self.hook.run('POST', endpoint, json=json)
+
+        if r.status_code == 200:
+            id = r.json()['Content']
+        else:
+            return {'sucess': False, 'status_code': r.status_code, 'data': r}
+        
+        endpoint = 'Relatorio/Historico'
+        
+        continuar = True
+        nome = None
+        url = None
+
+        while continuar:
+            r = self.hook.run('GET', endpoint)
+            
+            if r.status_code == 200:
+                ids = r.json()['Content']
+            else:
+                return {'sucess': False, 'status_code': r.status_code, 'data': r}
+            
+            for i in ids:
+                if i['id'] == id:
+                    status = i['status']
+                    if status == 3:
+                        url = i['url']
+                        nome = i['nome']
+                        continuar = False
+                        break
+                    else:
+                        print(f'Gerando {i['nome']}')
+                        sleep(15)
+                        continue
+                else:
+                    return {'sucess': False, 'status_code': r.status_code, 'data': r}
+                
+        r = self.hook.run('GET', endpoint=url, url=True)
+
+        if r.status_code == 200:
+            if name != None: nome_arquivo = f'{name}.{url[-3:]}'
+            else: nome_arquivo = f'{nome}.{url[-3:]}'
+
+            full_path = os.path.join(self.PATH, f'{file_path}/{nome_arquivo}')
+            print(f"Tentando salvar em: {full_path}")
+
+            # Verifique se o diretório existe
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
+
+            with open(full_path, 'wb') as f:
+                f.write(r.content)
+            print("Download concluído!")
+        else:
+            return {'sucess': False, 'status_code': r.status_code, 'data': r}
+
+
 
     def consultar_projeto(self, projeto):
         endpoint = 'Programacao/ConsultarProjeto/Item'
