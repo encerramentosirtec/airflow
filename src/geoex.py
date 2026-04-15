@@ -229,6 +229,8 @@ class Geoex(GeoexHook):
         else:
             return {'sucess': False, 'status_code': r.status_code, 'data': r}
 
+        return {'sucess': True}
+
 
 
     def consultar_projeto(self, projeto):
