@@ -58,5 +58,6 @@ class GeoexHook(HttpHook):
 
     def run(self, method, endpoint, url=False, **kwargs):
         if not(url): url_raw = self.create_url(endpoint)
+        else: url_raw = endpoint
         
         return self.connect_to_endpoint(url_raw, method, **kwargs)
