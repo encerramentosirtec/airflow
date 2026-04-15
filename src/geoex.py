@@ -199,6 +199,7 @@ class Geoex(GeoexHook):
                 return {'sucess': False, 'status_code': r.status_code, 'data': r.content}
             
             for i in ids:
+                print(i['id'])
                 if i['id'] == id:
                     status = i['status']
                     if status == 3:
@@ -210,8 +211,8 @@ class Geoex(GeoexHook):
                         print(f'Gerando {i['nome']}')
                         sleep(15)
                         continue
-                else:
-                    print(f'Relatório {i['nome']} ainda não disponível')
+                #else:
+                    #print(f'Relatório {i['nome']} ainda não disponível')
                     #return {'sucess': False, 'status_code': r.status_code, 'data': r.content}
                 
         r = self.hook.run('GET', endpoint=url, url=True)
