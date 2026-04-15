@@ -179,6 +179,7 @@ class Geoex(GeoexHook):
 
         if r.status_code == 200:
             id = r.json()['Content']
+            print(json.dumps(r.json(), indent=4, ensure_ascii=False))
         else:
             print('falha ao agendar relatório')
             return {'sucess': False, 'status_code': r.status_code, 'data': r.content}
