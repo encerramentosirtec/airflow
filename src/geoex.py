@@ -173,9 +173,9 @@ class Geoex(GeoexHook):
     
     def baixar_relatorio(self, id_relatorio, name = None, file_path = 'downloads'):
         endpoint = 'Relatorio/Agendar'
-        json = {"Relatorio": id_relatorio}
+        req = {"Relatorio": id_relatorio}
 
-        r = self.hook.run('POST', endpoint, json=json)
+        r = self.hook.run('POST', endpoint, json=req)
 
         if r.status_code == 200:
             id = r.json()['Content']
