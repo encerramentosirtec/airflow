@@ -199,7 +199,7 @@ class Geoex(GeoexHook):
                 return {'sucess': False, 'status_code': r.status_code, 'data': r.content}
             
             for i in ids:
-                print(i['id'])
+                print(i['id'], id, i['status'])
                 if i['id'] == id:
                     status = i['status']
                     if status == 3:
