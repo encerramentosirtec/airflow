@@ -180,7 +180,8 @@ class Geoex(GeoexHook):
         if r.status_code == 200:
             id = r.json()['Content']
         else:
-            return {'sucess': False, 'status_code': r.status_code, 'data': r}
+            print('falha ao agendar relatório')
+            return {'sucess': False, 'status_code': r.status_code, 'data': r.content}
         
         endpoint = 'Relatorio/Historico'
         
@@ -194,7 +195,8 @@ class Geoex(GeoexHook):
             if r.status_code == 200:
                 ids = r.json()['Content']
             else:
-                return {'sucess': False, 'status_code': r.status_code, 'data': r}
+                print('falha ao consultar histórico de relatórios')
+                return {'sucess': False, 'status_code': r.status_code, 'data': r.content}
             
             for i in ids:
                 if i['id'] == id:
@@ -209,7 +211,8 @@ class Geoex(GeoexHook):
                         sleep(15)
                         continue
                 else:
-                    return {'sucess': False, 'status_code': r.status_code, 'data': r}
+                    print(f'Relatório {i['nome']} ainda não disponível')
+                    return {'sucess': False, 'status_code': r.status_code, 'data': r.content}
                 
         r = self.hook.run('GET', endpoint=url, url=True)
 
@@ -227,7 +230,8 @@ class Geoex(GeoexHook):
                 f.write(r.content)
             print("Download concluído!")
         else:
-            return {'sucess': False, 'status_code': r.status_code, 'data': r}
+            print('falha no download')
+            return {'sucess': False, 'status_code': r.status_code, 'data': r.content}
 
         return {'sucess': True}
 
