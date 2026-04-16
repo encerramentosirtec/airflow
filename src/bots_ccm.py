@@ -164,7 +164,7 @@ class Bots:
         # Filtro para a carteira
         datas_para_filtrar = ['01/01/2023', '01/02/2023', '01/03/2023', '01/04/2023', '01/05/2023', '01/06/2023']
         obras_concluidas_completo = obras_concluidas_completo.loc[~obras_concluidas_completo['CARTEIRA'].isin(datas_para_filtrar)]
-        obras_concluidas = obras_concluidas_completo['PROJETO'].drop_duplicates()
+        obras_concluidas = obras_concluidas_completo['PROJETO'].drop_duplicates().copy()
         obras_concluidas = obras_concluidas.dropna()
         #print(obras_concluidas)
 
