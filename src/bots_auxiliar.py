@@ -329,7 +329,7 @@ class Bots_aux():
         sender_email = "sirtec.heli@gmail.com"'''
 
         receiver_emails_test = ["heli.silva@sirtec.com.br"]
-        #receiver_emails = [
+        receiver_emails = [
             'adriele.jesus@sirtec.com.br',
             'allan.alves@sirtec.com.br',
             'anderson.almeida@sirtec.com.br',
