@@ -219,7 +219,7 @@ class Geoex(GeoexHook):
         r = self.hook.run('GET', endpoint=url, url=True)
 
         while True:
-            if r.json()['StatusCode'] == 200:
+            if r.status_code == 200:
                 if name != None: nome_arquivo = f'{name}.{url[-3:]}'
                 else: nome_arquivo = f'{nome}.{url[-3:]}'
 
@@ -235,7 +235,7 @@ class Geoex(GeoexHook):
                 return {'sucess': True}
             else:
                 print('falha no download')
-                return {'sucess': False, 'status_code': r.json()['StatusCode'], 'data': r.content}
+                return {'sucess': False, 'status_code': r.status_code, 'data': r.text}
 
 
 
