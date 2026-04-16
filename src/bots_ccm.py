@@ -58,7 +58,7 @@ class Bots:
         return df
 
     def fazer_requisicao(self, url, body):
-        resposta = ''
+        '''resposta = ''
         
         r = self.geoex_hook.run("POST", url, json=body)
         resposta = r.json()
@@ -66,7 +66,26 @@ class Bots:
         if resposta["IsUnauthorized"] or resposta['StatusCode']==403:
             print('Cookie Inválido')
             print(resposta)
+            raise TypeError('Cookie Inválido')'''
+        
+
+        r = self.geoex_hook.run("POST", url, json=body)
+
+        if r.status_code != 200:
+            print(f"Erro na requisição: Status {r.status_code}")
+            print(f"Resposta bruta: {r.text[:200]}") # Loga o início da resposta para depuração
+            return {"IsUnauthorized": False, "StatusCode": r.status_code, "Content": None}
+
+        try:
+            resposta = r.json()
+        except Exception:
+            print("A resposta não é um JSON válido")
+            return {"IsUnauthorized": False, "StatusCode": 500, "Content": None}
+        
+        if resposta.get("IsUnauthorized") or resposta.get('StatusCode') == 403:
+            print('Cookie Inválido')
             raise TypeError('Cookie Inválido')
+
         
         return resposta
 
@@ -252,17 +271,28 @@ class Bots:
 
         ####################### CONFERE QUAIS OBRAS ESTÃO PENDENTES DE ENVIO DA PASTA NO GEOEX
 
-        jequie = ['MARCIONÍLIO DE SOUZA', 'CRAVOLÂNDIA', 'BREJÕES', 'IRAJUBA', 'ITAQUARA', 'ITIRUÇU', 'JAGUAQUARA', 'JEQUIÉ', 'LAFAIETE COUTINHO', 'LAJEDO DO TOBOCAL', 'MANOEL VITORINO', 'MARACÁS', 'NOVA ITARANA', 'PLANALTINO', 'SANTA INÊS', 'LAFAIETE COUTINHO']
-        vitoria_da_conquista = ['ANAGÉ', 'BARRA DO CHOÇA', 'BELO CAMPO', 'BOA NOVA', 'BOM JEJUS DA SERRA', 'CAETANOS', 'CÂNDIDO SALES', 'CARAÍBAS', 'CONDEÚBA', 'CORDEIROS', 'ENCRUZILHADA', 'MAETINGA', 'MIRANTE', 'PIRIPÁ', 'PLANALTO', 'POÇÕES', 'PRESIDENTE JANIO QUADROS', 'TREMEDAL', 'VITÓRIA DA CONQUISTA', 'BOM JESUS DA SERRA']
-        itapetinga = ['MACARANI', 'CAATIBA', 'FIRMINO ALVES', 'IBICUÍ', 'IGUAÍ', 'ITAMBÉ', 'ITAPETINGA', 'ITARANTIM', 'ITORORÓ', 'MAIQUINIQUE', 'NOVA CANAÃ', 'POTIRAGUÁ', 'RIBEIRÃO DO LARGO']
-        barreiras = ['ANGICAL', 'BAIANÓPOLIS', 'BARREIRAS', 'CATOLÂNDIA', 'COTEGIPE', 'CRISTÓPOLIS', 'FORMOSA DO RIO PRETO', 'LUIS EDUARDO MAGALHÃES', 'RIACHÃO DAS NEVES', 'SANTA RITA DE CÁSSIA', 'SÃO DESIDÉRIO', 'WANDERLEY']
-        ibotirama = ['IBOTIRAMA', 'MUQUEM DO SÃO FRANCISCO', 'OLIVEIRA DOS BREJINHOS', 'BARRA', 'BURITIRAMA', 'MORPARÁ', 'BROTAS DE MACAÚBAS', 'IPUPIARA', 'MANSIDÃO', 'BOQUIRA', 'MACAÚBAS', 'IBITIARA', 'NOVO HORIZONTE', 'IBIPITANGA']
-        bom_jesus_da_lapa = ['BOM JESUS DA LAPA', 'PARATINGA', 'RIACHO DE SANTANA', 'MATINA', 'SERRA DO RAMALHO', 'SÍTIO DO MATO', 'SANTANA', 'CANÁPOLIS', 'SERRA DOURADA', 'TABOCAS DO BREJO VELHO', 'BREJOLÂNDIA', 'SANTA MARIA DA VITORIA', 'SÃO FÉLIX DO CORIBE', 'JABORANDI', 'CORIBE', 'COCOS', 'FEIRA DA MATA', 'CORRENTINA']
-        guanambi = ['CAETITÉ', 'CANDIBA', 'CARINHANHA', 'FEIRA DA MATA', 'GUANAMBI', 'IGAPORÃ', 'IUIÚ', 'JACARACI', 'LICÍNIO DE ALMEIDA', 'MALHADA', 'MATINA', 'MORTUGABA', 'PALMAS DE MONTE ALTO', 'PINDAÍ', 'RIACHO DE SANTANA', 'SEBASTIÃO LARANJEIRAS', 'URANDI']
-        irece = ['SOUTO SOARES', 'CANARANA', 'AMÉRICA DOURADA', 'BARRA DO MENDES', 'BARRO ALTO', 'CAFARNAUM', 'CENTRAL', 'GENTIO DO OURO', 'IBIPEBA', 'IBITITÁ', 'IRECÊ', 'ITAGUAÇU DA BAHIA', 'JOÃO DOURADO', 'JUSSARA', 'LAPÃO', 'MORRO DO CHAPÉU', 'MULUNGU DO MORRO', 'PRESIDENTE DUTRA', 'SÃO GABRIEL', 'UIBAÍ', 'XIQUE-XIQUE']
-        livramento = ['ABAÍRA', 'RIO DE CONTAS', 'ÉRICO CARDOSO', 'CATURAMA', 'RIO DO PIRES', 'PIATÃ']
-        brumado = ['MALHADA DE PEDRAS', 'ARACATU', 'GUAJERU', 'CACULÉ', 'LIVRAMENTO DE NOSSA SENHORA', 'JUSSIAPÊ', 'LIVRAMENTO', 'DOM BASÍLIO', 'IBIASSUCÊ', 'ITUAÇU', 'BRUMADO', 'BOTUPORÃ', 'RIO DO ANTÔNIO', 'LAGOA REAL']
-        
+        lista_cidades = {
+            'JEQUIÉ' : ['MARCIONÍLIO DE SOUZA', 'CRAVOLÂNDIA', 'BREJÕES', 'IRAJUBA', 'ITAQUARA', 'ITIRUÇU', 'JAGUAQUARA', 'JEQUIÉ', 'LAFAIETE COUTINHO', 'LAJEDO DO TOBOCAL', 'MANOEL VITORINO', 'MARACÁS', 'NOVA ITARANA', 'PLANALTINO', 'SANTA INÊS', 'LAFAIETE COUTINHO'],
+            'VITÓRIA DA CONQUISTA' : ['ANAGÉ', 'BARRA DO CHOÇA', 'BELO CAMPO', 'BOA NOVA', 'BOM JEJUS DA SERRA', 'CAETANOS', 'CÂNDIDO SALES', 'CARAÍBAS', 'CONDEÚBA', 'CORDEIROS', 'ENCRUZILHADA', 'MAETINGA', 'MIRANTE', 'PIRIPÁ', 'PLANALTO', 'POÇÕES', 'PRESIDENTE JANIO QUADROS', 'TREMEDAL', 'VITÓRIA DA CONQUISTA', 'BOM JESUS DA SERRA'],
+            'ITAPETINGA' : ['MACARANI', 'CAATIBA', 'FIRMINO ALVES', 'IBICUÍ', 'IGUAÍ', 'ITAMBÉ', 'ITAPETINGA', 'ITARANTIM', 'ITORORÓ', 'MAIQUINIQUE', 'NOVA CANAÃ', 'POTIRAGUÁ', 'RIBEIRÃO DO LARGO'],
+            'BARREIRAS' : ['ANGICAL', 'BAIANÓPOLIS', 'BARREIRAS', 'CATOLÂNDIA', 'COTEGIPE', 'CRISTÓPOLIS', 'FORMOSA DO RIO PRETO', 'LUIS EDUARDO MAGALHÃES', 'RIACHÃO DAS NEVES', 'SANTA RITA DE CÁSSIA', 'SÃO DESIDÉRIO', 'WANDERLEY'],
+            'IBOTIRAMA' : ['IBOTIRAMA', 'MUQUEM DO SÃO FRANCISCO', 'OLIVEIRA DOS BREJINHOS', 'BARRA', 'BURITIRAMA', 'MORPARÁ', 'BROTAS DE MACAÚBAS', 'IPUPIARA', 'MANSIDÃO', 'BOQUIRA', 'MACAÚBAS', 'IBITIARA', 'NOVO HORIZONTE', 'IBIPITANGA'],
+            'BOM JESUS DA LAPA' : ['BOM JESUS DA LAPA', 'PARATINGA', 'RIACHO DE SANTANA', 'MATINA', 'SERRA DO RAMALHO', 'SÍTIO DO MATO', 'SANTANA', 'CANÁPOLIS', 'SERRA DOURADA', 'TABOCAS DO BREJO VELHO', 'BREJOLÂNDIA', 'SANTA MARIA DA VITORIA', 'SÃO FÉLIX DO CORIBE', 'JABORANDI', 'CORIBE', 'COCOS', 'FEIRA DA MATA', 'CORRENTINA'],
+            'GUANAMBI' : ['CAETITÉ', 'CANDIBA', 'CARINHANHA', 'FEIRA DA MATA', 'GUANAMBI', 'IGAPORÃ', 'IUIÚ', 'JACARACI', 'LICÍNIO DE ALMEIDA', 'MALHADA', 'MATINA', 'MORTUGABA', 'PALMAS DE MONTE ALTO', 'PINDAÍ', 'RIACHO DE SANTANA', 'SEBASTIÃO LARANJEIRAS', 'URANDI'],
+            'IRECÊ' : ['SOUTO SOARES', 'CANARANA', 'AMÉRICA DOURADA', 'BARRA DO MENDES', 'BARRO ALTO', 'CAFARNAUM', 'CENTRAL', 'GENTIO DO OURO', 'IBIPEBA', 'IBITITÁ', 'IRECÊ', 'ITAGUAÇU DA BAHIA', 'JOÃO DOURADO', 'JUSSARA', 'LAPÃO', 'MORRO DO CHAPÉU', 'MULUNGU DO MORRO', 'PRESIDENTE DUTRA', 'SÃO GABRIEL', 'UIBAÍ', 'XIQUE-XIQUE'],
+            'LIVRAMENTO' : ['ABAÍRA', 'RIO DE CONTAS', 'ÉRICO CARDOSO', 'CATURAMA', 'RIO DO PIRES', 'PIATÃ'],
+            'BRUMADO' : ['MALHADA DE PEDRAS', 'ARACATU', 'GUAJERU', 'CACULÉ', 'LIVRAMENTO DE NOSSA SENHORA', 'JUSSIAPÊ', 'LIVRAMENTO', 'DOM BASÍLIO', 'IBIASSUCÊ', 'ITUAÇU', 'BRUMADO', 'BOTUPORÃ', 'RIO DO ANTÔNIO', 'LAGOA REAL'],
+        }
+
+        df_cidades = []
+
+        for regiao, cidades in lista_cidades.items():
+            for cidade in cidades:
+                df_cidades.append({'REGIÃO': regiao, 'CIDADE': cidade})
+
+        df_cidades = pd.DataFrame(df_cidades)
+        busca_rapida = df_cidades.set_index('CIDADE')['REGIÃO'].to_dict()
+
         status_aceitos = ['CRIADO', 'CANCELADO', 'ACEITO', 'ACEITO COM RESTRIÇÕES', 'REJEITADO', 'VALIDADO']
         projetos_pendente_asbuilt = [['UNIDADE', 'PROJETO', 'TÍTULO', 'VALOR DO PROJETO', 'DATA DE ENERGIZAÇÃO', 'SUPERVISOR', 'MUNICÍPIO']]
         
@@ -287,13 +317,28 @@ class Bots:
                 #print(f'Projeto já existe, pulando: {i} - ({x}/{str(len(obras_concluidas_sem_pasta_no_fechamento))})')
                 x += 1
                 continue
-            try:
+            
+            '''try:
                 resposta = self.fazer_requisicao(url=self.url_geo, body={'id': str(i)})
             except Exception as e:
                 print(i)
                 traceback.print_exc()
-                raise e
+                raise e'''
             
+            try:
+                resposta = self.fazer_requisicao(url=self.url_geo, body={'id': str(i)})
+                # Se a resposta vier vazia ou com erro, pula para o próximo projeto
+                if not resposta or resposta.get('Content') is None:
+                    print(f"Pulando projeto {i} devido a resposta inválida.")
+                    x += 1
+                    continue
+            except Exception as e:
+                print(f"Falha crítica no projeto {i}: {e}")
+                # Opcional: sleep curto para evitar flood em caso de instabilidade de rede
+                sleep(2)
+                x += 1
+                continue
+                        
             try:
                 id_projeto = resposta['Content']['ProjetoId']
                 body_pasta = {'ProjetoId': id_projeto}
@@ -349,7 +394,8 @@ class Bots:
                         if not unidade:
                             unidade = ''
                         else:
-                            if unidade in jequie:
+                            municipio = busca_rapida.get(unidade)
+                            '''if unidade in jequie:
                                 unidade = 'JEQUIÉ'
                             elif unidade in ibotirama:
                                 unidade = 'IBOTIRAMA'
@@ -370,7 +416,7 @@ class Bots:
                             elif unidade in brumado:
                                 unidade = 'BRUMADO'
                             else:
-                                unidade = unidade
+                                unidade = unidade'''
                     except Exception as e:
                         print("erro buscando unidade: ")
                         traceback.print_exc()
