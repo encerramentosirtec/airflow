@@ -102,9 +102,9 @@ class Bots:
         return token
 
     def trigger_dag(self, dag_id):
-        token = abre_json(os.path.join(self.PATH,'access_token.json'))
+        token = self.get_token()
         headers = {'Content-Type': 'application/json',
-                   'Authorization': f'Bearer {token['access_token']}'
+                   'Authorization': f'Bearer {token}'
                     }
         
         response = requests.post(
