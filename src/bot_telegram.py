@@ -1,6 +1,6 @@
 import os
 import json
-import logging
+#import logging
 import telebot
 import requests
 import traceback
@@ -88,6 +88,18 @@ class Bots:
         useragent = Variable.get("useragent_manut")
         #print(cookie, '\n', gxsessao, '\n', gxbot, '\n', useragent)
         return cookie, gxsessao, gxbot, useragent
+
+    def get_token(self):
+        auth_url = "http://localhost:8080/auth/token"
+        senha = abre_json(os.path.join(self.PATH, 'simple_auth_manager_passwords.json.generated'))
+        auth_data = {
+            "username": "heli",
+            "password": senha['heli']
+        }
+
+        auth_response = requests.post(auth_url, json=auth_data)
+        token = auth_response.json().get('access_token')
+        return token
 
     def trigger_dag(self, dag_id):
         token = abre_json(os.path.join(self.PATH,'access_token.json'))
