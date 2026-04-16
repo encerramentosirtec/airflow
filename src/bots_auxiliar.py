@@ -329,7 +329,7 @@ class Bots_aux():
         sender_email = "sirtec.heli@gmail.com"'''
 
         receiver_emails_test = ["heli.silva@sirtec.com.br"]
-        receiver_emails = [
+        #receiver_emails = [
             'adriele.jesus@sirtec.com.br',
             'allan.alves@sirtec.com.br',
             'anderson.almeida@sirtec.com.br',
@@ -420,7 +420,8 @@ class Bots_aux():
         # Create a multipart message and set headers
         message = MIMEMultipart()
         message["From"] = sender_email
-        message["To"] = ", ".join(receiver_emails)
+        #message["To"] = ", ".join(receiver_emails)
+        message["To"] = ", ".join(receiver_emails_test)
         #message["Bcc"] = "heli.silva@sirtec.com.br"
         message["Subject"] = "Relatório de rejeições de pastas"
 
@@ -453,7 +454,7 @@ class Bots_aux():
         with smtplib.SMTP_SSL(smtp_server, port) as server:
             #server.starttls()
             server.login(login, password)
-            server.sendmail(sender_email, receiver_emails, message.as_string())
+            server.sendmail(sender_email, receiver_emails_test, message.as_string())
 
         print('Sent')
 
