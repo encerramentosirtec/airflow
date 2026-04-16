@@ -132,7 +132,11 @@ class Bots:
         @self.bot.message_handler(commands=['xcom'])
         def xcom_start(message):
             r = self.trigger_dag('cookie-manut')
-            self.bot.send_message(message.chat.id, f'{r.status_code} | {json.dumps(r.json(), indent=4, ensure_ascii=False)}')
+            try:
+                self.bot.send_message(message.chat.id, f'{r.status_code} | {json.dumps(r.json(), indent=4, ensure_ascii=False)}')
+            except:
+                self.bot.send_message(message.chat.id, f'{r.status_code} \n {r.text}')
+
 
         @self.bot.message_handler(commands=['cookie'])
         def send_cookie(message):

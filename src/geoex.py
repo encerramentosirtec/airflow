@@ -218,24 +218,25 @@ class Geoex(GeoexHook):
                 
         r = self.hook.run('GET', endpoint=url, url=True)
 
-        if r.json()['StatusCode'] == 200:
-            if name != None: nome_arquivo = f'{name}.{url[-3:]}'
-            else: nome_arquivo = f'{nome}.{url[-3:]}'
+        while True:
+            if r.json()['StatusCode'] == 200:
+                if name != None: nome_arquivo = f'{name}.{url[-3:]}'
+                else: nome_arquivo = f'{nome}.{url[-3:]}'
 
-            full_path = os.path.join(self.PATH, f'{file_path}/{nome_arquivo}')
-            print(f"Tentando salvar em: {full_path}")
+                full_path = os.path.join(self.PATH, f'{file_path}/{nome_arquivo}')
+                print(f"Tentando salvar em: {full_path}")
 
-            # Verifique se o diretório existe
-            os.makedirs(os.path.dirname(full_path), exist_ok=True)
+                # Verifique se o diretório existe
+                os.makedirs(os.path.dirname(full_path), exist_ok=True)
 
-            with open(full_path, 'wb') as f:
-                f.write(r.content)
-            print("Download concluído!")
-        else:
-            print('falha no download')
-            return {'sucess': False, 'status_code': r.json()['StatusCode'], 'data': r.content}
+                with open(full_path, 'wb') as f:
+                    f.write(r.content)
+                print("Download concluído!")
+                return {'sucess': True}
+            else:
+                print('falha no download')
+                return {'sucess': False, 'status_code': r.json()['StatusCode'], 'data': r.content}
 
-        return {'sucess': True}
 
 
 
