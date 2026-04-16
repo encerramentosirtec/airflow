@@ -168,9 +168,9 @@ class Bots:
         obras_concluidas = obras_concluidas.dropna()
         #print(obras_concluidas)
 
-        obras_concluidas_formatado = []
+        #obras_concluidas_formatado = []
         
-        for i in obras_concluidas:
+        '''for i in obras_concluidas:
             try:
                 i = int(i)
             except Exception as e:
@@ -179,7 +179,13 @@ class Bots:
                 i = int(i)
             obras_concluidas_formatado.append(i)
         
-        obras_concluidas = obras_concluidas_formatado
+        obras_concluidas = obras_concluidas_formatado'''
+
+        padrao = r'B-|/PIVO|-PIVO|/JUDICIAL|Y-'
+
+        obras_concluidas_formatado = obras_concluidas['PROJETO'].astype(str).str.replace(padrao, '', regex=True)
+        obras_concluidas_formatado = pd.to_numeric(obras_concluidas_formatado, errors='coerce')
+        obras_concluidas_formatado = obras_concluidas_formatado.drop_duplicates().dropna().astype(int)
 
         ####################### LENDO PLANILHA DO FECHAMENTO
         while True:
@@ -245,7 +251,7 @@ class Bots:
         #obras_recepcionadas_geral = pd.concat([obras_recepcionadas_resolucao, obras_recepcionadas_vtc, obras_recepcionadas_jeq , obras_recepcionadas_brr, obras_recepcionadas_gbi, obras_recepcionadas_bjl, obras_recepcionadas_ire, obras_recepcionadas_ibt, obras_recepcionadas_bru], ignore_index = True)
         obras_recepcionadas_geral = pd.concat([obras_recepcionadas_vtc, obras_recepcionadas_jeq , obras_recepcionadas_brr, obras_recepcionadas_gbi, obras_recepcionadas_bjl, obras_recepcionadas_ire, obras_recepcionadas_ibt, obras_recepcionadas_bru], ignore_index = True)
         
-        cont = 0
+        '''cont = 0
         for i in obras_recepcionadas_geral:
             if i == 'PROJETO':
                 obras_recepcionadas_geral.drop(cont)
@@ -253,10 +259,24 @@ class Bots:
             i = str(i).replace(' ', '')
             if ((i != None) and (i != '')):
                 obras_recepcionadas_geral[cont] = int(i[2:9])
-            cont += 1
+            cont += 1'''
         
+        # Filtra para remover qualquer linha que seja 'PROJETO' ou vazia/nula
+        obras_recepcionadas_geral = obras_recepcionadas_geral[
+            (obras_recepcionadas_geral != 'PROJETO') & 
+            (obras_recepcionadas_geral.notna()) & 
+            (obras_recepcionadas_geral.astype(str).str.strip() != '')
+        ].copy()
+
+        obras_recepcionadas_geral = (
+            obras_recepcionadas_geral.astype(str)
+            .str.replace(' ', '')
+            .str[2:9]
+            .astype(int)
+        )
+
         obras_concluidas_sem_pasta_no_fechamento = []
-        obras_concluidas = obras_concluidas
+        obras_concluidas = obras_concluidas_formatado
         obras_recepcionadas_geral = obras_recepcionadas_geral.tolist()
 
         
