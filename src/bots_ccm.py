@@ -391,10 +391,11 @@ class Bots:
                     
                     try: 
                         unidade = resposta['Content']['Municipio']
+                        municipio = resposta['Content']['Municipio']
                         if not unidade:
                             unidade = ''
                         else:
-                            municipio = busca_rapida.get(unidade)
+                            unidade = busca_rapida.get(unidade)
                             '''if unidade in jequie:
                                 unidade = 'JEQUIÉ'
                             elif unidade in ibotirama:
@@ -429,7 +430,8 @@ class Bots:
                         supervisor = ''
                     if supervisor[0:3] == 'SUP':
                         supervisor = supervisor[8:]
-
+                    
+                    '''
                     try: 
                         municipio = resposta['Content']['Municipio']
                         if not municipio:
@@ -438,6 +440,7 @@ class Bots:
                         print("erro buscando municipio: ")
                         traceback.print_exc()
                         municipio = ''
+                    '''
                     
                     projetos_pendente_asbuilt.append([unidade, i, titulo, vl_projeto, data_energ, supervisor, municipio])
                     print(f'{status_pasta} - {i} - {unidade} - {municipio} - {titulo} - {data_energ} - {vl_projeto} - ({x}/{str(len(obras_concluidas_sem_pasta_no_fechamento))})')
