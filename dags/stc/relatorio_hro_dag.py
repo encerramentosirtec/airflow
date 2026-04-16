@@ -2,6 +2,7 @@
 from airflow.sdk import DAG
 #from airflow.operators.python import PythonOperator
 from airflow.providers.standard.operators.python import PythonOperator
+from airflow.providers.smtp.notifications.smtp import send_smtp_notification
 import pendulum
 from src.bots_stc import Bots
 
@@ -9,9 +10,9 @@ bot = Bots()
 
 default_args = {
     'depends_on_past' : False,
-    'email' : ['heli.silva@sirtec.com.br'],
-    'email_on_failure' : True,
-    'email_on_retry' : False,
+    #'email' : ['heli.silva@sirtec.com.br'],
+    #'email_on_failure' : True,
+    #'email_on_retry' : False,
     'owner' : 'stc',
     'retries' : 2,
     'retry_delay' : pendulum.duration(seconds=5)
@@ -24,7 +25,15 @@ with DAG('relatorio-hro',
         schedule = '0 7-18 * * 1-6',
         max_active_runs = 1,
         tags = ['stc', 'geoex'],
-        catchup = False) as dag:
+        catchup = False,
+        on_failure_callback=[
+            send_smtp_notification(
+                from_email="sirtec.heli@gmail.com",
+                to="heli.silva@sirtec.com.br",
+                subject="[Error] The dag {{ dag.dag_id }} failed",
+                html_content="debug logs",
+            )
+        ],) as dag:
     
     relatorio = PythonOperator(
         task_id='relatorio',

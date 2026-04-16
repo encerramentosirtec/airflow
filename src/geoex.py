@@ -56,7 +56,7 @@ class Geoex(GeoexHook):
         while True:
             r = self.hook.run('POST', endpoint, json=json)
             
-            if r.status_code == 200:
+            if r.json()['StatusCode'] == 200:
                 arquivos_015 = 0
                 arquivos_018 = 0
                 arquivos_021 = 0
@@ -82,19 +82,19 @@ class Geoex(GeoexHook):
 
                 return (arquivos_015, arquivos_018, arquivos_021, arquivos_127, arquivos_022)
             
-            elif r.status_code == 429:
-                print(r.status_code)
+            elif r.json()['StatusCode'] == 429:
+                print(r.json()['StatusCode'])
                 sleep(30)
                 
 
 
-    def baixar_relatorio(self, id_relatorio, name = None, file_path = 'downloads'):
+    def baixar_relatorio_old(self, id_relatorio, name = None, file_path = 'downloads'):
         endpoint = 'Relatorio/Agendar'
         json = {"Relatorio": id_relatorio}
 
         r = self.hook.run('POST', endpoint, json=json)
 
-        if r.status_code == 200:
+        if r.json()['StatusCode'] == 200:
             id = r.json()['Content']
 
             estagio = 1
@@ -114,7 +114,7 @@ class Geoex(GeoexHook):
                 
                 print('estagio 1', r)
 
-                if r.status_code == 200:
+                if r.json()['StatusCode'] == 200:
                     content = r.json()
                     if content['StatusCode'] == 100:
                         estagio = content['Content']['Estagio']
@@ -124,8 +124,8 @@ class Geoex(GeoexHook):
                         status_code = content['StatusCode']
                     else:
                         return {'sucess': False, 'status_code': content['StatusCode'], 'data': content['Message']}
-                elif r.status_code != 429:
-                    return {'sucess': False, 'status_code': r.status_code, 'data': None}
+                elif r.json()['StatusCode'] != 429:
+                    return {'sucess': False, 'status_code': r.json()['StatusCode'], 'data': None}
                 
                 if estagio == 1:
                     sleep(15)
@@ -145,7 +145,7 @@ class Geoex(GeoexHook):
 
                 print('estagio 2', r.json())
 
-                if r.status_code == 200:
+                if r.json()['StatusCode'] == 200:
                     estagio = r.json()['Content']['Estagio']
 
                 if estagio == 2:
@@ -155,7 +155,7 @@ class Geoex(GeoexHook):
                 arquivo = r.json()['Content']['Arquivo']
                 nome = r.json()['Content']['Nome']
         else:
-            return {'sucess': False, 'status_code': r.status_code, 'data': r}
+            return {'sucess': False, 'status_code': r.json()['StatusCode'], 'data': r}
 
         if name != None: nome = f'{name}.csv'
 
@@ -171,6 +171,73 @@ class Geoex(GeoexHook):
 
         return {'sucess': True}
     
+    def baixar_relatorio(self, id_relatorio, name = None, file_path = 'downloads'):
+        endpoint = 'Relatorio/Agendar'
+        req = {"Relatorio": id_relatorio}
+
+        r = self.hook.run('POST', endpoint, json=req)
+
+        if r.json()['StatusCode'] == 200:
+            id = r.json()['Content']
+            #print(json.dumps(r.json(), indent=4, ensure_ascii=False))
+        else:
+            print('falha ao agendar relatório')
+            return {'sucess': False, 'status_code': r.json()['StatusCode'], 'data': r.content}
+        
+        endpoint = 'Relatorio/Historico'
+        
+        continuar = True
+        nome = None
+        url = None
+
+        while continuar:
+            r = self.hook.run('GET', endpoint)
+            
+            if r.json()['StatusCode'] == 200:
+                ids = r.json()['Content']
+            else:
+                print('falha ao consultar histórico de relatórios')
+                return {'sucess': False, 'status_code': r.json()['StatusCode'], 'data': r.content}
+            
+            for i in ids:
+                #print(i['id'], id, i['status'])
+                if i['id'] == id:
+                    status = i['status']
+                    if status == 3:
+                        url = i['url']
+                        nome = i['nome']
+                        continuar = False
+                        break
+                    else:
+                        print(f'Gerando {i['nome']}')
+                        sleep(15)
+                        continue
+                #else:
+                    #print(f'Relatório {i['nome']} ainda não disponível')
+                    #return {'sucess': False, 'status_code': r.json()['StatusCode'], 'data': r.content}
+                
+        r = self.hook.run('GET', endpoint=url, url=True)
+
+        if r.json()['StatusCode'] == 200:
+            if name != None: nome_arquivo = f'{name}.{url[-3:]}'
+            else: nome_arquivo = f'{nome}.{url[-3:]}'
+
+            full_path = os.path.join(self.PATH, f'{file_path}/{nome_arquivo}')
+            print(f"Tentando salvar em: {full_path}")
+
+            # Verifique se o diretório existe
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
+
+            with open(full_path, 'wb') as f:
+                f.write(r.content)
+            print("Download concluído!")
+        else:
+            print('falha no download')
+            return {'sucess': False, 'status_code': r.json()['StatusCode'], 'data': r.content}
+
+        return {'sucess': True}
+
+
 
     def consultar_projeto(self, projeto):
         endpoint = 'Programacao/ConsultarProjeto/Item'
@@ -180,14 +247,14 @@ class Geoex(GeoexHook):
 
         r = self.hook.run('POST', endpoint, json=json)
 
-        if r.status_code == 200:
+        if r.json()['StatusCode'] == 200:
             content = r.json()
             if content['StatusCode'] == 200:
                 return {'sucess': True, 'status_code': content['StatusCode'], 'data': content['Content']}
             else:
                 return {'sucess': False, 'status_code': content['StatusCode'], 'data': content['Message']}
         else:
-            return {'sucess': False, 'status_code': r.status_code, 'data': None}
+            return {'sucess': False, 'status_code': r.json()['StatusCode'], 'data': None}
         
 
     def consultar_envio_de_pasta(self, projeto_id):
@@ -203,14 +270,14 @@ class Geoex(GeoexHook):
 
         r = self.hook.run('POST', endpoint, json=json)
     
-        if r.status_code == 200:
+        if r.json()['StatusCode'] == 200:
             content = r.json()
             if content['StatusCode'] == 200:
                 return {'sucess': True, 'status_code': content['StatusCode'], 'data': content['Content']}
             else:
                 return {'sucess': False, 'status_code': content['StatusCode'], 'data': content['Message']}
         else:
-            return {'sucess': False, 'status_code': r.status_code, 'data': None}
+            return {'sucess': False, 'status_code': r.json()['StatusCode'], 'data': None}
         
 
     def busca_info_hro(self, serial):
@@ -221,14 +288,14 @@ class Geoex(GeoexHook):
             }
 
             r = self.hook.run('POST', endpoint, json=json)
-            if r.status_code == 200:
+            if r.json()['StatusCode'] == 200:
                 content = r.json()
                 if content['StatusCode'] == 200:
                     return {'sucess': True, 'status_code': content['StatusCode'], 'data': content['Content']}
                 else:
                     return {'sucess': False, 'status_code': content['StatusCode'], 'data': content['Message']}
             else:
-                return {'sucess': False, 'status_code': r.status_code, 'data': ''}
+                return {'sucess': False, 'status_code': r.json()['StatusCode'], 'data': ''}
 
 
     def enviar_pasta(self, projeto):
@@ -320,12 +387,12 @@ class Geoex(GeoexHook):
             
             r = self.hook.run('POST', endpoint, json=json)
 
-            if r.status_code == 200:
+            if r.json()['StatusCode'] == 200:
                 content = r.json()
                 if content['StatusCode'] == 200:
                     return {'sucess': True, 'status_code': content['StatusCode'] == 200, 'data': content['Message']}
             else:
-                return {'sucess': False, 'status_code': r.status_code, 'data': None}
+                return {'sucess': False, 'status_code': r.json()['StatusCode'], 'data': None}
             
         else:
             return {'sucess': False, 'status_code': info_projeto['status_code'], 'data': info_projeto['data']}
@@ -338,7 +405,7 @@ class Geoex(GeoexHook):
 
         r = self.hook.run('POST', endpoint, files=files)
 
-        if r.status_code == 200:
+        if r.json()['StatusCode'] == 200:
             content = r.json()
             if content['StatusCode'] == 100:
                 print('Solicitação de criação de HROs enviada!')
@@ -375,11 +442,11 @@ class Geoex(GeoexHook):
         
         r = self.hook.run('POST', endpoint, json=json)
 
-        if r.status_code == 200:
+        if r.json()['StatusCode'] == 200:
             content = r.json()
             if content['StatusCode'] == 200:
                 return {'sucess': True, 'status_code': content['StatusCode'], 'data': content['Content']}
             else:
                 return {'sucess': False, 'status_code': content['StatusCode'], 'data': content['Message']}
         else:
-            return {'sucess': False, 'status_code': r.status_code, 'data': ''}
+            return {'sucess': False, 'status_code': r.json()['StatusCode'], 'data': ''}
