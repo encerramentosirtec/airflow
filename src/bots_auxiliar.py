@@ -215,7 +215,11 @@ class Bots_aux():
         print('lendo projetos')
         unidades = self.bot.le_planilha_google(self.planilha_rejeicoes, 'Projeto/UTD')
         unidades['VALOR'] = pd.to_numeric(unidades['VALOR'], errors='coerce')
-        #print(unidades['VALOR'])
+        
+        if not os.path.exists(os.path.join(self.PATH,'downloads/rejeicoes.csv')):
+            df_vazio = pd.DataFrame(columns=['PROJETO', 'REPETICOES'])
+            df_vazio.to_csv(os.path.join(self.PATH,'downloads/rejeicoes.csv'), index=False, encoding='utf-8')
+
         df = pd.read_csv(os.path.join(self.PATH,'downloads/rejeicoes.csv'), encoding='ISO-8859-1', sep=';', thousands='.', decimal=',', low_memory=False)
         antigos = pd.read_csv(os.path.join(self.PATH,'downloads/anteriores.csv'), encoding='ISO-8859-1', sep=';', low_memory=False)
         projetos_antigos = antigos['PROJETO'].to_list()
@@ -300,10 +304,14 @@ class Bots_aux():
         
         if projetos[~projetos['PROJETO'].isin(antigos['PROJETO'])].shape[0]>0:
             print('atualizando historico')
-            historico = pd.read_csv(os.path.join(self.PATH,'downloads/historico.csv'), encoding='ISO-8859-1', sep=';', low_memory=False)
-            dados['DATA_REGISTRO'] = datetime.now()
-            novohist = pd.concat([historico,dados])
-            novohist.to_csv(os.path.join(self.PATH,'downloads/historico.csv'), index=False, sep=';')
+            if os.path.exists(os.path.join(self.PATH,'downloads/historico.csv')):
+                historico = pd.read_csv(os.path.join(self.PATH,'downloads/historico.csv'), encoding='ISO-8859-1', sep=';', low_memory=False)
+                dados['DATA_REGISTRO'] = datetime.now()
+                novohist = pd.concat([historico,dados])
+                novohist.to_csv(os.path.join(self.PATH,'downloads/historico.csv'), index=False, sep=';')
+            else:
+                dados['DATA_REGISTRO'] = datetime.now()
+                dados.to_csv(os.path.join(self.PATH,'downloads/historico.csv'), index=False, sep=';')
             
         if projetos.shape[0] != 0:
             return df3.hide(axis='index').to_html(), projetos[~projetos['PROJETO'].isin(antigos['PROJETO'])].shape[0], projetos.shape[0]
