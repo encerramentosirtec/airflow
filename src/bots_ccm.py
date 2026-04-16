@@ -183,7 +183,7 @@ class Bots:
 
         padrao = r'B-|/PIVO|-PIVO|/JUDICIAL|Y-'
 
-        obras_concluidas_formatado = obras_concluidas.astype(str).str.replace(padrao, '', regex=True)
+        obras_concluidas_formatado = obras_concluidas.astype(str).str.replace(padrao, '', regex=True).copy()
         obras_concluidas_formatado = pd.to_numeric(obras_concluidas_formatado, errors='coerce')
         obras_concluidas_formatado = obras_concluidas_formatado.drop_duplicates().dropna().astype(int)
 
@@ -276,18 +276,23 @@ class Bots:
         )
 
         obras_concluidas_sem_pasta_no_fechamento = []
-        obras_concluidas = obras_concluidas_formatado
+        obras_concluidas = obras_concluidas_formatado.copy()
         obras_recepcionadas_geral = obras_recepcionadas_geral.tolist()
 
         
         ####################### CONFERE QUAIS OBRAS JÁ ESTÃO NA PLANILHA DO FECHAMENTO
-        cont = 0
+        '''cont = 0
         for cont, i in enumerate(obras_concluidas): 
             if i in obras_recepcionadas_geral or int(i)==1063382:
                 pass
             else:
                 obras_concluidas_sem_pasta_no_fechamento.append(obras_concluidas[cont])
-            cont += 1
+            cont += 1'''
+
+        obras_concluidas_sem_pasta_no_fechamento = [
+            obra for obra in obras_concluidas 
+            if obra not in obras_recepcionadas_geral and int(obra) != 1063382
+        ]
 
         ####################### CONFERE QUAIS OBRAS ESTÃO PENDENTES DE ENVIO DA PASTA NO GEOEX
 
