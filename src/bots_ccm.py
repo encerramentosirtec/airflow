@@ -183,7 +183,7 @@ class Bots:
 
         padrao = r'B-|/PIVO|-PIVO|/JUDICIAL|Y-'
 
-        obras_concluidas_formatado = obras_concluidas['PROJETO'].astype(str).str.replace(padrao, '', regex=True)
+        obras_concluidas_formatado = obras_concluidas.astype(str).str.replace(padrao, '', regex=True)
         obras_concluidas_formatado = pd.to_numeric(obras_concluidas_formatado, errors='coerce')
         obras_concluidas_formatado = obras_concluidas_formatado.drop_duplicates().dropna().astype(int)
 
