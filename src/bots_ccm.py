@@ -354,7 +354,7 @@ class Bots:
                 resposta = self.fazer_requisicao(url=self.url_geo, body={'id': str(i)})
                 # Se a resposta vier vazia ou com erro, pula para o próximo projeto
                 if not resposta or resposta.get('Content') is None:
-                    print(f"Pulando projeto {i} devido a resposta inválida.")
+                    print(f"Pulando projeto {i} devido a resposta inválida. - ({x}/{str(len(obras_concluidas_sem_pasta_no_fechamento))})")
                     x += 1
                     continue
             except Exception as e:
