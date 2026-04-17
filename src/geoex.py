@@ -176,6 +176,7 @@ class Geoex(GeoexHook):
         ativos = []
 
         while continuar:
+            print('Verificando relatórios ativos')
             endpoint = 'Relatorio/Historico'
             r = self.hook.run('GET', endpoint)
             
@@ -187,6 +188,7 @@ class Geoex(GeoexHook):
             
             for i in ids:
                 if i['status'] != 3 and i['status'] != 6:
+                    print('Cancelando relatório ativo: ', i['nome'])
                     endpoint = 'Relatorio/Cancelar'
                     req = {"WorkerRelatorioId": i['id']}
                     r = self.hook.run('POST', endpoint, json=req)
