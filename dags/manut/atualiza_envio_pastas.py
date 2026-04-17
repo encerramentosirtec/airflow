@@ -28,11 +28,13 @@ CLIENT_BIGQUERY = bigquery.Client.from_service_account_json(os.path.join(PATH, '
 from src.config import configs as cfg
 LOG_TABLE = cfg.log_table
 
+global nome
+
 def baixar_arquivo_geoex():
     # Consulta id do relatorio
     id_relatorio = ID_RELATORIOS.loc[1].ID
 
-    download = GEOEX.baixar_relatorio(id_relatorio)
+    download = GEOEX.baixar_relatorio(id_relatorio, nome_arquivo='Geoex - Acomp - Envio de pastas - Consulta')
 
     if download['sucess']:
         print("Download realizado com sucesso!")
@@ -112,7 +114,7 @@ default_args = {
 
 with DAG(
     'atualiza_envio_pastas',
-    schedule='*/20 6-22 * * *',
+    schedule=None,#'*/20 6-22 * * *',
     start_date=datetime(2026, 4, 16, tzinfo=pendulum.timezone("America/Sao_Paulo")),
     catchup=False,
     default_args = default_args,

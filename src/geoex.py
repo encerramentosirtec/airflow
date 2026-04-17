@@ -232,7 +232,7 @@ class Geoex(GeoexHook):
                 with open(full_path, 'wb') as f:
                     f.write(r.content)
                 print("Download concluído!")
-                return {'sucess': True}
+                return {'sucess': True, 'data': nome_arquivo}
             else:
                 print('falha no download')
                 return {'sucess': False, 'status_code': r.status_code, 'data': r.text}

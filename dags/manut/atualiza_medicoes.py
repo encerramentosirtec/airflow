@@ -32,7 +32,7 @@ LOG_TABLE = cfg.log_table
 def baixar_arquivo_geoex():
     id_relatorio = ID_RELATORIOS.loc[0].ID
 
-    download = GEOEX.baixar_relatorio(id_relatorio)
+    download = GEOEX.baixar_relatorio(id_relatorio, name='Geoex - Relatório - Acompanhamento - Detalhado')
 
     if download['sucess']:
         print("Download realizado com sucesso!")
@@ -113,7 +113,7 @@ default_args = {
 with DAG(
     dag_id='atualizar_medicoes',
     tags=['manut', 'geoex'],
-    schedule='*/30 6-22 * * *',
+    schedule=None,#'*/30 6-22 * * *',
     default_args=default_args,
     start_date=datetime(2026, 4, 16, tzinfo=pendulum.timezone("America/Sao_Paulo"))
 ):

@@ -58,7 +58,7 @@ class Bots:
 
         ids = self.le_planilha_google(url='https://docs.google.com/spreadsheets/d/1VFxxABMX1WQDbYFll2nO5CEp2FGuNpIqTMftncVRpic/edit?gid=0#gid=0', aba='id_relatorios_geoex')
         id_relatorio = ids.loc[0].ID
-        download = self.geoex.baixar_relatorio(id_relatorio)
+        download = self.geoex.baixar_relatorio(id_relatorio, name = 'Geoex - Relatório - Acompanhamento - Detalhado')
         if download['sucess']:
             # ATUALIZA NA PLANILHA GOOGLE
             try:
@@ -126,7 +126,7 @@ class Bots:
         ids = pd.DataFrame(ws.get_all_records())
         id_relatorio = ids.loc[1].ID
 
-        download = self.geoex.baixar_relatorio(id_relatorio)
+        download = self.geoex.baixar_relatorio(id_relatorio, name='Geoex - Acomp - Envio de pastas - Consulta')
 
         if download['sucess']:
             try:
@@ -197,7 +197,7 @@ class Bots:
         df_att = pd.DataFrame()
 
         for id in id_relatorios:
-            download = self.geoex.baixar_relatorio(id)
+            download = self.geoex.baixar_relatorio(id, name='Geoex - Processos com HRO - Consulta')
             if download['sucess']:
                 try:
                     # Leitura dos dados

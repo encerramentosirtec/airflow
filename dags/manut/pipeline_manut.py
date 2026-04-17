@@ -43,7 +43,7 @@ def atualizar_base_medicoes():
     }
 
     id_relatorio = ID_RELATORIOS.loc[0].ID
-    download = GEOEX.baixar_relatorio(id_relatorio)
+    download = GEOEX.baixar_relatorio(id_relatorio, name='Geoex - Relatório - Acompanhamento - Detalhado')
     if download['sucess']:
         try:
             df = pd.read_csv(os.path.join(PATH, 'downloads/Geoex - Relatório - Acompanhamento - Detalhado.csv'), encoding='ISO-8859-1', sep=';', thousands='.', decimal=',', dtype='str')
@@ -104,7 +104,7 @@ def atualizar_base_hro():
     df_att = pd.DataFrame()
 
     for id in id_relatorios:
-        download = GEOEX.baixar_relatorio(id)
+        download = GEOEX.baixar_relatorio(id, name='Geoex - Processos com HRO - Consulta')
         if download['sucess']:
             try:
                 # Leitura dos dados
@@ -182,7 +182,7 @@ def atualizar_base_envio_pastas_consulta():
     # Consulta id do relatorio
     id_relatorio = ID_RELATORIOS.loc[1].ID
 
-    download = GEOEX.baixar_relatorio(id_relatorio)
+    download = GEOEX.baixar_relatorio(id_relatorio, name='Geoex - Acomp - Envio de pastas - Consulta')
 
     if download['sucess']:
         try:
