@@ -359,7 +359,7 @@ class Bots:
                     continue
             except Exception as e:
                 print(f"Falha crítica no projeto {i}: {e}")
-                if e == TypeError('Cookie Inválido'):
+                if "Cookie Inválido" in str(e):
                     print("Cookie inválido detectado. Encerrando o processo.")
                     raise e  # Encerra o processo se o cookie for inválido
                 # Opcional: sleep curto para evitar flood em caso de instabilidade de rede
