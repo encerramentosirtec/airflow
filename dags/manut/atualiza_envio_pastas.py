@@ -34,7 +34,7 @@ def baixar_arquivo_geoex():
     # Consulta id do relatorio
     id_relatorio = ID_RELATORIOS.loc[1].ID
 
-    download = GEOEX.baixar_relatorio(id_relatorio, nome_arquivo='Geoex - Acomp - Envio de pastas - Consulta')
+    download = GEOEX.baixar_relatorio(id_relatorio, name='Geoex - Acomp - Envio de pastas - Consulta')
 
     if download['sucess']:
         print("Download realizado com sucesso!")
