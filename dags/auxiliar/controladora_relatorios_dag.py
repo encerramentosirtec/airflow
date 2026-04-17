@@ -1,7 +1,9 @@
 
 from airflow.sdk import DAG
-from airflow.operators.empty import EmptyOperator
-from airflow.operators.python import BranchPythonOperator
+#from airflow.operators.empty import EmptyOperator
+from airflow.providers.standard.operators.empty.EmptyOperator import EmptyOperator
+#from airflow.operators.python import BranchPythonOperator
+from airflow.providers.standard.operators.python.BranchPythonOperator import BranchPythonOperator
 from airflow.providers.standard.operators.python import PythonOperator
 from airflow.providers.smtp.notifications.smtp import send_smtp_notification
 from airflow.providers.standard.operators.trigger_dagrun import TriggerDagRunOperator
