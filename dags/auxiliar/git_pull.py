@@ -1,10 +1,11 @@
 from airflow.sdk import DAG
 from airflow.providers.standard.operators.bash import BashOperator
-from pendulum import today
+from pendulum import today, timezone
+from datetime import datetime
 
 with DAG(
         'git_pull',
-        start_date=today('America/Sao_Paulo'),
+        start_date=datetime(2026, 4, 16, tzinfo=timezone("America/Sao_Paulo")),
         schedule = None,
         tags = ['git', 'bash', 'aux'],
         catchup=False ) as dag:

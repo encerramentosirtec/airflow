@@ -5,6 +5,7 @@ from airflow.providers.standard.operators.python import PythonOperator
 from airflow.providers.smtp.notifications.smtp import send_smtp_notification
 import pendulum
 from src.bots_stc import Bots
+from datetime import datetime
 
 bot = Bots()
 
@@ -21,7 +22,7 @@ default_args = {
 with DAG('relatorio-hro',
         default_args = default_args,
         #default_view="graph",
-        start_date=pendulum.today('America/Sao_Paulo'),
+        start_date=datetime(2026, 4, 16, tzinfo=pendulum.timezone("America/Sao_Paulo")),
         schedule = '0 7-18 * * 1-6',
         max_active_runs = 1,
         tags = ['stc', 'geoex'],

@@ -5,7 +5,8 @@ from airflow.providers.standard.operators.python import PythonOperator
 import os
 import sys
 import pandas as pd
-import pendulum
+from pendulum import timezone
+from datetime import datetime
 
 PATH = os.getenv('AIRFLOW_HOME')
 os.chdir(PATH)
@@ -56,7 +57,7 @@ with DAG(
     dag_id='atualiza_pedidos_criados',
     tags=['auxiliar'],
     schedule='*/40 6-22 * * 1-6',
-    start_date=pendulum.today('America/Sao_Paulo')
+    start_date=datetime(2026, 4, 16, tzinfo=timezone("America/Sao_Paulo"))
 ):
     
     atualizacao = PythonOperator(

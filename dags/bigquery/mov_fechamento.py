@@ -128,7 +128,7 @@ if __name__ == '__main__':
 with DAG(
     'atualiza_mov_fechamento',
     schedule='@daily',
-    start_date=pendulum.today('America/Sao_Paulo'),
+    start_date=datetime(2026, 4, 16, tzinfo=pendulum.timezone("America/Sao_Paulo")),
     tags=['bigquery']
 ):
     

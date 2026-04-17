@@ -310,7 +310,7 @@ default_args = {
 with DAG(
     'envia_email_pendencias_manut',
     schedule='0 10 * * 1-5',
-    start_date=pendulum.today('America/Sao_Paulo'),
+    start_date=datetime(2026, 4, 16, tzinfo=pendulum.timezone("America/Sao_Paulo")),
     catchup=False,
     max_active_runs = 1,
     tags=['manut', 'email'],

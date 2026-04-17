@@ -149,7 +149,7 @@ default_args = {
 with DAG('v2_atesto',
         default_args = default_args,
         #default_view="graph",
-        start_date=today('America/Sao_Paulo'),
+        start_date=datetime(2026, 4, 16, tzinfo=timezone("America/Sao_Paulo")),
         schedule = '0,30 2,6,7,8,9,10,11,13,15,16,17,19,21 * * 1-6',
         max_active_runs = 1,
         tags = ['obra', 'geoex'],

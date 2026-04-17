@@ -2,7 +2,8 @@
 from airflow.sdk import DAG
 #from airflow.operators.python import PythonOperator
 from airflow.providers.standard.operators.python import PythonOperator
-from pendulum import duration, today
+from pendulum import duration, today, timezone
+from datetime import datetime
 from src.bots_ccm import Bots
 
 bot = Bots(cred_file='global_brook.json')
@@ -21,7 +22,7 @@ default_args = {
 with DAG('v5',
         default_args = default_args,
         #default_view="graph",
-        start_date=today('America/Sao_Paulo'),
+        start_date=datetime(2026, 4, 16, tzinfo=timezone("America/Sao_Paulo")),
         schedule = '0 6-22 * * 1-6',
         max_active_runs = 1,
         tags = ['obra', 'geoex'],

@@ -9,7 +9,8 @@ import sys'''
 import src.spreadsheets as spreadsheets
 import pandas as pd
 from time import sleep
-from pendulum import today, duration
+from pendulum import today, duration, timezone
+from datetime import datetime
 #classes próprias
 from src.geoex import Geoex
 from src.google_sheets import GoogleSheets
@@ -128,7 +129,7 @@ default_args = {
 with DAG('solicitacoes-de-reservas',
         default_args = default_args,
         #default_view="graph",
-        start_date=today('America/Sao_Paulo'),
+        start_date=datetime(2026, 4, 16, tzinfo=timezone("America/Sao_Paulo")),
         schedule = '0 6,12 * * 1-6',
         max_active_runs = 1,
         tags = ['reservas', 'geoex', 'manut'],

@@ -7,7 +7,7 @@ from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 from email.mime.image import MIMEImage
 from email.mime.text import MIMEText
-from pendulum import today
+from pendulum import today, timezone
 from time import sleep
 import smtplib
 import os
@@ -190,7 +190,7 @@ default_args = {
 with DAG('email-gpm',
         default_args = default_args,
         #default_view="graph",
-        start_date=today('America/Sao_Paulo'),
+        start_date=datetime(2026, 4, 16, tzinfo=timezone("America/Sao_Paulo")),
         schedule = '0 12 * * 1-6',
         max_active_runs = 1,
         tags = ['email', 'gpm'],

@@ -132,7 +132,7 @@ with DAG(
     tags=['manut'],
     schedule='*/1 7-22 * * *',
     default_args=default_args,
-    start_date=pendulum.today('America/Sao_Paulo'),
+    start_date=datetime(2026, 4, 16, tzinfo=pendulum.timezone("America/Sao_Paulo")),
     max_active_runs=1
 ):
 

@@ -83,7 +83,7 @@ class Bots:
             return {"IsUnauthorized": False, "StatusCode": 500, "Content": None}
         
         if resposta.get("IsUnauthorized") or resposta.get('StatusCode') == 403:
-            print('Cookie Inválido')
+            print(f'Cookie Inválido - Status Code: {resposta.get("StatusCode", "N/A")}, Mensagem: {resposta.get("Message", "N/A")}')
             raise TypeError('Cookie Inválido')
 
         
@@ -358,8 +358,8 @@ class Bots:
                     x += 1
                     continue
             except Exception as e:
-                print(f"Falha crítica no projeto {i}: {e} - Status Code: {resposta.get('StatusCode', 'N/A')}, Mensagem: {resposta.get('Message', 'N/A')}")
-                if resposta.get('IsUnauthorized'):
+                print(f"Falha crítica no projeto {i}: {e}")
+                if e == TypeError('Cookie Inválido'):
                     print("Cookie inválido detectado. Encerrando o processo.")
                     raise e  # Encerra o processo se o cookie for inválido
                 # Opcional: sleep curto para evitar flood em caso de instabilidade de rede

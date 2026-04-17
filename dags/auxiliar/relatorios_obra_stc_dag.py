@@ -1,11 +1,12 @@
 from airflow.sdk import DAG
 from airflow.providers.standard.operators.trigger_dagrun import TriggerDagRunOperator
 from airflow.providers.smtp.notifications.smtp import send_smtp_notification
-from pendulum import today, duration
+from pendulum import duration, timezone#, today
+from datetime import datetime
 
 with DAG(
     dag_id="maestrina_stc_ccm",
-    start_date=today('America/Sao_Paulo'),
+    start_date=datetime(2026, 4, 16, tzinfo=timezone("America/Sao_Paulo")),
     schedule=None,  # Disparo manual ou via Bot Telegram
     catchup=False,
     tags=["stc", "obra", "relatorios", "sequencial", "geoex"],

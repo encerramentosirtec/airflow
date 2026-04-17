@@ -149,7 +149,7 @@ with DAG(
     tags=['manut', 'geoex'],
     schedule='*/40 6-22 * * *',
     default_args=default_args,
-    start_date=pendulum.today('America/Sao_Paulo')
+    start_date=datetime(2026, 4, 16, tzinfo=pendulum.timezone("America/Sao_Paulo"))
 ):
 
     baixar_relatorio = PythonOperator(

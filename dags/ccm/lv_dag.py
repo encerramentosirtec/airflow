@@ -6,7 +6,8 @@ from airflow.providers.standard.operators.python import PythonOperator
 #bibliotecas
 import pandas as pd
 from time import sleep
-from pendulum import duration, today
+from pendulum import duration, today, timezone
+from datetime import datetime
 #classes próprias
 from src.bots_ccm import Bots
 from src.config import configs
@@ -96,7 +97,7 @@ default_args = {
 with DAG('lv',
         default_args = default_args,
         #default_view="graph",
-        start_date=today('America/Sao_Paulo'),
+        start_date=datetime(2026, 4, 16, tzinfo=timezone("America/Sao_Paulo")),
         schedule = '0,30 2,6,7,8,9,10,11,13,15,16,17,19,21 * * 1-6',
         max_active_runs = 1,
         tags = ['obra', 'geoex'],

@@ -4,6 +4,7 @@ from airflow.sdk import DAG
 from airflow.providers.standard.operators.python import PythonOperator
 import pendulum
 from src.bots_stc import Bots
+from datetime import datetime
 
 bot = Bots()
 default_args = {
@@ -19,7 +20,7 @@ default_args = {
 with DAG('solar',
         default_args = default_args,
         #default_view="graph",
-        start_date=pendulum.today('America/Sao_Paulo'),
+        start_date=datetime(2026, 4, 16, tzinfo=pendulum.timezone("America/Sao_Paulo")),
         schedule = '0,30 7-18,20 * * 1-6',
         tags = ['solar', 'geoex', 'stc'],
         catchup = False) as dag:

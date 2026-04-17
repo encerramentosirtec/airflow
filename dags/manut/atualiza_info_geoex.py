@@ -184,7 +184,7 @@ default_args = {
 with DAG(
     'atualiza_base_geoex_manut',
     schedule = '*/120 6-22 * * *',
-    start_date=pendulum.today('America/Sao_Paulo'),
+    start_date=datetime(2026, 4, 16, tzinfo=pendulum.timezone("America/Sao_Paulo")),
     catchup=False,
     default_args = default_args,
     #default_view="graph",
