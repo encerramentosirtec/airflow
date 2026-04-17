@@ -172,6 +172,32 @@ class Geoex(GeoexHook):
         return {'sucess': True}
     
     def baixar_relatorio(self, id_relatorio, name = None, file_path = 'downloads'):
+        continuar = True
+        ativos = []
+
+        while continuar:
+            endpoint = 'Relatorio/Historico'
+            r = self.hook.run('GET', endpoint)
+            
+            if r.json()['StatusCode'] == 200:
+                ids = r.json()['Content']
+            else:
+                print('falha ao consultar histórico de relatórios')
+                return {'sucess': False, 'status_code': r.json()['StatusCode'], 'data': r.content}
+            
+            for i in ids:
+                if i['status'] != 3 and i['status'] != 6:
+                    endpoint = 'Relatorio/Cancelar'
+                    req = {"WorkerRelatorioId": i['id']}
+                    r = self.hook.run('POST', endpoint, json=req)
+
+                    ativos.append(True)
+                else:
+                    ativos.append(False)
+            
+            continuar = any(ativos)
+            ativos.clear()
+
         endpoint = 'Relatorio/Agendar'
         req = {"Relatorio": id_relatorio}
 
@@ -200,10 +226,8 @@ class Geoex(GeoexHook):
                 return {'sucess': False, 'status_code': r.json()['StatusCode'], 'data': r.content}
             
             for i in ids:
-                #print(i['id'], id, i['status'])
                 if i['id'] == id:
-                    status = i['status']
-                    if status == 3:
+                    if i['status'] == 3:
                         url = i['url']
                         nome = i['nome']
                         continuar = False
