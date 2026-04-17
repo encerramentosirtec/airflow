@@ -358,7 +358,7 @@ class Bots:
                     x += 1
                     continue
             except Exception as e:
-                print(f"Falha crítica no projeto {i}: {e}")
+                print(f"Falha crítica no projeto {i}: {e} - Status Code: {resposta.get('StatusCode', 'N/A')}, Mensagem: {resposta.get('Message', 'N/A')}")
                 if resposta.get('IsUnauthorized'):
                     print("Cookie inválido detectado. Encerrando o processo.")
                     raise e  # Encerra o processo se o cookie for inválido
