@@ -11,9 +11,6 @@ bot = Bots()
 
 default_args = {
     'depends_on_past' : False,
-    'email' : ['heli.silva@sirtec.com.br'],
-    'email_on_failure' : True,
-    'email_on_retry' : False,
     'retries' : 2,
     'owner' : 'heli',
     'retry_delay' : duration(seconds=5)
