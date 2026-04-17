@@ -53,5 +53,13 @@ with DAG('controladora_relatorios_manut',
         poke_interval=30,
         trigger_rule='none_failed_min_one_success'
     )
+    
+    pedidos_criado = TriggerDagRunOperator(
+        task_id="pedidos_criado_trigger",
+        trigger_dag_id="atualiza_pedidos_criados",
+        wait_for_completion=True,
+        poke_interval=30,
+        trigger_rule='none_failed_min_one_success'
+    )
 
-    pastas >> hro >> medições
+    pastas >> hro >> medições >> pedidos_criado
