@@ -359,6 +359,9 @@ class Bots:
                     continue
             except Exception as e:
                 print(f"Falha crítica no projeto {i}: {e}")
+                if resposta.get('IsUnauthorized'):
+                    print("Cookie inválido detectado. Encerrando o processo.")
+                    raise e  # Encerra o processo se o cookie for inválido
                 # Opcional: sleep curto para evitar flood em caso de instabilidade de rede
                 sleep(2)
                 x += 1
