@@ -15,6 +15,7 @@ with DAG(
         bash_command=f"""
             cd ~/airflow
             git pull
+            airflow dags reserialize
         """
     )
 
