@@ -1,4 +1,5 @@
 import pandas as pd
+import pandas_gbq
 from gspread import authorize, utils
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -465,4 +466,31 @@ class Bots_aux():
 
         print('Sent')
 
-    # Relatório de Serviços do GPM
+    # Relatório de Solicitações de Reservas
+
+    def relatorio_reservas(self):
+        id_reservas = self.bot.le_planilha_google('https://docs.google.com/spreadsheets/d/1RhXWgyRZwEZHU-RAin0l3mrjyGJ5uvvxB86vkD8aIr8', 'Solicitações Geoex', 'A2').values()
+        download = self.geoex.baixar_relatorio(id_reservas, 'reservas', 'downloads')
+        
+        if download['sucess']:
+            print('Download concluido.')
+        else:
+            print(download)
+            raise Exception(
+                f'''
+                Falha ao baixar csv.
+                Statuscode: { download['status_code'] }
+                Message: { download['data'] }
+                '''
+            )
+        
+    def salvar_reservas(self):
+        df = pd.read_csv(os.path.join(self.PATH,'downloads/reservas.csv'), encoding='ISO-8859-1', sep=';', low_memory=False)
+
+        pandas_gbq.to_gbq(
+            df, 
+            destination_table='fechamento.valores-v5-24-25', 
+            project_id='famous-archway-473912-d9', 
+            if_exists='replace',  # Substitui a tabela inteira
+            credentials=self.bot.GS_SERVICE
+        )
