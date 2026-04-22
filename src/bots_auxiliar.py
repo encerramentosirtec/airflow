@@ -469,7 +469,7 @@ class Bots_aux():
     # Relatório de Solicitações de Reservas
 
     def relatorio_reservas(self):
-        id_reservas = self.bot.le_planilha_google('https://docs.google.com/spreadsheets/d/1RhXWgyRZwEZHU-RAin0l3mrjyGJ5uvvxB86vkD8aIr8', 'Solicitações Geoex', 'A2').values()
+        id_reservas = self.bot.le_celula_google('https://docs.google.com/spreadsheets/d/1RhXWgyRZwEZHU-RAin0l3mrjyGJ5uvvxB86vkD8aIr8', 'Solicitações Geoex', 'A2')
         download = self.geoex.baixar_relatorio(id_reservas, 'reservas', 'downloads')
         
         if download['sucess']:

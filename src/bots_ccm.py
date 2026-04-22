@@ -57,6 +57,16 @@ class Bots:
 
         return df
 
+    def le_celula_google(self, url, aba, intervalo):
+        try:
+            sh = self.GS_SERVICE.open_by_url(url)
+        except:
+            sh = self.GS_SERVICE.open_by_key(url)
+        ws = sh.worksheet(aba)
+        df = ws.acell(intervalo).value
+
+        return df
+
     def fazer_requisicao(self, url, body):
         '''resposta = ''
         
