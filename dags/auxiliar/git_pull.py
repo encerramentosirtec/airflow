@@ -16,6 +16,7 @@ with DAG(
             cd ~/airflow
             git pull
             source airenv/bin/activate
+            export AIRFLOW_HOME=~/airflow
             airflow dags reserialize
         """
     )
