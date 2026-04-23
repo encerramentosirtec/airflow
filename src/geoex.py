@@ -180,11 +180,15 @@ class Geoex(GeoexHook):
             endpoint = 'Relatorio/Historico'
             r = self.hook.run('GET', endpoint)
             
-            if r.json()['StatusCode'] == 200:
+            if r.status_code == 200:
                 ids = r.json()['Content']
+            elif r.status_code == 429:
+                print(f'Limite de requisições atingido: {r.status_code}, {r.message}')
+                sleep(30)
+                continue
             else:
                 print('falha ao consultar histórico de relatórios')
-                return {'sucess': False, 'status_code': r.json()['StatusCode'], 'data': r.content}
+                return {'sucess': False, 'status_code': r.status_code, 'data': r.content}
             
             for i in ids:
                 if i['status'] != 3 and i['status'] != 6:
@@ -205,12 +209,12 @@ class Geoex(GeoexHook):
 
         r = self.hook.run('POST', endpoint, json=req)
 
-        if r.json()['StatusCode'] == 200:
+        if r.status_code == 200:
             id = r.json()['Content']
             #print(json.dumps(r.json(), indent=4, ensure_ascii=False))
         else:
             print('falha ao agendar relatório')
-            return {'sucess': False, 'status_code': r.json()['StatusCode'], 'data': r.content}
+            return {'sucess': False, 'status_code': r.status_code, 'data': r.content}
         
         endpoint = 'Relatorio/Historico'
         
@@ -221,11 +225,11 @@ class Geoex(GeoexHook):
         while continuar:
             r = self.hook.run('GET', endpoint)
             
-            if r.json()['StatusCode'] == 200:
+            if r.status_code == 200:
                 ids = r.json()['Content']
             else:
                 print('falha ao consultar histórico de relatórios')
-                return {'sucess': False, 'status_code': r.json()['StatusCode'], 'data': r.content}
+                return {'sucess': False, 'status_code': r.status_code, 'data': r.content}
             
             for i in ids:
                 if i['id'] == id:
@@ -240,7 +244,7 @@ class Geoex(GeoexHook):
                         continue
                 #else:
                     #print(f'Relatório {i['nome']} ainda não disponível')
-                    #return {'sucess': False, 'status_code': r.json()['StatusCode'], 'data': r.content}
+                    #return {'sucess': False, 'status_code': r.status_code, 'data': r.content}
                 
         r = self.hook.run('GET', endpoint=url, url=True)
 
@@ -274,14 +278,14 @@ class Geoex(GeoexHook):
 
         r = self.hook.run('POST', endpoint, json=json)
 
-        if r.json()['StatusCode'] == 200:
+        if r.status_code == 200:
             content = r.json()
             if content['StatusCode'] == 200:
                 return {'sucess': True, 'status_code': content['StatusCode'], 'data': content['Content']}
             else:
                 return {'sucess': False, 'status_code': content['StatusCode'], 'data': content['Message']}
         else:
-            return {'sucess': False, 'status_code': r.json()['StatusCode'], 'data': None}
+            return {'sucess': False, 'status_code': r.status_code, 'data': None}
         
 
     def consultar_envio_de_pasta(self, projeto_id):
