@@ -59,6 +59,14 @@ with DAG('controladora_relatorios',
         poke_interval=30,                   # Verifica o status a cada 30s
         trigger_rule='none_failed_min_one_success'
     )
+    
+    relatorio_reservas = TriggerDagRunOperator(
+        task_id="relatorio_reservas_trigger",
+        trigger_dag_id="relatorio-reservas",  # ID exato da DAG de coleta
+        wait_for_completion=True,           # ESSENCIAL: Espera terminar para seguir
+        poke_interval=30,                   # Verifica o status a cada 30s
+        trigger_rule='none_failed_min_one_success'
+    )
 
     checar_hora = BranchPythonOperator(
         task_id='checar_horario_email',
@@ -68,4 +76,4 @@ with DAG('controladora_relatorios',
     pular = EmptyOperator(task_id='pular')
 
     checar_hora >> [rejeicoes, pular]
-    [rejeicoes, pular] >> relatorio_hro
+    [rejeicoes, pular] >> relatorio_hro >> relatorio_reservas
