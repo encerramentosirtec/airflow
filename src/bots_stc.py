@@ -232,6 +232,8 @@ class Bots:
             'https://www.googleapis.com/auth/drive'
         ]))
 
+        df.rename(columns={'UNIDADE.1': 'UNIDADE1'}, inplace=True)
+
         pandas_gbq.to_gbq(
             df, 
             destination_table='orcamentos.hro_stc', 
