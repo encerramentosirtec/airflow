@@ -2,6 +2,7 @@ import pandas as pd
 import pandas_gbq
 from gspread import authorize, utils
 from oauth2client.service_account import ServiceAccountCredentials
+from google.oauth2 import service_account
 
 import os
 from src.geoex import Geoex
@@ -487,10 +488,17 @@ class Bots_aux():
     def salvar_reservas(self):
         df = pd.read_csv(os.path.join(self.PATH,'downloads/reservas.csv'), encoding='ISO-8859-1', sep=';', low_memory=False)
 
+        credencial = service_account.Credentials.from_service_account_file(os.path.join(os.getcwd(), f'assets/auth_google/{self.cred_path}'))
+        client = authorize(credencial.with_scopes([
+            'https://www.googleapis.com/auth/bigquery',
+            'https://www.googleapis.com/auth/spreadsheets', 
+            'https://www.googleapis.com/auth/drive'
+        ]))
+
         pandas_gbq.to_gbq(
             df, 
             destination_table='fechamento.valores-v5-24-25', 
             project_id='famous-archway-473912-d9', 
             if_exists='replace',  # Substitui a tabela inteira
-            credentials=self.bot.GS_SERVICE
+            credentials=credencial
         )
