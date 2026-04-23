@@ -495,7 +495,7 @@ class Bots_aux():
             'https://www.googleapis.com/auth/drive'
         ]))
 
-        print(df.head())
+        df = df.drop(columns=['ProjetoText.1'])
 
         pandas_gbq.to_gbq(
             df, 
