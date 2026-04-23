@@ -233,7 +233,7 @@ class Bots:
             'https://www.googleapis.com/auth/drive'
         ]))
 
-        df.rename(columns={'UNIDADE.1': 'UNIDADE1'}, inplace=True)
+        df.rename(columns={'UNIDADE.1': 'UNIDADE1', 'STATUS.1': 'STATUS1'}, inplace=True)
 
         pandas_gbq.to_gbq(
             df, 
