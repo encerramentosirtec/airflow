@@ -225,7 +225,7 @@ class Bots:
         date_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=-3))).strftime('%d/%m/%Y, %H:%M:%S')
         sh.worksheet('Infos').update_acell('B1', date_now)
 
-        credencial = service_account.Credentials.from_service_account_file(os.path.join(os.getcwd(), f'assets/auth_google/{self.cred_path}'))
+        credencial = service_account.Credentials.from_service_account_file(os.path.join(os.getcwd(), self.cred_path))
         client = gspread.authorize(credencial.with_scopes([
             'https://www.googleapis.com/auth/bigquery',
             'https://www.googleapis.com/auth/spreadsheets', 
