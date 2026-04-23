@@ -1,8 +1,10 @@
 import os
 import json
 import gspread
+from google.oauth2 import service_account
 import datetime
 import pandas as pd
+import pandas_gbq
 from time import sleep
 from src.geoex import Geoex
 from pendulum import timezone
@@ -222,4 +224,19 @@ class Bots:
         print('data')
         date_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=-3))).strftime('%d/%m/%Y, %H:%M:%S')
         sh.worksheet('Infos').update_acell('B1', date_now)
+
+        credencial = service_account.Credentials.from_service_account_file(os.path.join(os.getcwd(), f'assets/auth_google/{self.cred_path}'))
+        client = gspread.authorize(credencial.with_scopes([
+            'https://www.googleapis.com/auth/bigquery',
+            'https://www.googleapis.com/auth/spreadsheets', 
+            'https://www.googleapis.com/auth/drive'
+        ]))
+
+        pandas_gbq.to_gbq(
+            df, 
+            destination_table='orcamentos.hro_stc', 
+            project_id='famous-archway-473912-d9', 
+            if_exists='replace',  # Substitui a tabela inteira
+            credentials=credencial
+        )
     
