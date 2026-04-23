@@ -499,7 +499,7 @@ class Bots_aux():
 
         pandas_gbq.to_gbq(
             df, 
-            destination_table='fechamento.valores-v5-24-25', 
+            destination_table='orcamentos.reservas', 
             project_id='famous-archway-473912-d9', 
             if_exists='replace',  # Substitui a tabela inteira
             credentials=credencial
