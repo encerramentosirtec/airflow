@@ -31,7 +31,7 @@ default_args = {
 with DAG('controladora_relatorios',
         default_args = default_args,
         start_date=datetime(2026, 4, 17, tzinfo=timezone("America/Sao_Paulo")),
-        schedule = '0 7-18 * * 1-6',
+        schedule = '0,30 7-18 * * 1-6',
         tags = ['aux', 'relatorios', 'stc', 'email', 'geoex'],
         catchup = False,
         on_failure_callback=[
