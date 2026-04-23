@@ -79,7 +79,12 @@ class Bots:
             raise TypeError('Cookie Inválido')'''
         
 
-        r = self.geoex_hook.run("POST", url, json=body)
+        while True:
+            r = self.geoex_hook.run("POST", url, json=body)
+            if r.status_code != 341:
+                break
+            print('Neoex em atualização')
+            sleep(30)
 
         if r.status_code != 200:
             print(f"Erro na requisição: Status {r.status_code}")
