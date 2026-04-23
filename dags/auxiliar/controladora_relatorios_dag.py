@@ -76,4 +76,4 @@ with DAG('controladora_relatorios',
     pular = EmptyOperator(task_id='pular')
 
     checar_hora >> [rejeicoes, pular]
-    [rejeicoes, pular] >> relatorio_hro >> relatorio_reservas
+    [rejeicoes, pular] >> relatorio_reservas >> relatorio_hro
