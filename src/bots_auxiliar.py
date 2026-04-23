@@ -495,6 +495,8 @@ class Bots_aux():
             'https://www.googleapis.com/auth/drive'
         ]))
 
+        print(df.head())
+
         pandas_gbq.to_gbq(
             df, 
             destination_table='fechamento.valores-v5-24-25', 
