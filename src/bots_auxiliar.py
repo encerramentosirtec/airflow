@@ -486,7 +486,7 @@ class Bots_aux():
             )
         
     def salvar_reservas(self):
-        df = pd.read_csv(os.path.join(self.PATH,'downloads/reservas.csv'), encoding='ISO-8859-1', sep=';', low_memory=False)
+        df = pd.read_csv(os.path.join(self.PATH, 'downloads/reservas.csv'), encoding='ISO-8859-1', sep=';', thousands='.', decimal=',', low_memory=False)
 
         credencial = service_account.Credentials.from_service_account_file(os.path.join(os.getcwd(), f'assets/auth_google/{self.cred_path}'))
         client = authorize(credencial.with_scopes([
