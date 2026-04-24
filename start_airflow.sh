@@ -1,6 +1,6 @@
 #!/bin/bash
 
-WORKDIR="/home/sirtec-fechamento/airflow"
+WORKDIR="~/airflow"
 AIRFLOW_HOME="$WORKDIR"
 VENV="$WORKDIR/airenv/bin/activate"
 LOG_FILE="$WORKDIR/airflow.log"
