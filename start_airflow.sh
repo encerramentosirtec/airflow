@@ -1,15 +1,9 @@
-#!/bin/bash
-
-WORKDIR="~/airflow"
-AIRFLOW_HOME="$WORKDIR"
-VENV="$WORKDIR/airenv/bin/activate"
-LOG_FILE="$WORKDIR/airflow.log"
+cd /home/sirtec-fechamento/airflow
 
 # Ativa o ambiente virtual
-source "$VENV"
+source airenv/bin/activate
 
-# Inicia o Airflow Standalone e salva o log
-#airflow standalone > "$LOG_FILE" 2>&1
+# Inicia o Airflow Standalone
 airflow standalone
 
 #echo "Airflow iniciado. Logs disponíveis em $LOG_FILE"
