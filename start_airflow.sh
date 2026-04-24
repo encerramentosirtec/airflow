@@ -9,6 +9,7 @@ LOG_FILE="$WORKDIR/airflow.log"
 source "$VENV"
 
 # Inicia o Airflow Standalone e salva o log
-airflow standalone > "$LOG_FILE" 2>&1
+#airflow standalone > "$LOG_FILE" 2>&1
+airflow standalone
 
-echo "Airflow iniciado. Logs disponíveis em $LOG_FILE"
+#echo "Airflow iniciado. Logs disponíveis em $LOG_FILE"
