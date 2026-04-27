@@ -38,7 +38,7 @@ class GeoexHook(HttpHook):
                 else:
                     response = self.scraper.get(url=url, headers = self.header)
                 
-                if (response.status_code == 429) or (response.status_code == 500):
+                if (response.status_code == 429) or (response.status_code == 500) or (response.status_code == 341):
                     sleep(10)
                     continue
                 elif response.status_code == 403:
