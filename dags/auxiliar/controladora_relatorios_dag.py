@@ -16,7 +16,7 @@ def verifica_horario():
     horarios = [8,11,14,17]
     
     # Exemplo: Só permite rodar entre 08:00 e 18:00
-    if agora.hour in horarios:
+    if agora.hour in horarios and agora.minute < 10:
         return 'rejeicoes_trigger'
     else:
         return 'pular'
