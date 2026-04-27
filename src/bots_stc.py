@@ -205,7 +205,7 @@ class Bots:
 
         #df['CICLO'] = df['TITULO'].apply(lambda x: x.split(' / ')[4]).map(self.meses)
 
-        hros = '1o8byF41_AmcXFykW8IcyN7fZkUmRZpICiJWqlpbT82M'
+        '''hros = '1o8byF41_AmcXFykW8IcyN7fZkUmRZpICiJWqlpbT82M'
         sh = self.GS_SERVICE.open_by_key(hros)
         ws = sh.worksheet('BASE_GEOEX')
         ws.clear()
@@ -219,7 +219,7 @@ class Bots:
                 ws.update(range_name='A2', values=df.fillna("").values.tolist())
                 break
             except Exception as e:
-                print(e)
+                print(e)'''
         
         print('data')
         date_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=-3))).strftime('%d/%m/%Y, %H:%M:%S')
