@@ -52,13 +52,13 @@ with DAG('controladora_relatorios',
         deferrable=True
     )
     
-    relatorio_hro = TriggerDagRunOperator(
+    '''relatorio_hro = TriggerDagRunOperator(
         task_id="relatorio_hro_trigger",
         trigger_dag_id="relatorio-hro",  # ID exato da DAG de coleta
         wait_for_completion=True,           # ESSENCIAL: Espera terminar para seguir
         poke_interval=30,                   # Verifica o status a cada 30s
         trigger_rule='none_failed_min_one_success'
-    )
+    )'''
     
     relatorio_reservas = TriggerDagRunOperator(
         task_id="relatorio_reservas_trigger",
@@ -76,4 +76,4 @@ with DAG('controladora_relatorios',
     pular = EmptyOperator(task_id='pular')
 
     checar_hora >> [rejeicoes, pular]
-    [rejeicoes, pular] >> relatorio_reservas >> relatorio_hro
+    [rejeicoes, pular] >> relatorio_reservas# >> relatorio_hro

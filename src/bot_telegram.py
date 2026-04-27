@@ -29,7 +29,7 @@ class Bots:
         #telebot.logger.setLevel(logging.DEBUG) # Exibe log detalhado
 
         self.cookie, self.gxsessao, self.gxbot = '', '', ''
-        self.data = abre_json(os.path.join(self.PATH, 'assets/auth_geoex/cookie_heli.json'))
+        self.data_heli = abre_json(os.path.join(self.PATH, 'assets/auth_geoex/cookie_heli.json'))
         self.data_bob = abre_json(os.path.join(self.PATH,'assets/auth_geoex/cookie_ccm.json'))
         self.data_hugo = abre_json(os.path.join(self.PATH,'assets/auth_geoex/cookie_hugo.json'))
 
@@ -164,16 +164,16 @@ class Bots:
                 traceback.print_exc()
             
             if cookie_valido:
-                self.data['cookie']=self.cookie
+                '''self.data['cookie']=self.cookie
                 self.data['gxsessao']=self.gxsessao
-                self.data['gxbot']=self.gxbot
+                self.data['gxbot']=self.gxbot'''
                 
                 self.data_bob['cookie']=self.cookie
                 self.data_bob['gxsessao']=self.gxsessao
                 self.data_bob['gxbot']=self.gxbot
                 
-                print(self.data, self.data_bob)
-                escreve_json(os.path.join(self.PATH,'assets/auth_geoex/cookie_heli.json'),self.data)
+                print(self.data)#, self.data_bob)
+                #escreve_json(os.path.join(self.PATH,'assets/auth_geoex/cookie_heli.json'),self.data)
                 escreve_json(os.path.join(self.PATH,'assets/auth_geoex/cookie_ccm.json'),self.data_bob)
                 self.trigger_dag(dag_id='cookie-manut')
                 msg = 'Informações atualizadas com sucesso!'
@@ -212,6 +212,43 @@ class Bots:
                 self.data_hugo['gxbot']=self.gxbot
                 
                 escreve_json('assets/auth_geoex/cookie_hugo.json', self.data_hugo)
+                self.trigger_dag(dag_id='cookie-manut')
+                msg = 'Informações atualizadas com sucesso!'
+            else:
+                msg = 'Dados inválidos.'
+            self.bot.send_message(message.chat.id, msg)
+
+        @self.bot.message_handler(commands=['cookie_heli'])
+        def envia_cookie(message):
+            msg = self.bot.send_message(message.chat.id, '''
+            Atualizando informações de acesso ao Geoex.
+            Insira o Cookie:
+            ''')
+            self.bot.register_next_step_handler(msg, read_cookie)
+
+        def read_cookie(message):
+            self.cookie = message.text
+            msg = self.bot.send_message(message.chat.id, 'Insira Gxbot:')
+            self.bot.register_next_step_handler(msg, read_gxbot)
+
+        def read_gxbot(message):
+            self.gxbot = message.text
+            msg = self.bot.send_message(message.chat.id, 'Insira Gxsessao:')
+            self.bot.register_next_step_handler(msg, read_gxsessao)
+
+        def read_gxsessao(message):
+            self.gxsessao = message.text
+            try:
+                cookie_valido = self.testa_cookie(c=self.cookie, g=self.gxsessao, gb=self.gxbot)
+            except:
+                traceback.print_exc()
+            
+            if cookie_valido:
+                self.data_heli['cookie']=self.cookie
+                self.data_heli['gxsessao']=self.gxsessao
+                self.data_heli['gxbot']=self.gxbot
+                
+                escreve_json('assets/auth_geoex/cookie_heli.json', self.data_heli)
                 self.trigger_dag(dag_id='cookie-manut')
                 msg = 'Informações atualizadas com sucesso!'
             else:

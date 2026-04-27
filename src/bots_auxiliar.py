@@ -28,7 +28,7 @@ class Bots_aux():
 
         self.PATH = os.getenv('AIRFLOW_HOME')
         self.cred_path = 'jimmy.json'
-        self.cookie_path = 'cookie_ccm.json'
+        self.cookie_path = 'cookie_heli.json'
         self.geoex = Geoex(self.cookie_path)
         self.bot = Bots(self.cookie_path, self.cred_path)
         self.gs = self.bot.GS_SERVICE
