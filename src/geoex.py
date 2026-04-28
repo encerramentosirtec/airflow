@@ -175,6 +175,7 @@ class Geoex(GeoexHook):
         continuar = True
         ativos = []
         cancelados = [3,4,6,41]
+        finalizados = [3,41]
 
         while continuar:
             print('Verificando relatórios ativos')
@@ -234,7 +235,7 @@ class Geoex(GeoexHook):
             
             for i in ids:
                 if i['id'] == id:
-                    if i['status'] == 3:
+                    if i['status'] in finalizados:
                         url = i['url']
                         nome = i['nome']
                         continuar = False
