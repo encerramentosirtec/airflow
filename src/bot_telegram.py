@@ -172,7 +172,7 @@ class Bots:
                 self.data_bob['gxsessao']=self.gxsessao
                 self.data_bob['gxbot']=self.gxbot
                 
-                print(self.data)#, self.data_bob)
+                print(self.data_bob)
                 #escreve_json(os.path.join(self.PATH,'assets/auth_geoex/cookie_heli.json'),self.data)
                 escreve_json(os.path.join(self.PATH,'assets/auth_geoex/cookie_ccm.json'),self.data_bob)
                 self.trigger_dag(dag_id='cookie-manut')
