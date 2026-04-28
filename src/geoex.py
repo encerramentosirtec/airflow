@@ -192,16 +192,22 @@ class Geoex(GeoexHook):
                 print('falha ao consultar histórico de relatórios')
                 return {'sucess': False, 'status_code': r.status_code, 'data': r.content}
             
-            for i in ids:
-                if i['status'] not in cancelados:
-                    print('Cancelando relatório ativo: ', i['nome'])
-                    endpoint = 'Relatorio/Cancelar'
-                    req = {"WorkerRelatorioId": i['id']}
-                    r = self.hook.run('POST', endpoint, json=req)
+            try:
+                for i in ids:
+                    if i['status'] not in cancelados:
+                        print('Cancelando relatório ativo: ', i['nome'])
+                        endpoint = 'Relatorio/Cancelar'
+                        req = {"WorkerRelatorioId": i['id']}
+                        r = self.hook.run('POST', endpoint, json=req)
 
-                    ativos.append(True)
-                else:
-                    ativos.append(False)
+                        ativos.append(True)
+                    else:
+                        ativos.append(False)
+            except Exception as e:
+                print('Erro ao cancelar relatório ativo: ', e)
+                print(ids)
+                print(r.text)
+                return {'sucess': False, 'status_code': r.status_code, 'data': r.content}
             
             continuar = any(ativos)
             ativos.clear()
