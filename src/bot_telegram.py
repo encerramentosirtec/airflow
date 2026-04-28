@@ -73,7 +73,7 @@ class Bots:
             return True
 
     def push_cookie(self):
-        data_new = abre_json('assets/auth_geoex/cookie_heli.json')
+        data_new = abre_json('assets/auth_geoex/cookie_ccm.json')
         
         Variable.set(key='cookie_manut', value=data_new['cookie'])
         Variable.set(key='gxsessao_manut', value=data_new['gxsessao'])
