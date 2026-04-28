@@ -205,8 +205,6 @@ class Geoex(GeoexHook):
                         ativos.append(False)
             except Exception as e:
                 print('Erro ao cancelar relatório ativo: ', e)
-                print(ids)
-                print(r.text)
                 return {'sucess': False, 'status_code': r.status_code, 'data': r.content}
             
             continuar = any(ativos)
