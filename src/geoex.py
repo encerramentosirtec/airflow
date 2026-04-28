@@ -174,7 +174,7 @@ class Geoex(GeoexHook):
     def baixar_relatorio(self, id_relatorio, name = None, file_path = 'downloads'):
         continuar = True
         ativos = []
-        cancelados = [3,4,6]
+        cancelados = [3,4,6,41]
 
         while continuar:
             print('Verificando relatórios ativos')
