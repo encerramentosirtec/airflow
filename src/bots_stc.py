@@ -205,9 +205,9 @@ class Bots:
 
         #df['CICLO'] = df['TITULO'].apply(lambda x: x.split(' / ')[4]).map(self.meses)
 
-        '''hros = '1o8byF41_AmcXFykW8IcyN7fZkUmRZpICiJWqlpbT82M'
+        hros = '1o8byF41_AmcXFykW8IcyN7fZkUmRZpICiJWqlpbT82M'
         sh = self.GS_SERVICE.open_by_key(hros)
-        ws = sh.worksheet('BASE_GEOEX')
+        '''ws = sh.worksheet('BASE_GEOEX')
         ws.clear()
         
         while True:
