@@ -184,7 +184,7 @@ class Bots:
         @self.bot.message_handler(commands=['cookie_hugo'])
         def envia_cookie(message):
             msg = self.bot.send_message(message.chat.id, '''
-            Atualizando informações de acesso ao Geoex.
+            Atualizando informações de acesso ao Geoex - Hugo.
             Insira o Cookie:
             ''')
             self.bot.register_next_step_handler(msg, read_cookie)
@@ -221,7 +221,7 @@ class Bots:
         @self.bot.message_handler(commands=['cookie_heli'])
         def envia_cookie(message):
             msg = self.bot.send_message(message.chat.id, '''
-            Atualizando informações de acesso ao Geoex.
+            Atualizando informações de acesso ao Geoex - Heli.
             Insira o Cookie:
             ''')
             self.bot.register_next_step_handler(msg, read_cookie)
