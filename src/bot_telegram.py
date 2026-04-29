@@ -187,19 +187,19 @@ class Bots:
             Atualizando informações de acesso ao Geoex - Hugo.
             Insira o Cookie:
             ''')
-            self.bot.register_next_step_handler(msg, read_cookie)
+            self.bot.register_next_step_handler(msg, read_cookie_hugo)
 
-        def read_cookie(message):
+        def read_cookie_hugo(message):
             self.cookie = message.text
             msg = self.bot.send_message(message.chat.id, 'Insira Gxbot:')
-            self.bot.register_next_step_handler(msg, read_gxbot)
+            self.bot.register_next_step_handler(msg, read_gxbot_hugo)
 
-        def read_gxbot(message):
+        def read_gxbot_hugo(message):
             self.gxbot = message.text
             msg = self.bot.send_message(message.chat.id, 'Insira Gxsessao:')
-            self.bot.register_next_step_handler(msg, read_gxsessao)
+            self.bot.register_next_step_handler(msg, read_gxsessao_hugo)
 
-        def read_gxsessao(message):
+        def read_gxsessao_hugo(message):
             self.gxsessao = message.text
             try:
                 cookie_valido = self.testa_cookie(c=self.cookie, g=self.gxsessao, gb=self.gxbot)
@@ -224,19 +224,19 @@ class Bots:
             Atualizando informações de acesso ao Geoex - Heli.
             Insira o Cookie:
             ''')
-            self.bot.register_next_step_handler(msg, read_cookie)
+            self.bot.register_next_step_handler(msg, read_cookie_heli)
 
-        def read_cookie(message):
+        def read_cookie_heli(message):
             self.cookie = message.text
             msg = self.bot.send_message(message.chat.id, 'Insira Gxbot:')
-            self.bot.register_next_step_handler(msg, read_gxbot)
+            self.bot.register_next_step_handler(msg, read_gxbot_heli)
 
-        def read_gxbot(message):
+        def read_gxbot_heli(message):
             self.gxbot = message.text
             msg = self.bot.send_message(message.chat.id, 'Insira Gxsessao:')
-            self.bot.register_next_step_handler(msg, read_gxsessao)
+            self.bot.register_next_step_handler(msg, read_gxsessao_heli)
 
-        def read_gxsessao(message):
+        def read_gxsessao_heli(message):
             self.gxsessao = message.text
             try:
                 cookie_valido = self.testa_cookie(c=self.cookie, g=self.gxsessao, gb=self.gxbot)
