@@ -17,7 +17,7 @@ default_args = {
 with DAG('controladora_relatorios_manut',
         default_args = default_args,
         start_date=datetime(2026, 4, 17, tzinfo=timezone("America/Sao_Paulo")),
-        schedule = '30 7-22 * * 1-6',
+        schedule = '/20 7-22 * * 1-6',
         tags = ['aux', 'relatorios', 'manut', 'geoex'],
         catchup = False,
         on_failure_callback=[
