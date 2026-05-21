@@ -174,7 +174,7 @@ class Geoex(GeoexHook):
     def baixar_relatorio(self, id_relatorio, name = None, file_path = 'downloads'):
         continuar = True
         ativos = []
-        cancelados = [3,4,6,41]
+        cancelados = [4,6,179]
         finalizados = [3,41]
 
         while continuar:
@@ -194,7 +194,7 @@ class Geoex(GeoexHook):
             
             try:
                 for i in ids:
-                    if i['status'] not in cancelados:
+                    if i['status'] not in cancelados and i['status'] not in finalizados:
                         print('Cancelando relatório ativo: ', i['nome'])
                         endpoint = 'Relatorio/Cancelar'
                         req = {"WorkerRelatorioId": i['id']}
