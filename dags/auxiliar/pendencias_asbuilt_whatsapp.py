@@ -34,8 +34,8 @@ query = """
 DF_CONTATOS = CLIENT_BIGQUERY.query_bigquery_table(query)
 
 CONTATOS_SUPERVISORES = DF_CONTATOS.query("FUNCAO == 'SUPERVISOR'").set_index('NOME')['TELEFONE'].to_dict()
-CONTATOS_COORD = DF_CONTATOS.query("FUNCAO == 'COORDENADOR'").set_index('NOME')['TELEFONE'].to_dict()
-CONTATOS_GERENTES = DF_CONTATOS.query("FUNCAO == 'GERENTE'").set_index('NOME')['TELEFONE'].to_dict()
+CONTATOS_COORD = DF_CONTATOS.query("FUNCAO == 'COORDENADOR'").set_index('REGIAO')['TELEFONE'].to_dict()
+CONTATOS_GERENTES = DF_CONTATOS.query("FUNCAO == 'GERENTE'").set_index('REGIAO')['TELEFONE'].to_dict()
 
 
 MAP_UNIDADE = {
@@ -183,7 +183,7 @@ def enviar_pendencias_v6_geral(df):
         ENVIA PENDENCIAS NA V6 GERAL POR UNIDADE
 
     """
-    mensagem = f"⚠️ *PENDÊNCIA DE MOVIMENTAÇÃO DE MATERIAL* ⚠️\n\n"
+    mensagem = f"⚠️ *PENDÊNCIA DE MOVIMENTAÇÃO DE MATERIAL NA V6* ⚠️\n\n"
 
     for gerencia in df['GERENCIA'].unique():
         df_gerencia = df.query(f"GERENCIA == '{gerencia}'").sort_values(by="VALOR", ascending=False)
@@ -213,8 +213,8 @@ def enviar_pendencias_v6_geral(df):
         if x is not None
     ]
 
-    r = WAHA.send_group_message("120363071699650663", mensagem, mensoes)  # GRUPO COORD
-    # r = WAHA.send_group_message("120363409216677503", mensagem, "557781010127")  # GRUPO TESTE
+    # r = WAHA.send_group_message("120363071699650663", mensagem, mensoes)  # GRUPO COORD
+    r = WAHA.send_group_message("120363409216677503", mensagem, ["557781010127"])  # GRUPO TESTE
     return r
 
 
@@ -250,7 +250,7 @@ def enviar_pendencias_supervisores(df_asbuilt, df_v6):
         q_df_v6 = df_v6.query(f"SUPERVISOR == '{supervisor}'").sort_values(by="VALOR", ascending=False)
 
         if contato_supervisor:
-            mensagem = f"⚠️ Projetos com pendência de *MOVIMENTAÇÃO DE MATERIAL*: ⚠️"
+            mensagem = f"⚠️ Projetos com pendência de *MOVIMENTAÇÃO DE MATERIAL* na V6: ⚠️"
             for i in q_df_v6.itertuples():
                 mensagem += f"\n\nProjeto: {i.PROJETO}\nQtd. de materiais: {i.QTD_MATERIAL} unidades\nValor do projeto: R$ {i.VALOR:,.0f}\n".replace(",", ".")
             WAHA.send_private_message(contato_supervisor, mensagem)
@@ -343,7 +343,7 @@ def leitura_base_movimentacao():
             SUPERVISOR,
             COUNT(MATERIAL) AS QTD_MATERIAL
         FROM JUNCAO
-        WHERE CHECK_FECHAMENTO = 'Pendente'
+        WHERE MOV_ALMOX = 'FALSE'
             AND UNIDADE IS NOT NULL
             AND PROJETO IS NOT NULL
         GROUP BY UNIDADE, SETOR, PROJETO, SUPERVISOR
@@ -402,8 +402,8 @@ def envia_pendencia_supervisores():
 
 if __name__ == "__main__":
     # envia_pendencia_asbuilt()
-    # envia_pendencia_movimentacao()
-    envia_pendencia_supervisores()
+    envia_pendencia_movimentacao()
+    # envia_pendencia_supervisores()
 
 
 

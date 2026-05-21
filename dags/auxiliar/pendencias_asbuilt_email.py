@@ -113,6 +113,9 @@ def gera_graficos(df):
     ax1_linha.set_ylabel("Média Dias Atraso", color="black")
     ax1_linha.tick_params(axis='y', labelcolor='black')
 
+    max_dias = df_gerencia['DIAS_ATRASO'].max()
+    ax1_linha.set_ylim(0, max_dias + max_dias*0.5)
+
     for x, y in zip(range(len(df_gerencia)), df_gerencia["DIAS_ATRASO"]):
         ax1_linha.text(
             x,
@@ -178,6 +181,9 @@ def gera_graficos(df):
 
     ax2_linha.set_ylabel("Média Dias Atraso", color="black")
     ax2_linha.tick_params(axis='y', labelcolor='black')
+
+    max_dias = df_operacao['DIAS_ATRASO'].max()
+    ax2_linha.set_ylim(0, max_dias + max_dias*0.5)
 
     for x, y in zip(range(len(df_operacao)), df_operacao["DIAS_ATRASO"]):
         ax2_linha.text(
@@ -245,6 +251,9 @@ def gera_graficos(df):
 
     ax3_linha.set_ylabel("Média Dias Atraso", color="black")
     ax3_linha.tick_params(axis='y', labelcolor='black')
+
+    max_dias = df_supervisor['DIAS_ATRASO'].max()
+    ax3_linha.set_ylim(0, max_dias + max_dias*0.5)
 
     for x, y in zip(range(len(df_supervisor)), df_supervisor["DIAS_ATRASO"]):
         ax3_linha.text(
@@ -341,7 +350,7 @@ def enviar_email(df):
         """
     df_destinatários = CLIENT_BIGQUERY.query_bigquery_table(query)
     destinatarios = df_destinatários['EMAIL'].tolist()
-    destinatarios = destinatarios + ['gabriel.brito@sirtec.com.br', 'hugo.viana@sirtec.com.br']
+    destinatarios = destinatarios + ['gabriel.brito@sirtec.com.br', 'hugo.viana@sirtec.com.br', ]
 
     destinatarios = ["hugo.viana@sirtec.com.br"]
 
@@ -421,7 +430,7 @@ def enviar_email(df):
     <body>
     <h2>Indicadores Diários</h2>
 
-    <h3>Pendências As-Built</h3>
+    <h3>Pendências de As-Built</h3>
     <img src="cid:img_0">
 
         {tabela}
