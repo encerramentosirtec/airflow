@@ -422,7 +422,7 @@ class Bots_aux():
             <p>Prezados(as),
             <p>Segue relatório periódico contendo a lista de projetos reprovados desde a ultima atualização. Foram {tabela[1]} novas reprovações de um total de {tabela[2]}.
             <p>Em anexo segue relatório em CSV com todos dos projetos rejeitados<br><br>
-            <p><img src="cid:grafico" width="50%"></p><br>
+            <p><img src="cid:grafico" width="75%"></p><br>
             {tabela[0]}
         </body>
         </html>"""
