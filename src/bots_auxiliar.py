@@ -434,29 +434,24 @@ class Bots_aux():
         #message["Bcc"] = "heli.silva@sirtec.com.br"
         message["Subject"] = "Relatório de rejeições de pastas"
 
-        # Attach the HTML part
-        message.attach(MIMEText(html, "html"))
+        related_part = MIMEMultipart('related')
+        related_part.attach(MIMEText(html, "html"))
         
         with open(os.path.join(self.PATH,'downloads/grafico.png'), 'rb') as img:
                 msg_img = MIMEImage(img.read(), name=os.path.basename(os.path.join(self.PATH,'downloads/grafico.png')))
                 msg_img.add_header('Content-ID', f'<grafico>')
-                message.attach(msg_img)
+                msg_img.add_header('Content-Disposition', 'inline') # Adicione esta linha para maior compatibilidade
+                related_part.attach(msg_img)
 
-
-
-
+        message.attach(related_part)
+        
         with open(os.path.join(self.PATH,'downloads/rejeicoes.csv'), "rb") as fil:
             part = MIMEApplication(
                 fil.read(),
                 Name=basename(os.path.join(self.PATH,'downloads/rejeicoes.csv'))
             )
-        # After the file is closed
         part['Content-Disposition'] = 'attachment; filename="%s"' % basename(os.path.join(self.PATH,'downloads/rejeicoes.csv'))
         message.attach(part)
-        
-
-
-
         
         print('envia email')
         # Send the email
