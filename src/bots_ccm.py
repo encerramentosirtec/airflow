@@ -502,7 +502,7 @@ class Bots:
         data_frame = pd.DataFrame(projetos_pendente_asbuilt)
         data_frame[[1]] = data_frame[[1]].drop_duplicates()
         data_frame = data_frame.dropna()
-        print(data_frame)
+        display(data_frame)
 
         while True:
             try:
