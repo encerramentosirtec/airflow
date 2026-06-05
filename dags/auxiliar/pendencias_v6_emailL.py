@@ -327,7 +327,7 @@ def gera_graficos(df):
 
     plt.savefig(
         "assets/figures/pendencias_movimentacao.png",
-        dpi=300,
+        dpi=200,
         bbox_inches="tight"
     )
 
@@ -390,9 +390,7 @@ def enviar_email(df):
     destinatarios = df_destinatários['EMAIL'].tolist()
     destinatarios = destinatarios + ['gabriel.brito@sirtec.com.br', 'hugo.viana@sirtec.com.br', 'gessica.pereira@sirtec.com.br', 'brenda.moreira@sirtec.com.br']
 
-    destinatarios = [
-        "hugo.viana@sirtec.com.br"
-    ]
+    # destinatarios = ["hugo.viana@sirtec.com.br"]
 
 
     html = f"""
@@ -464,6 +462,15 @@ def enviar_email(df):
                 color: #888888;
             }}
 
+            img {{
+                width: 100%;
+                max-width: 100%;
+                height: auto;
+                display: block;
+                margin-top: 15px;
+                margin-bottom: 20px;
+            }}
+
         </style>
 
     </head>
@@ -508,34 +515,42 @@ if __name__ == "__main__":
 
 
 
-# default_args = {
-#     'depends_on_past' : False,
-#     'owner' : 'hugo',
-#     'retries' : 3,
-#     'retry_delay' : pendulum.duration(minutes=5)
-# }
+default_args = {
+    'depends_on_past' : False,
+    'owner' : 'hugo',
+    'retries' : 3,
+    'retry_delay' : pendulum.duration(minutes=5)
+}
 
 
-# with DAG(
-#     'enviar_email_movimentacoes_v6',
-#     schedule='0 9 * * 1-5',
-#     start_date=pendulum.today('America/Sao_Paulo'),
-#     catchup=False,
-#     default_args = default_args,
-#     max_active_runs = 1,
-#     tags = ['e-mail']
-# ):
+with DAG(
+    'enviar_email_movimentacoes_v6',
+    schedule='0 9 * * 1-5',
+    start_date=pendulum.today('America/Sao_Paulo'),
+    catchup=False,
+    default_args = default_args,
+    max_active_runs = 1,
+    tags = ['e-mail']
+):
         
-#     gera_relatorio = PythonOperator(
-#         task_id="gera_relatorio",
-#         python_callable=main,
-#     )
+    leitura = PythonOperator(
+        task_id="leitura_das_bases",
+        python_callable=leitura_base_asbuilt,
+    )
 
-#     enviar = PythonOperator(
-#         task_id="enviar_email",
-#         python_callable=main,
-#         trigger_rule="all_success",  # só roda se TODAS upstream tiverem sucesso
-#     )
+    graficos = PythonOperator(
+        task_id="gerar_graficos",
+        python_callable=gera_graficos,
+        op_kwargs={'df': DF_V6},
+        trigger_rule="all_success",  # só roda se TODAS upstream tiverem sucesso
+    )
+
+    enviar = PythonOperator(
+        task_id="enviar_email",
+        python_callable=enviar_email,
+        op_kwargs={'df': DF_V6},
+        trigger_rule="all_success",  # só roda se TODAS upstream tiverem sucesso
+    )
 
 
-#     gera_relatorio >> enviar
+    leitura >> graficos >> enviar

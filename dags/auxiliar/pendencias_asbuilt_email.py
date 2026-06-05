@@ -293,7 +293,7 @@ def gera_graficos(df):
 
     plt.savefig(
         "assets/figures/pendencias_asbuilt.png",
-        dpi=300,
+        dpi=200,
         bbox_inches="tight"
     )
 
@@ -350,9 +350,9 @@ def enviar_email(df):
         """
     df_destinatários = CLIENT_BIGQUERY.query_bigquery_table(query)
     destinatarios = df_destinatários['EMAIL'].tolist()
-    destinatarios = destinatarios + ['gabriel.brito@sirtec.com.br', 'hugo.viana@sirtec.com.br', ]
+    destinatarios = destinatarios + ['gabriel.brito@sirtec.com.br', 'hugo.viana@sirtec.com.br', 'gessica.pereira@sirtec.com.br', 'brenda.moreira@sirtec.com.br']
 
-    destinatarios = ["hugo.viana@sirtec.com.br"]
+    # destinatarios = ["hugo.viana@sirtec.com.br"]
 
     html = f"""
     <head>
@@ -421,6 +421,15 @@ def enviar_email(df):
                 margin-top: 30px;
                 font-size: 12px;
                 color: #888888;
+            }}
+
+            img {{
+                width: 100%;
+                max-width: 100%;
+                height: auto;
+                display: block;
+                margin-top: 15px;
+                margin-bottom: 20px;
             }}
 
         </style>

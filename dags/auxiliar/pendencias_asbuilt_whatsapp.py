@@ -183,9 +183,10 @@ def enviar_pendencias_v6_geral(df):
         ENVIA PENDENCIAS NA V6 GERAL POR UNIDADE
 
     """
-    mensagem = f"⚠️ *PENDÊNCIA DE MOVIMENTAÇÃO DE MATERIAL NA V6* ⚠️\n\n"
 
     for gerencia in df['GERENCIA'].unique():
+        mensagem = f"⚠️ *PENDÊNCIA DE MOVIMENTAÇÃO DE MATERIAL NA V6* ⚠️\n\n"
+        
         df_gerencia = df.query(f"GERENCIA == '{gerencia}'").sort_values(by="VALOR", ascending=False)
         mensagem += f"Gerência: *{gerencia}*\n\n"
 
@@ -201,21 +202,19 @@ def enviar_pendencias_v6_geral(df):
             mensagem += f"  💵 Valor total: R${df_coord['VALOR'].sum():,.0f}\n".replace(",", ".")
             mensagem += f"  @{contato_coord}\n\n"
 
-        mensagem += "-----------------------------------\n\n"
+        mensoes = [
+            x for x in (
+                    list(CONTATOS_COORD.values()) + list(CONTATOS_GERENTES.values())
+                )
+                if x is not None
+            ]
+
+        # r = WAHA.send_group_message("120363071699650663", mensagem, mensoes)  # GRUPO COORD
+        r = WAHA.send_group_message("120363409216677503", mensagem, ["557781010127"])  # GRUPO TESTE
         
-    # print(mensagem)
 
 
-    mensoes = [
-        x for x in (
-            list(CONTATOS_COORD.values()) + list(CONTATOS_GERENTES.values())
-        )
-        if x is not None
-    ]
 
-    # r = WAHA.send_group_message("120363071699650663", mensagem, mensoes)  # GRUPO COORD
-    r = WAHA.send_group_message("120363409216677503", mensagem, ["557781010127"])  # GRUPO TESTE
-    return r
 
 
 def enviar_pendencias_supervisores(df_asbuilt, df_v6):
@@ -226,13 +225,12 @@ def enviar_pendencias_supervisores(df_asbuilt, df_v6):
     """
     for supervisor in df_asbuilt['SUPERVISOR'].unique():
         contato_supervisor = CONTATOS_SUPERVISORES.get(supervisor, '')
-        # contato_supervisor = '557781010127'
 
         if contato_supervisor:
 
             q_df_asbuilt = df_asbuilt.query(f"SUPERVISOR == '{supervisor}'").sort_values(by="VALOR TOTAL", ascending=False)
             
-            mensagem = f"⚠️ Projetos com pendência de *ASBUILT*: ⚠️\n"
+            mensagem = f"⚠️ Projetos com pendência de *ASBUILT*: {supervisor}⚠️\n"
             for i in q_df_asbuilt.itertuples():
                 if i.DIAS_ATRASO >= 7:
                     mensagem += f"\n\nProjeto: {i.PROJETO}\nPendência: {i.PENDENCIAS}\nValor: R$ {i._8:,.0f}\nDias de atraso: {i.DIAS_ATRASO} 🔴\n".replace(",", ".")
@@ -242,18 +240,21 @@ def enviar_pendencias_supervisores(df_asbuilt, df_v6):
                     mensagem += f"\n\nProjeto: {i.PROJETO}\nPendência: {i.PENDENCIAS}\nValor: R$ {i._8:,.0f}\nDias de atraso: {i.DIAS_ATRASO} 🟢\n".replace(",", ".")
 
             WAHA.send_private_message(contato_supervisor, mensagem)
+            # WAHA.send_private_message('557781010127', mensagem)
 
     for supervisor in df_v6['SUPERVISOR'].unique():
         contato_supervisor = CONTATOS_SUPERVISORES.get(supervisor, '')
-        # contato_supervisor = '557781010127'
-
-        q_df_v6 = df_v6.query(f"SUPERVISOR == '{supervisor}'").sort_values(by="VALOR", ascending=False)
 
         if contato_supervisor:
-            mensagem = f"⚠️ Projetos com pendência de *MOVIMENTAÇÃO DE MATERIAL* na V6: ⚠️"
+
+            q_df_v6 = df_v6.query(f"SUPERVISOR == '{supervisor}'").sort_values(by="VALOR", ascending=False)
+    
+            mensagem = f"⚠️ Projetos com pendência de *MOVIMENTAÇÃO DE MATERIAL* na V6: {supervisor}⚠️"
             for i in q_df_v6.itertuples():
                 mensagem += f"\n\nProjeto: {i.PROJETO}\nQtd. de materiais: {i.QTD_MATERIAL} unidades\nValor do projeto: R$ {i.VALOR:,.0f}\n".replace(",", ".")
+
             WAHA.send_private_message(contato_supervisor, mensagem)
+            # WAHA.send_private_message('557781010127', mensagem)
 
 
 def enviar_pendencias_gerentes(df_asbuilt, df_v6):
@@ -344,6 +345,7 @@ def leitura_base_movimentacao():
             COUNT(MATERIAL) AS QTD_MATERIAL
         FROM JUNCAO
         WHERE MOV_ALMOX = 'FALSE'
+            AND CHECK_FECHAMENTO = 'Pendente'
             AND UNIDADE IS NOT NULL
             AND PROJETO IS NOT NULL
         GROUP BY UNIDADE, SETOR, PROJETO, SUPERVISOR
@@ -387,7 +389,7 @@ def envia_pendencia_movimentacao():
     print(r)
 
 
-def envia_pendencia_supervisores():
+def pendencia_supervisores():
     df_v6 = leitura_base_movimentacao() 
     df_v6['GERENCIA'] = df_v6['UNIDADE'].map(MAP_GERENCIA).fillna('')
     df_v6['UNIDADE'] = df_v6['UNIDADE'].map(MAP_UNIDADE).fillna(df_v6['UNIDADE'])
@@ -402,8 +404,8 @@ def envia_pendencia_supervisores():
 
 if __name__ == "__main__":
     # envia_pendencia_asbuilt()
-    envia_pendencia_movimentacao()
-    # envia_pendencia_supervisores()
+    # envia_pendencia_movimentacao()
+    pendencia_supervisores()
 
 
 
