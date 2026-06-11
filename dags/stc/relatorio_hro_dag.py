@@ -38,12 +38,14 @@ with DAG('relatorio-hro',
     
     relatorio = PythonOperator(
         task_id='relatorio',
-        python_callable=bot.relatorio
+        python_callable=bot.relatorio,
+        execution_timeout=pendulum.duration(minutes=30)
     )
     
     tratamento = PythonOperator(
         task_id='tratamento',
-        python_callable=bot.tratamento
+        python_callable=bot.tratamento,
+        execution_timeout=pendulum.duration(minutes=2)
     )
 
     relatorio >> tratamento

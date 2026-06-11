@@ -29,7 +29,8 @@ with DAG('rejeicoes',
 
     relatorio = PythonOperator(
         task_id='relatorio',
-        python_callable=email.relatorio
+        python_callable=email.relatorio,
+        execution_timeout=duration(minutes=2)
     )
     
     '''tratamento = PythonOperator(
@@ -39,7 +40,8 @@ with DAG('rejeicoes',
     
     enviaEmail = PythonOperator(
         task_id='enviaEmail',
-        python_callable=email.enviaEmail
+        python_callable=email.enviaEmail,
+        execution_timeout=duration(minutes=3)
     )
 
     relatorio >> enviaEmail

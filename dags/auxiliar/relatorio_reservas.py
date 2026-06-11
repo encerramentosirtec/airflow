@@ -35,12 +35,14 @@ with DAG('relatorio-reservas',
     
     relatorio = PythonOperator(
         task_id='relatorio',
-        python_callable=bot.relatorio_reservas
+        python_callable=bot.relatorio_reservas,
+        execution_timeout=pendulum.duration(minutes=5)
     )
     
     tratamento = PythonOperator(
         task_id='tratamento',
-        python_callable=bot.salvar_reservas
+        python_callable=bot.salvar_reservas,
+        execution_timeout=pendulum.duration(minutes=2)
     )
 
     relatorio >> tratamento

@@ -30,7 +30,8 @@ with DAG('asbuilt',
         task_id='asbuilt',
         python_callable=bot.asbuilt,
         retries=2,
-        retry_delay=duration(seconds=20)
+        retry_delay=duration(seconds=20),
+        execution_timeout=duration(hours=2)
     )
 
     asbuilt
