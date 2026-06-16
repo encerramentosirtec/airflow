@@ -348,7 +348,7 @@ class Bots:
         database = 'assets/db/db.csv'
 
         df = pd.read_csv(database)
-        zerados = [1193199, 1168391, 1222485, 1231902, 1183205, 1227488, 1228610, 1230135, 1231959, 972378, 1156314, 1131643, 1207605, 1201395, 1195842, 1247528, 1207189, 1145820, 1102510, 1163605, 1143926, 1214254, 1125940]
+        zerados = [1125950, 1193199, 1168391, 1222485, 1231902, 1183205, 1227488, 1228610, 1230135, 1231959, 972378, 1156314, 1131643, 1207605, 1201395, 1195842, 1247528, 1207189, 1145820, 1102510, 1163605, 1143926, 1214254, 1125940]
         excluidos = [1130987]
 
         x = 1
@@ -410,7 +410,10 @@ class Bots:
                 if not(status_pasta in status_aceitos):
                     try:
                         if int(i) in zerados:
-                            vl_projeto = ''
+                            if int(i) == 1125950:
+                                vl_projeto = 651937.25
+                            else:
+                                vl_projeto = ''
                         else:
                             vl_projeto = espelho_CCM.loc[espelho_CCM["PROJETO"] == int(i), "VALOR"].values[0]
                     except Exception as e:
