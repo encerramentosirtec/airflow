@@ -6,7 +6,7 @@ class Waha:
         self.header = {
             "Accept": "application/json",
             "Content-Type": "application/json",
-            "X-Api-Key": "8936ee414309428ca1ba6065a207ad37"
+            "X-Api-Key": "9d2e7c31281f4812b401ee46821cac85"
         }
 
     def send_private_message(self, chat_id, text, session="default"):

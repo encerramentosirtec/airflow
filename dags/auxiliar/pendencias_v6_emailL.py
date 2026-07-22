@@ -390,7 +390,7 @@ def enviar_email(df):
     destinatarios = df_destinatários['EMAIL'].tolist()
     destinatarios = destinatarios + ['gabriel.brito@sirtec.com.br', 'hugo.viana@sirtec.com.br', 'gessica.pereira@sirtec.com.br', 'brenda.moreira@sirtec.com.br']
 
-    # destinatarios = ["hugo.viana@sirtec.com.br"]
+    destinatarios = ["hugo.viana@sirtec.com.br"]
 
 
     html = f"""
@@ -516,6 +516,8 @@ if __name__ == "__main__":
 
 
 default_args = {
+    'schedule_interval' : '0 10 * * 1-5',
+    'start_date' : pendulum.today('America/Sao_Paulo'),
     'depends_on_past' : False,
     'owner' : 'hugo',
     'retries' : 3,

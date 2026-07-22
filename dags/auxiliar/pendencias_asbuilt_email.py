@@ -352,7 +352,7 @@ def enviar_email(df):
     destinatarios = df_destinatários['EMAIL'].tolist()
     destinatarios = destinatarios + ['gabriel.brito@sirtec.com.br', 'hugo.viana@sirtec.com.br', 'gessica.pereira@sirtec.com.br', 'brenda.moreira@sirtec.com.br']
 
-    # destinatarios = ["hugo.viana@sirtec.com.br"]
+    destinatarios = ["hugo.viana@sirtec.com.br"]
 
     html = f"""
     <head>
@@ -490,7 +490,7 @@ default_args = {
 
 with DAG(
     'enviar_email_pendencia_asbuilt',
-    schedule='0 9 * * 1-5',
+    schedule='30 10 * * 1-5',
     start_date=pendulum.today('America/Sao_Paulo'),
     catchup=False,
     default_args = default_args,

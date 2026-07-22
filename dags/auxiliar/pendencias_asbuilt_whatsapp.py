@@ -239,7 +239,8 @@ def enviar_pendencias_supervisores(df_asbuilt, df_v6):
                 else:
                     mensagem += f"\n\nProjeto: {i.PROJETO}\nPendência: {i.PENDENCIAS}\nValor: R$ {i._8:,.0f}\nDias de atraso: {i.DIAS_ATRASO} 🟢\n".replace(",", ".")
 
-            WAHA.send_private_message(contato_supervisor, mensagem)
+            r = WAHA.send_private_message(contato_supervisor, mensagem)
+            print(r)
             # WAHA.send_private_message('557781010127', mensagem)
 
     for supervisor in df_v6['SUPERVISOR'].unique():
@@ -253,7 +254,8 @@ def enviar_pendencias_supervisores(df_asbuilt, df_v6):
             for i in q_df_v6.itertuples():
                 mensagem += f"\n\nProjeto: {i.PROJETO}\nQtd. de materiais: {i.QTD_MATERIAL} unidades\nValor do projeto: R$ {i.VALOR:,.0f}\n".replace(",", ".")
 
-            WAHA.send_private_message(contato_supervisor, mensagem)
+            r = WAHA.send_private_message(contato_supervisor, mensagem)
+            print(r)
             # WAHA.send_private_message('557781010127', mensagem)
 
 
@@ -429,38 +431,38 @@ default_args = {
 }
 
 
-with DAG(
-    'enviar_asbuilt',
-    schedule='0 9 * * 1-5',
-    start_date=pendulum.today('America/Sao_Paulo'),
-    catchup=False,
-    default_args = default_args,
-    max_active_runs = 1,
-):
+# with DAG(
+#     'enviar_asbuilt',
+#     schedule='0 9 * * 1-5',
+#     start_date=pendulum.today('America/Sao_Paulo'),
+#     catchup=False,
+#     default_args = default_args,
+#     max_active_runs = 1,
+# ):
         
-    gera_relatorio = PythonOperator(
-        task_id="envia_pendencia_asbuilt",
-        python_callable=envia_pendencia_asbuilt,
-    )
+#     gera_relatorio = PythonOperator(
+#         task_id="envia_pendencia_asbuilt",
+#         python_callable=envia_pendencia_asbuilt,
+#     )
 
-    envia_pendencia_asbuilt
-
-
-
-with DAG(
-    'enviar_movimentacoes_v6',
-    schedule='0 9 * * 1-5',
-    start_date=pendulum.today('America/Sao_Paulo'),
-    catchup=False,
-    default_args = default_args,
-    max_active_runs = 1,
-):
-
-    envienvia_pendencia_movimentacao = PythonOperator(
-        task_id="envia_pendencia_movimentacao",
-        python_callable=envia_pendencia_movimentacao,
-        trigger_rule="all_success",  # só roda se TODAS upstream tiverem sucesso
-    )
+#     envia_pendencia_asbuilt
 
 
-    envia_pendencia_movimentacao
+
+# with DAG(
+#     'enviar_movimentacoes_v6',
+#     schedule='0 9 * * 1-5',
+#     start_date=pendulum.today('America/Sao_Paulo'),
+#     catchup=False,
+#     default_args = default_args,
+#     max_active_runs = 1,
+# ):
+
+#     envienvia_pendencia_movimentacao = PythonOperator(
+#         task_id="envia_pendencia_movimentacao",
+#         python_callable=envia_pendencia_movimentacao,
+#         trigger_rule="all_success",  # só roda se TODAS upstream tiverem sucesso
+#     )
+
+
+#     envia_pendencia_movimentacao

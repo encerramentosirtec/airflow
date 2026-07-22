@@ -42,3 +42,4 @@ notebook.ipynb
 desktop.ini
 airflow.db-shm
 airflow.db-wal
+sessions/
