@@ -527,7 +527,7 @@ default_args = {
 
 with DAG(
     'enviar_email_movimentacoes_v6',
-    schedule='0 9 * * 1-5',
+    schedule='0 10 * * 1-5',
     start_date=pendulum.today('America/Sao_Paulo'),
     catchup=False,
     default_args = default_args,

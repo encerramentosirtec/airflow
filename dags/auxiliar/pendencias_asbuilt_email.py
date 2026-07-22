@@ -508,12 +508,14 @@ with DAG(
     gera_graficos = PythonOperator(
         task_id="gera_graficos",
         python_callable=gera_graficos,
+        op_kwargs={'df': DF_ASBUILT},
         trigger_rule="all_success",  # só roda se TODAS upstream tiverem sucesso
     )
 
     enviar_email = PythonOperator(
         task_id="enviar_email",
         python_callable=enviar_email,
+        op_kwargs={'df': DF_ASBUILT},
         trigger_rule="all_success",  # só roda se TODAS upstream tiverem sucesso
     )
 
