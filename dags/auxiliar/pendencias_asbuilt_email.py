@@ -16,8 +16,23 @@ from src.bigquery import BigQuery
 CLIENT_BIGQUERY = BigQuery()
 
 from src.envia_email import enviaEmail
+from src.email_dashboard import montar_dashboard_html
 
 DF_ASBUILT = None
+
+MAP_GERENCIA = {
+    'BARREIRAS': 'EXTREMO OESTE',
+    'IBOTIRAMA': 'EXTREMO OESTE',
+    'JEQUIÉ': 'SUDOESTE',
+    'CONQUISTA': 'SUDOESTE',
+    'ITAPETINGA': 'SUDOESTE',
+    'BRUMADO': 'OESTE',
+    'LIVRAMENTO': 'OESTE',
+    'GUANAMBI': 'OESTE',
+    'LAPA': 'OESTE',
+    'IRECÊ': 'CENTRO OESTE',
+}
+
 
 def gera_graficos(df):
 
@@ -300,40 +315,10 @@ def gera_graficos(df):
     plt.close()
 
 
-
 def enviar_email(df):
-
-    def formatar_moeda(valor):
-        return f"R$ {valor:,.0f}".replace(",", ".")
-
-    
-    def colorir_notas(val):
-        if val >= 7:
-            return 'background-color: red; color: white'
-        elif val >= 3:
-            return 'background-color: #FFC107; color: black'
-        else:
-            return 'background-color: green; color: white'
-        
-
-    df["VALOR TOTAL"] = df["VALOR TOTAL"].apply(formatar_moeda)
-    df = df.sort_values(by="DIAS_ATRASO", ascending=False).rename(columns={
-        "DIAS_ATRASO": "DIAS EM ATRASO"
-        })
-
-    tabela = df.style.applymap(colorir_notas, subset=['DIAS EM ATRASO'])\
-                .hide(axis='index')\
-                .to_html(
-                    index=False,
-                    border=0,
-                    classes="tabela"
-                )
-
-
-
-    # =========================================
-    # EMAIL
-    # =========================================
+    df = df.copy()
+    df['UNIDADE'] = df['UNIDADE'].map({'VITÓRIA DA CONQUISTA': 'CONQUISTA', 'BOM JESUS DA LAPA': 'LAPA'}).fillna(df['UNIDADE'])
+    df['OPERACAO'] = df['UNIDADE'].map(MAP_GERENCIA).fillna(df['OPERACAO'])
 
     query = """
         SELECT
@@ -354,101 +339,18 @@ def enviar_email(df):
 
     destinatarios = ["hugo.viana@sirtec.com.br"]
 
-    html = f"""
-    <head>
+    html = montar_dashboard_html(
+        df,
+        eyebrow='Encerramento de Obras &amp; Serviços',
+        titulo_html='Pendências de as-built',
+        texto_contagem='projetos com pendência de as-built',
+        escopo_titulo='Escopo',
+        escopo_texto='projetos da base de obras com pendência de as-built.',
+        col_valor='VALOR TOTAL',
+        col_dias='DIAS_ATRASO',
+    )
 
-        <style>
-
-            body {{
-                font-family: Arial, Helvetica, sans-serif;
-                font-size: 14px;
-                color: #333333;
-            }}
-
-            .container {{
-                max-width: 1100px;
-            }}
-
-            .titulo {{
-                font-size: 18px;
-                font-weight: bold;
-                color: #2f3b52;
-                margin-bottom: 10px;
-            }}
-
-            .descricao {{
-                margin-bottom: 20px;
-                color: #666666;
-            }}
-
-            .bloco {{
-                margin-top: 30px;
-            }}
-
-            .subtitulo {{
-                font-size: 15px;
-                font-weight: bold;
-                color: #2f3b52;
-                margin-bottom: 10px;
-            }}
-
-            table {{
-                border-collapse: collapse;
-                width: 100%;
-            }}
-
-            th {{
-                background-color: #f4f6f8;
-                color: #333333;
-                border: 1px solid #dddddd;
-                padding: 8px;
-                text-align: center;
-                font-size: 13px;
-            }}
-
-            td {{
-                border: 1px solid #e5e5e5;
-                padding: 8px;
-                text-align: center;
-                font-size: 13px;
-            }}
-
-            tr:nth-child(even) {{
-                background-color: #fafafa;
-            }}
-
-            .footer {{
-                margin-top: 30px;
-                font-size: 12px;
-                color: #888888;
-            }}
-
-            img {{
-                width: 100%;
-                max-width: 100%;
-                height: auto;
-                display: block;
-                margin-top: 15px;
-                margin-bottom: 20px;
-            }}
-
-        </style>
-
-    </head>
-
-    <body>
-    <h2>Indicadores Diários</h2>
-
-    <h3>Pendências de As-Built</h3>
-    <img src="cid:img_0">
-
-        {tabela}
-    </body>
-
-    """
-
-
-    enviaEmail('Relatório encerramento - Pendências As-Built', html, destinatarios, imagens_corpo_email=['assets/figures/pendencias_asbuilt.png'])
+    enviaEmail('Relatório encerramento - Pendências As-Built', html, destinatarios)
 
 
 
