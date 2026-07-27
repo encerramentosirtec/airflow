@@ -2,6 +2,7 @@ from airflow.sdk import DAG
 from airflow.providers.standard.operators.python import PythonOperator
 import pendulum
 from datetime import datetime
+import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -17,8 +18,6 @@ CLIENT_BIGQUERY = BigQuery()
 
 from src.envia_email import enviaEmail
 from src.email_dashboard import montar_dashboard_html
-
-DF_V6 = None
 
 MAP_UNIDADE = {
     'IBO': 'IBOTIRAMA',
@@ -58,7 +57,8 @@ MAP_GERENCIA = {
 }
 
 
-def gera_graficos(df):
+def gera_graficos(path):
+    df = pd.read_parquet(path)
 
     df_gerencia = (
         df.groupby("OPERACAO")
@@ -335,7 +335,8 @@ def gera_graficos(df):
     plt.close()
 
 
-def enviar_email(df):
+def enviar_email(path):
+    df = pd.read_parquet(path)
 
     query = """
         SELECT
@@ -369,27 +370,28 @@ def enviar_email(df):
 
 
 def leitura_base_asbuilt():
-    global DF_V6
-
     query = """
         SELECT
             *
-        FROM 
+        FROM
             `sirtec-472112.external_tables.obras_pendentes_mov`
         WHERE
             PROJETO IS NOT NULL
     """
 
-    DF_V6 = CLIENT_BIGQUERY.query_bigquery_table(query)
-    DF_V6['OPERACAO'] = DF_V6['UNIDADE'].map(MAP_GERENCIA).fillna('-')
-    DF_V6['DIAS'] = DF_V6['DIAS'].fillna(0)
+    df = CLIENT_BIGQUERY.query_bigquery_table(query)
+    df['OPERACAO'] = df['UNIDADE'].map(MAP_GERENCIA).fillna('-')
+    df['DIAS'] = df['DIAS'].fillna(0)
 
+    path = "/tmp/pendencias_v6_df.parquet"
+    df.to_parquet(path)
+    return path
 
 
 if __name__ == "__main__":
-    leitura_base_asbuilt()
-    gera_graficos(DF_V6)
-    enviar_email(DF_V6)
+    caminho = leitura_base_asbuilt()
+    gera_graficos(caminho)
+    enviar_email(caminho)
 
 
 
@@ -421,14 +423,14 @@ with DAG(
     graficos = PythonOperator(
         task_id="gerar_graficos",
         python_callable=gera_graficos,
-        op_kwargs={'df': DF_V6},
+        op_kwargs={'path': "{{ ti.xcom_pull(task_ids='leitura_das_bases') }}"},
         trigger_rule="all_success",  # só roda se TODAS upstream tiverem sucesso
     )
 
     enviar = PythonOperator(
         task_id="enviar_email",
         python_callable=enviar_email,
-        op_kwargs={'df': DF_V6},
+        op_kwargs={'path': "{{ ti.xcom_pull(task_ids='leitura_das_bases') }}"},
         trigger_rule="all_success",  # só roda se TODAS upstream tiverem sucesso
     )
 
