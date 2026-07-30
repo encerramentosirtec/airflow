@@ -508,3 +508,34 @@ default_args = {
     'retries' : 3,
     'retry_delay' : pendulum.duration(minutes=5)
 }
+
+
+with DAG(
+    'enviar_whatsapp_pendencias',
+    schedule='0 8,15 * * 1-5',
+    start_date=pendulum.today('America/Bahia'),
+    catchup=False,
+    default_args=default_args,
+    max_active_runs=1,
+    tags=['whatsapp'],
+):
+
+    tarefa_pendencia_geral = PythonOperator(
+        task_id="envia_imagem_pendencias_geral",
+        python_callable=envia_imagem_pendencias_geral,
+        trigger_rule="all_success",
+    )
+
+    tarefa_pendencia_asbuilt = PythonOperator(
+        task_id="envia_imagem_pendencias_asbuilt",
+        python_callable=envia_imagem_pendencias_asbuilt,
+        trigger_rule="all_success",
+    )
+
+    tarefa_pendencia_movimentacao = PythonOperator(
+        task_id="envia_imagem_pendencias_movimentacao",
+        python_callable=envia_imagem_pendencias_movimentacao,
+        trigger_rule="all_success",
+    )
+
+    tarefa_pendencia_geral >> tarefa_pendencia_asbuilt >> tarefa_pendencia_movimentacao
