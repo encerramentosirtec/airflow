@@ -14,8 +14,8 @@ sys.path.insert(0, PATH)
 from src.bigquery import BigQuery
 CLIENT_BIGQUERY = BigQuery()
 
-from src.waha import Waha
-WAHA = Waha()
+from src.evolution_api import EvolutionAPI
+EVO_API = EvolutionAPI()
 
 
 query = """
@@ -103,8 +103,7 @@ def envia_ranking_unidades_pend_asbuilt(df):
     mensagem += f"🥉 {df.groupby('SUPERVISOR')['VALOR TOTAL'].sum().nlargest(3).index[2]} - R$ {df.groupby('SUPERVISOR')['VALOR TOTAL'].sum().nlargest(3).values[2]:,.0f}\n".replace(",", ".")
 
 
-    WAHA.send_group_message("120363409216677503", mensagem, ["557781010127"])
-
+    EVO_API.send_group_message("120363409216677503", mensagem, ["557781010127"])
 
 def enviar_pendencias_asbuilt(df):
     """
@@ -131,8 +130,7 @@ def enviar_pendencias_asbuilt(df):
             else:
                 mensagem += f"Projeto: {i.PROJETO}\nSupervisor: {i.SUPERVISOR}\nValor: R$ {i._8:,.0f}\nDias de atraso: {i.DIAS_ATRASO} 🟢\n\n".replace(",", ".")
         
-        WAHA.send_group_message("120363409216677503", mensagem, [contato_coord, contato_gerente])
-
+        EVO_API.send_group_message("120363409216677503", mensagem, [contato_coord, contato_gerente])
 
 def enviar_pendencias_asbuilt_geral(df):
     """
@@ -172,10 +170,9 @@ def enviar_pendencias_asbuilt_geral(df):
         if x is not None
     ]
         
-    r = WAHA.send_group_message("120363071699650663", mensagem, mensoes)  # GRUPO COORD
-    # r = WAHA.send_group_message("120363409216677503", mensagem, "557781010127")  # GRUPO TESTE
+    r = EVO_API.send_group_message("120363071699650663", mensagem, mensoes)  # GRUPO COORD
+    # r = EVO_API.send_group_message("120363409216677503", mensagem, "557781010127")  # GRUPO TESTE
     return r
-
 
 def enviar_pendencias_v6_geral(df):
     """
@@ -209,14 +206,9 @@ def enviar_pendencias_v6_geral(df):
                 if x is not None
             ]
 
-        # r = WAHA.send_group_message("120363071699650663", mensagem, mensoes)  # GRUPO COORD
-        r = WAHA.send_group_message("120363409216677503", mensagem, ["557781010127"])  # GRUPO TESTE
+        # r = EVO_API.send_group_message("120363071699650663", mensagem, mensoes)  # GRUPO COORD
+        r = EVO_API.send_group_message("120363409216677503", mensagem, ["557781010127"])  # GRUPO TESTE
         
-
-
-
-
-
 def enviar_pendencias_supervisores(df_asbuilt, df_v6):
     """
 
@@ -239,9 +231,8 @@ def enviar_pendencias_supervisores(df_asbuilt, df_v6):
                 else:
                     mensagem += f"\n\nProjeto: {i.PROJETO}\nPendência: {i.PENDENCIAS}\nValor: R$ {i._8:,.0f}\nDias de atraso: {i.DIAS_ATRASO} 🟢\n".replace(",", ".")
 
-            r = WAHA.send_private_message(contato_supervisor, mensagem)
-            print(r)
-            # WAHA.send_private_message('557781010127', mensagem)
+            # r = EVO_API.send_private_message(contato_supervisor, mensagem)
+            EVO_API.send_text_message('557781010127', mensagem)
 
     for supervisor in df_v6['SUPERVISOR'].unique():
         contato_supervisor = CONTATOS_SUPERVISORES.get(supervisor, '')
@@ -254,9 +245,8 @@ def enviar_pendencias_supervisores(df_asbuilt, df_v6):
             for i in q_df_v6.itertuples():
                 mensagem += f"\n\nProjeto: {i.PROJETO}\nQtd. de materiais: {i.QTD_MATERIAL} unidades\nValor do projeto: R$ {i.VALOR:,.0f}\n".replace(",", ".")
 
-            r = WAHA.send_private_message(contato_supervisor, mensagem)
-            print(r)
-            # WAHA.send_private_message('557781010127', mensagem)
+            # r = EVO_API.send_private_message(contato_supervisor, mensagem)
+            EVO_API.send_private_message('557781010127', mensagem)
 
 
 def enviar_pendencias_gerentes(df_asbuilt, df_v6):
@@ -281,7 +271,7 @@ def enviar_pendencias_gerentes(df_asbuilt, df_v6):
                 else:
                     mensagem += f"\n\nProjeto: {i.PROJETO}\nPendência: {i.PENDENCIAS}\nValor: R$ {i._8:,.0f}\nDias de atraso: {i.DIAS_ATRASO} 🟢\n".replace(",", ".")
 
-            WAHA.send_private_message(contato_gerente, mensagem)
+            EVO_API.send_private_message(contato_gerente, mensagem)
 
     for operacao in df_v6['UNIDADE'].unique():
         contato_gerente = CONTATOS_GERENTES.get(operacao, '')
@@ -289,7 +279,7 @@ def enviar_pendencias_gerentes(df_asbuilt, df_v6):
             mensagem = f"⚠️ Projetos com pendência de *MOVIMENTAÇÃO DE MATERIAL* - {operacao}: ⚠️"
             for i in q_df_v6.itertuples():
                 mensagem += f"\n\nProjeto: {i.PROJETO}\nQtd. de materiais: {i.QTD_MATERIAL} unidades\nValor do projeto: R$ {i.VALOR:,.0f}\n".replace(",", ".")
-            WAHA.send_private_message(contato_gerente, mensagem)
+            EVO_API.send_private_message(contato_gerente, mensagem)
 
 
 def leitura_base_asbuilt():
