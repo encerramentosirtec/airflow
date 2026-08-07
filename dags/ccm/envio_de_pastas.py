@@ -21,7 +21,7 @@ with DAG('pastas',
         default_args = default_args,
         #default_view="graph",
         start_date=datetime(2026, 4, 16, tzinfo=timezone("America/Sao_Paulo")),
-        schedule = '0,30 6-22/2 * * 1-6',
+        schedule = '0 6-22/1 * * 1-6',
         max_active_runs = 1,
         tags = ['obra', 'geoex', 'pastas'],
         catchup = False) as dag:
