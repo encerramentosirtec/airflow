@@ -752,10 +752,10 @@ class Bots:
 
         for idx, projeto in enumerate(projetos, start=1):
             if projeto != '' and projeto[0] == 'B':
-                print(f'{self.hora_atual()}: Atualizando {idx}/{total} - {projeto}')
+                print(f'Atualizando {idx}/{total} - {projeto}')
                 valores.append(self.consulta_projeto(projeto))
             else:
-                print(f'{self.hora_atual()}: Pulando {idx}/{total} - linha vazia')
+                print(f'Pulando {idx}/{total} - linha vazia')
                 valores.append(['','',''])
 
 
