@@ -7,7 +7,7 @@ load_dotenv()
 
 class EvolutionAPI:
     def __init__(self):
-        self.api_url = "http://100.106.117.121:8081"
+        self.api_url = "http://localhost:8081"
         self.api_key = os.getenv("EVOLUTION_API_KEY")
         self.instance = "encerramento_sirtec"
 

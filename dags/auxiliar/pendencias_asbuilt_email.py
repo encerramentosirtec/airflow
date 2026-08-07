@@ -337,7 +337,7 @@ def enviar_email(path):
     destinatarios = df_destinatários['EMAIL'].tolist()
     destinatarios = destinatarios + ['gabriel.brito@sirtec.com.br', 'hugo.viana@sirtec.com.br', 'gessica.pereira@sirtec.com.br', 'brenda.moreira@sirtec.com.br']
 
-    destinatarios = ["hugo.viana@sirtec.com.br"]
+    # destinatarios = ["hugo.viana@sirtec.com.br"]
 
     html = montar_dashboard_html(
         df,

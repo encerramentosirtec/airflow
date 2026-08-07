@@ -32,7 +32,7 @@ EVO_API = EvolutionAPI()
 from src.email_dashboard import _estilo_gerencia
 
 PASTA_FIGURAS = os.path.join(PATH, "assets", "figures")
-NUMERO_TESTE = "557781010127"
+NUMERO_TESTE = "120363071699650663@g.us"
 
 
 query = """

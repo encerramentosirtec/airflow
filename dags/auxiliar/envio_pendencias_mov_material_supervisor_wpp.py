@@ -106,9 +106,13 @@ def leitura_base_materiais_pendentes():
                 MATERIAL,
                 DESCRICAO,
                 QUATIDADE AS QUANTIDADE,
-                TIPO_MOV
-            FROM JUNCAO
-            WHERE MOV_ALMOX = 'FALSE'
+                TIPO_MOV,
+                CHECK_FECHAMENTO
+            FROM 
+                JUNCAO
+            WHERE
+                MOV_ALMOX = 'FALSE' AND
+                CHECK_FECHAMENTO = 'Pendente'
             """
         df_materiais = CLIENT_BIGQUERY.query_bigquery_table(query)
         df_materiais['QUANTIDADE'] = pd.to_numeric(
@@ -328,7 +332,8 @@ def envia_imagens_pendencias_supervisores():
         caminho_tabela = _gera_tabela_supervisor(df_sup_projetos, df_sup_materiais, supervisor, caminho)
 
         EVO_API.send_image_from_file(
-            '5577981010127', caminho_tabela,
+            #'5577981010127', caminho_tabela,
+            contato_supervisor, caminho_tabela,
             caption=f"📦 Esses são os seus projetos com pendência de movimentação de material, {supervisor}",
         )
 
@@ -346,7 +351,7 @@ default_args = {
 
 
 with DAG(
-    'enviar_whatsapp_pendencias_supervisores',
+    'enviar_whatsapp_pendencias_mov_supervisores',
     schedule='0 8,15 * * 1-5',
     start_date=pendulum.today('America/Bahia'),
     catchup=False,

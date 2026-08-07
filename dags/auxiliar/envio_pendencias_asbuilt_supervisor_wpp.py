@@ -263,7 +263,7 @@ def envia_imagens_pendencias_asbuilt_supervisores():
         caminho_tabela = _gera_tabela_supervisor(df_sup_projetos, supervisor, caminho)
 
         EVO_API.send_image_from_file(
-            '5577981010127', caminho_tabela,
+            contato_supervisor, caminho_tabela,
             caption=f"📋 Esses são os seus projetos com pendência de as-built, {supervisor}",
         )
 
