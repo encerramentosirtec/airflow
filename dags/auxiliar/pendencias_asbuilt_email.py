@@ -330,7 +330,7 @@ def enviar_email(path):
         FROM `sirtec-472112.external_tables.contatos`
         WHERE
             EMPRESA = 'SIRTEC' AND
-            SETOR = 'OPERAÇÃO' AND
+            SETOR = 'Operação' AND
             EMAIL IS NOT NULL
         """
     df_destinatários = CLIENT_BIGQUERY.query_bigquery_table(query)
@@ -392,7 +392,7 @@ default_args = {
 
 with DAG(
     'enviar_email_pendencia_asbuilt',
-    schedule='30 10 * * 1-5',
+    schedule='00 10 * * 1-5',
     start_date=pendulum.today('America/Sao_Paulo'),
     catchup=False,
     default_args = default_args,

@@ -348,7 +348,7 @@ def enviar_email(path):
         FROM `sirtec-472112.external_tables.contatos`
         WHERE
             EMPRESA = 'SIRTEC' AND
-            SETOR = 'OPERAÇÃO' AND
+            SETOR = 'Operação' AND
             EMAIL IS NOT NULL
         """
     df_destinatários = CLIENT_BIGQUERY.query_bigquery_table(query)
