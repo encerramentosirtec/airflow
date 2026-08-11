@@ -83,7 +83,7 @@ class GoogleSheets:
         try:
             ws = sh.worksheet(aba)
             ws.clear()
-            ws.update([df.columns.values.tolist()] + df.values.tolist(), value_input_option=input_option)
+            ws.update([df.columns.values.tolist()] + df.fillna('').values.tolist(), value_input_option=input_option)
             return True
         except Exception as e:
             raise e
@@ -103,5 +103,3 @@ class GoogleSheets:
             return True
         except Exception as e:
             raise e
-
-
