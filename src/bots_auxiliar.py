@@ -303,7 +303,7 @@ class Bots_aux():
                 return 'background-color: green; color: white'
 
         df3 = df2[['SETOR','LOCALIDADE','USUARIO SOLICITACAO','PROJETO','VALOR TOTAL','DATA PENDENCIA','REPETICOES','OBSERVACAO']]
-        df3 = df3.style.applymap(colorir_notas, subset=['REPETICOES'])
+        df3 = df3.style.map(colorir_notas, subset=['REPETICOES'])
         
         if projetos[~projetos['PROJETO'].isin(antigos['PROJETO'])].shape[0]>0:
             print('atualizando historico')
