@@ -9,6 +9,7 @@ from pendulum import timezone
 from datetime import datetime
 from src.config import configs
 from src.geoex import Geoex, GeoexHook
+from src.google_sheets import GoogleSheets
 
 class Bots:
 
@@ -24,6 +25,8 @@ class Bots:
         self.GS_SERVICE = gspread.service_account(filename=os.path.join(os.getcwd(), f'assets/auth_google/{cred_file}'))
         self.br_tz = timezone("Brazil/East")
 
+        self.gs = GoogleSheets(cred_file)
+
         self.geoex_hook = GeoexHook(self.cookie)
 
         self.url_geo = 'Cadastro/ConsultarProjeto/Item'
@@ -35,6 +38,7 @@ class Bots:
             0 : 'NÃO ENVIADO',
             1 : 'CRIADO',
             6 : 'CANCELADO',
+            22 : 'PENDENTE',
             30 : 'ACEITO',
             31 : 'ACEITO COM RESTRIÇÕES',
             32 : 'REJEITADO',
@@ -665,3 +669,96 @@ class Bots:
 
         print('Pastas atualizadas!')
 
+
+
+    # Envio de Pastas
+    def hora_atual(self):
+        data_e_hora_atuais = datetime.now()
+        data_e_hora_em_texto = data_e_hora_atuais.strftime('%d/%m/%Y %H:%M')
+        return data_e_hora_em_texto
+
+    def consulta_projeto(self, projeto):
+        datazps09 = ''
+        try:
+            r = self.geoex.consultar_projeto(projeto)
+        except Exception as e:
+            print("erro inesperado ao consultar projeto", projeto, r)
+            raise e
+        
+        if r['sucess']:
+            r = r['data']
+            if r['DtZps09']!=None:
+                datazps09 = datetime.fromisoformat(r['DtZps09']).date().strftime("%d/%m/%Y")
+        else:
+            if r['status_code'] == 400:
+                return 'SEM ACESSO','SEM ACESSO','SEM ACESSO'
+            raise Exception(
+                    f"""
+                    Falha ao consultar {projeto}.
+                    Statuscode: {r['status_code']}
+                    Message: {r['data']}
+                    """
+                )
+            
+        
+        #ANALISTA	STATUS PASTA
+        data_pasta, status_pasta = '', ''
+        sleep(1)
+        try:
+            r = self.geoex.consultar_envio_de_pasta(r['ProjetoId'])
+        except Exception as e:
+            print("erro inesperado ao consultar projeto", projeto, r)
+            raise e
+        
+        if r['sucess']:
+            r = r['data']
+            if r['Envios']!=None:
+                for i in r['Envios']:
+                    if i['Empresa']=='SIRTEC/SINO':
+                        if i['Ultimo']!=None:
+                            status_pasta = self.statuspastaid.get(i['HistoricoStatus'],i['HistoricoStatus'])
+                        else:
+                            status_pasta = 'PENDENTE'
+                        
+                        if status_pasta in ['PENDENTE', 'CANCELADO', 'REJEITADO']:
+                            data_pasta = datetime.today().date().strftime("%d/%m/%Y")
+                        elif status_pasta == 'CRIADO':
+                            data_pasta = datetime.fromisoformat(i['Ultimo']['Data']).date().strftime("%d/%m/%Y")
+                        elif status_pasta == 'VALIDADO':
+                            data_pasta = datetime.fromisoformat(i['Ultimo']['DataValidacao']).date().strftime("%d/%m/%Y")
+                        elif status_pasta in ['ACEITO', 'ACEITO COM RESTRIÇÕES']:
+                            data_pasta = datetime.fromisoformat(i['Ultimo']['DataBaixa']).date().strftime("%d/%m/%Y")
+            else:
+                data_pasta = datetime.today().date().strftime("%d/%m/%Y")
+                status_pasta = 'PENDENTE'
+        else:
+            raise Exception(
+                    f"""
+                    Falha ao consultar {projeto}.
+                    Statuscode: {r['status_code']}
+                    Message: {r['data']}
+                    """
+                )
+                
+        return datazps09, data_pasta, status_pasta
+
+    def atualiza_pasta(self):
+        planilha = 'https://docs.google.com/spreadsheets/d/1p5hP6cXqZ67jUksUivGhiCd_F_wxP5PMpZIW8jxzHPA/edit?gid=445257240#gid=445257240'
+        sh = self.gs.le_planilha(planilha, 'PRAZO ENVIO', intervalo='A:H')
+        projetos = list(sh["PROJETO"])
+        total = len(projetos)
+        print(self.hora_atual() + ': Atualizando Projetos')
+        valores = []
+
+        for idx, projeto in enumerate(projetos, start=1):
+            if projeto != '' and projeto[0] == 'B':
+                print(f'Atualizando {idx}/{total} - {projeto}')
+                valores.append(self.consulta_projeto(projeto))
+            else:
+                print(f'Pulando {idx}/{total} - linha vazia')
+                valores.append(['','',''])
+
+
+        self.gs.escreve_planilha(planilha, 'PRAZO ENVIO', pd.DataFrame(valores, columns=['DATA ZPS09', 'DATA PASTA', 'STATUS PASTA']), range='I2:K', input_option='USER_ENTERED')
+        print(self.hora_atual() + ': Pastas atualizadas!')
+        #print(valores)

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-WORKDIR="/home/sirtec-fechamento/airflow"
-VENV="$WORKDIR/airenv/bin/activate"
+WORKDIR="/home/encerramento/airflow"
+VENV="$WORKDIR/venv/bin/activate"
 LOG_FILE="$WORKDIR/tunnel.log"
 LINK_FILE="$WORKDIR/tunnel_link.txt"
 

@@ -21,7 +21,7 @@ ASSINATURA = """
             </p>
         """
 
-def enviaEmail(assunto, corpo_email, enviar_para, anexos, imagens_corpo_email=None, copiar=None, copia_oculta=None):
+def enviaEmail(assunto, corpo_email, enviar_para, anexos=None, imagens_corpo_email=None, copiar=None, copia_oculta=None):
         
         """
             Constroi e envia e-mail usando e-mail padrão do setor de fechamento.
@@ -65,12 +65,13 @@ def enviaEmail(assunto, corpo_email, enviar_para, anexos, imagens_corpo_email=No
         msg_alternative.attach(MIMEText(corpo_completo, "html"))
         
         # Inclui imagems no corpo do e-mail
-        for i, img_path in enumerate(imagens_corpo_email):
-            with open(os.path.join(PATH, img_path), 'rb') as img:
-                msg_img = MIMEImage(img.read())
-                msg_img.add_header('Content-ID', f'<img_{i}>')
-                msg_img.add_header('Content-Disposition', 'inline', filename=os.path.basename(os.path.join(PATH,img_path)))
-                msg.attach(msg_img)
+        if imagens_corpo_email:
+            for i, img_path in enumerate(imagens_corpo_email):
+                with open(os.path.join(PATH, img_path), 'rb') as img:
+                    msg_img = MIMEImage(img.read())
+                    msg_img.add_header('Content-ID', f'<img_{i}>')
+                    msg_img.add_header('Content-Disposition', 'inline', filename=os.path.basename(os.path.join(PATH,img_path)))
+                    msg.attach(msg_img)
 
         # Inclui imagem da assinatura
         with open(os.path.join(PATH, 'assets/figures/assinatura_email.png'), 'rb') as img:
@@ -80,15 +81,16 @@ def enviaEmail(assunto, corpo_email, enviar_para, anexos, imagens_corpo_email=No
             msg.attach(msg_img)
 
         # Adiciona anexos
-        for anexo_path in anexos:
-            with open(os.path.join(PATH, anexo_path), "rb") as fil:
-                part = MIMEApplication(
-                    fil.read(),
-                    Name=basename(os.path.join(PATH,anexo_path))
-                )
+        if anexos:
+            for anexo_path in anexos:
+                with open(os.path.join(PATH, anexo_path), "rb") as fil:
+                    part = MIMEApplication(
+                        fil.read(),
+                        Name=basename(os.path.join(PATH,anexo_path))
+                    )
 
-            part['Content-Disposition'] = 'attachment; filename="%s"' % basename(os.path.join(PATH, anexo_path))
-            msg.attach(part)
+                part['Content-Disposition'] = 'attachment; filename="%s"' % basename(os.path.join(PATH, anexo_path))
+                msg.attach(part)
 
 
         # Envia e-mail

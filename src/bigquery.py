@@ -1,4 +1,5 @@
 from google.cloud import bigquery
+from google.oauth2 import service_account
 import pandas as pd
 
 import os
@@ -10,7 +11,19 @@ sys.path.insert(0, PATH)
 
 class BigQuery:
     def __init__(self):
-        self.client_bigquery = bigquery.Client.from_service_account_json(os.path.join(PATH, 'assets/auth_google/sirtec-bot.json'))
+        credentials = service_account.Credentials.from_service_account_file(
+            os.path.join(PATH, 'assets/auth_google/sirtec-bot.json'),
+            scopes=[
+                "https://www.googleapis.com/auth/cloud-platform",
+                "https://www.googleapis.com/auth/drive",
+            ],
+        )
+
+        self.client_bigquery = bigquery.Client(
+            credentials=credentials,
+            project=credentials.project_id,
+        )
+
 
     def overwrite_to_bigquery(self, df: pd.DataFrame, table_id: str):
         job_config = bigquery.LoadJobConfig(
@@ -30,3 +43,5 @@ class BigQuery:
         print(f"{len(df)} linhas carregadas em {table_id} (concatenada).")
 
 
+    def query_bigquery_table(self, query):
+        return self.client_bigquery.query(query).to_dataframe()
