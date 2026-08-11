@@ -280,6 +280,7 @@ class Bots_aux():
         projetos.to_csv(os.path.join(self.PATH,'downloads/anteriores.csv'), index=False, sep=';')#, thousands='.', decimal=',')
         
         #df2['VALOR TOTAL'] = 'R$ ' + df2['VALOR'].round(2).astype(str)
+        df2['VALOR'] = pd.to_numeric(df2['VALOR'], errors='coerce').fillna(0)
         df2['VALOR TOTAL'] = df2['VALOR'].apply(
             lambda x: format_currency(x, 'BRL', locale='pt_BR')
         )
