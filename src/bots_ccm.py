@@ -753,10 +753,10 @@ class Bots:
         for idx, projeto in enumerate(projetos, start=1):
             if projeto != '' and projeto[0] == 'B':
                 print(f'Atualizando {idx}/{total} - {projeto}')
-                valores.append([projeto] + list(self.consulta_projeto_pasta(projeto)))
+                valores.append((projeto,) + self.consulta_projeto_pasta(projeto))
             else:
                 print(f'Pulando {idx}/{total} - linha vazia')
-                valores.append(['','',''])
+                valores.append(['','','',''])
 
 
         self.gs.escreve_planilha(planilha, 'Status de Pastas - BOT', pd.DataFrame(valores, columns=['PROJETO','DATA ZPS09', 'DATA PASTA', 'STATUS PASTA']), range='A2:D', input_option='USER_ENTERED')
