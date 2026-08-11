@@ -677,7 +677,7 @@ class Bots:
         data_e_hora_em_texto = data_e_hora_atuais.strftime('%d/%m/%Y %H:%M')
         return data_e_hora_em_texto
 
-    def consulta_projeto_pasta_pasta(self, projeto):
+    def consulta_projeto_pasta(self, projeto):
         datazps09 = ''
         try:
             r = self.geoex.consultar_projeto(projeto)
