@@ -677,7 +677,7 @@ class Bots:
         data_e_hora_em_texto = data_e_hora_atuais.strftime('%d/%m/%Y %H:%M')
         return data_e_hora_em_texto
 
-    def consulta_projeto(self, projeto):
+    def consulta_projeto_pasta_pasta(self, projeto):
         datazps09 = ''
         try:
             r = self.geoex.consultar_projeto(projeto)
@@ -753,12 +753,12 @@ class Bots:
         for idx, projeto in enumerate(projetos, start=1):
             if projeto != '' and projeto[0] == 'B':
                 print(f'Atualizando {idx}/{total} - {projeto}')
-                valores.append(self.consulta_projeto(projeto))
+                valores.append([projeto] + list(self.consulta_projeto_pasta(projeto)))
             else:
                 print(f'Pulando {idx}/{total} - linha vazia')
                 valores.append(['','',''])
 
 
-        self.gs.escreve_planilha(planilha, 'PRAZO ENVIO', pd.DataFrame(valores, columns=['DATA ZPS09', 'DATA PASTA', 'STATUS PASTA']), range='I2:K', input_option='USER_ENTERED')
+        self.gs.escreve_planilha(planilha, 'Status de Pastas - BOT', pd.DataFrame(valores, columns=['DATA ZPS09', 'DATA PASTA', 'STATUS PASTA']), range='A2:D', input_option='USER_ENTERED')
         print(self.hora_atual() + ': Pastas atualizadas!')
         #print(valores)
