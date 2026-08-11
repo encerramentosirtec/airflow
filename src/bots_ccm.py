@@ -759,6 +759,6 @@ class Bots:
                 valores.append(['','',''])
 
 
-        self.gs.escreve_planilha(planilha, 'Status de Pastas - BOT', pd.DataFrame(valores, columns=['DATA ZPS09', 'DATA PASTA', 'STATUS PASTA']), range='A2:D', input_option='USER_ENTERED')
+        self.gs.escreve_planilha(planilha, 'Status de Pastas - BOT', pd.DataFrame(valores, columns=['PROJETO','DATA ZPS09', 'DATA PASTA', 'STATUS PASTA']), range='A2:D', input_option='USER_ENTERED')
         print(self.hora_atual() + ': Pastas atualizadas!')
         #print(valores)
