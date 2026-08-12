@@ -474,7 +474,7 @@ class Bots:
             x += 1
 
         data_frame = pd.DataFrame(projetos_pendente_asbuilt, columns=['UNIDADE', 'PROJETO', 'TÍTULO', 'VALOR DO PROJETO', 'DATA DE ENERGIZAÇÃO', 'SUPERVISOR', 'MUNICÍPIO'])
-        data_frame[[1]] = data_frame[[1]].drop_duplicates()
+        data_frame['PROJETO'] = data_frame['PROJETO'].drop_duplicates()
         data_frame = data_frame.dropna()
         pd.set_option('display.max_rows', None)
 
