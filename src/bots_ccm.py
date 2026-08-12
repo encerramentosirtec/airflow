@@ -479,10 +479,10 @@ class Bots:
         pd.set_option('display.max_rows', None)
 
         espelho_CCM = self.le_planilha_google(configs.espelho_CCM, "Base de dados (Espelho)", 'B2:Y')
-        espelho_CCM['PROJETO'] = pd.to_numeric(espelho_CCM['PROJETO'].str.replace('B-', ''), errors='coerce')
+        espelho_CCM['Projeto'] = pd.to_numeric(espelho_CCM['Projeto'].str.replace('B-', ''), errors='coerce')
         espelho_CCM = espelho_CCM.dropna()
 
-        data_frame['SUPERVISOR'] = data_frame['SUPERVISOR'].fillna(data_frame['PROJETO'].map(espelho_CCM.set_index('PROJETO')['Supervisor']))
+        data_frame['SUPERVISOR'] = data_frame['SUPERVISOR'].fillna(data_frame['PROJETO'].map(espelho_CCM.set_index('Projeto')['Supervisor']))
         data_frame.set_option('display.max_columns', None)
         print(data_frame)
 
