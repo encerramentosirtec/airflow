@@ -291,7 +291,7 @@ class Bots:
             obras_recepcionadas_geral.astype(str)
             .str.replace(' ', '')
             .str[2:9]
-            .astype(int)
+            .pipe(pd.to_numeric, errors='coerce')
         )
 
         obras_concluidas_sem_pasta_no_fechamento = []
