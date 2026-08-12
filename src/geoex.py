@@ -87,7 +87,6 @@ class Geoex(GeoexHook):
                 sleep(30)
                 
 
-
     def baixar_relatorio_old(self, id_relatorio, name = None, file_path = 'downloads'):
         endpoint = 'Relatorio/Agendar'
         json = {"Relatorio": id_relatorio}
@@ -171,6 +170,7 @@ class Geoex(GeoexHook):
 
         return {'sucess': True}
     
+
     def baixar_relatorio(self, id_relatorio, name = None, file_path = 'downloads'):
         continuar = True
         ativos = []
@@ -272,8 +272,6 @@ class Geoex(GeoexHook):
             else:
                 print('falha no download')
                 return {'sucess': False, 'status_code': r.status_code, 'data': r.text}
-
-
 
 
     def consultar_projeto(self, projeto):
@@ -435,7 +433,6 @@ class Geoex(GeoexHook):
             return {'sucess': False, 'status_code': info_projeto['status_code'], 'data': info_projeto['data']}
         
 
-
     def criar_hro_em_massa(self, files):
 
         endpoint = 'QARegistroOperacional/AtualizacaoEmMassa/EncerramentoOnlineOperacional/Salvar'
@@ -487,3 +484,49 @@ class Geoex(GeoexHook):
                 return {'sucess': False, 'status_code': content['StatusCode'], 'data': content['Message']}
         else:
             return {'sucess': False, 'status_code': r.json()['StatusCode'], 'data': ''}
+
+
+    def consulta_hro_pastas(self, pastas:list):
+        """Lista todos os HROs de uma lista de pastas (projetos)"""
+
+        id_pastas = []
+
+        for pasta in pastas:
+            projeto_id = self.consultar_projeto(pasta)
+            if projeto_id['sucess']:
+                id_pastas.append(projeto_id['data']['ProjetoId'])
+        
+        endpoint = 'HubRegistroOperacionalItens/Itens'
+        r = self.hook.run('POST', endpoint, json={'Projetos': id_pastas})
+        if r.status_code == 200:
+            content = r.json()
+            if content['StatusCode'] == 200:
+                return {'sucess': True, 'status_code': content['StatusCode'], 'data': content['Content']}
+            else:
+                return {'sucess': False, 'status_code': content['StatusCode'], 'data': content['Message']}
+        else:
+            return {'sucess': False, 'status_code': r.status_code, 'data': None}
+
+        return r
+
+
+    def consulta_hro(self, hro):
+        """Consulta informações de um HRO específico"""
+
+        endpoint = 'HubRegistroOperacional/Item'
+        r = self.hook.run('POST', endpoint, json={'Serial': hro})
+        if r.status_code == 200:
+            content = r.json()
+            if content['StatusCode'] == 200:
+                return {'sucess': True, 'status_code': content['StatusCode'], 'data': content['Content']}
+            else:
+                return {'sucess': False, 'status_code': content['StatusCode'], 'data': content['Message']}
+        else:
+            return {'sucess': False, 'status_code': r.status_code, 'data': None}
+
+
+if __name__ == '__main__':
+    g = Geoex('cookie_hugo.json')
+    r = g.consulta_hro_pastas(['B-1259083', 'B-1259095'])
+
+    print(r)
