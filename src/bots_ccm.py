@@ -446,28 +446,6 @@ class Bots:
                             unidade = ''
                         else:
                             unidade = busca_rapida.get(unidade)
-                            '''if unidade in jequie:
-                                unidade = 'JEQUIÉ'
-                            elif unidade in ibotirama:
-                                unidade = 'IBOTIRAMA'
-                            elif unidade in bom_jesus_da_lapa:
-                                unidade = 'BOM JESUS DA LAPA'
-                            elif unidade in guanambi:
-                                unidade = 'GUANAMBI'
-                            elif unidade in irece:
-                                unidade = 'IRECÊ'
-                            elif unidade in vitoria_da_conquista:
-                                unidade = 'VITÓRIA DA CONQUISTA'
-                            elif unidade in barreiras:
-                                unidade = 'BARREIRAS'
-                            elif unidade in itapetinga:
-                                unidade = 'ITAPETINGA'
-                            elif unidade in livramento:
-                                unidade = 'LIVRAMENTO'
-                            elif unidade in brumado:
-                                unidade = 'BRUMADO'
-                            else:
-                                unidade = unidade'''
                     except Exception as e:
                         print("erro buscando unidade: ")
                         traceback.print_exc()
@@ -480,17 +458,6 @@ class Bots:
                         supervisor = ''
                     if supervisor[0:3] == 'SUP':
                         supervisor = supervisor[8:]
-                    
-                    '''
-                    try: 
-                        municipio = resposta['Content']['Municipio']
-                        if not municipio:
-                            municipio = ''
-                    except Exception as e:
-                        print("erro buscando municipio: ")
-                        traceback.print_exc()
-                        municipio = ''
-                    '''
                     
                     projetos_pendente_asbuilt.append([unidade, i, titulo, vl_projeto, data_energ, supervisor, municipio])
                     print(f'{status_pasta} - {i} - {unidade} - {municipio} - {titulo} - {data_energ} - {vl_projeto} - ({x}/{str(len(obras_concluidas_sem_pasta_no_fechamento))})')
@@ -506,15 +473,23 @@ class Bots:
 
             x += 1
 
-        data_frame = pd.DataFrame(projetos_pendente_asbuilt)
+        data_frame = pd.DataFrame(projetos_pendente_asbuilt, columns=['UNIDADE', 'PROJETO', 'TÍTULO', 'VALOR DO PROJETO', 'DATA DE ENERGIZAÇÃO', 'SUPERVISOR', 'MUNICÍPIO'])
         data_frame[[1]] = data_frame[[1]].drop_duplicates()
         data_frame = data_frame.dropna()
         pd.set_option('display.max_rows', None)
+
+        espelho_CCM = self.le_planilha_google(configs.espelho_CCM, "Base de dados (Espelho)", 'B2:Y')
+        espelho_CCM['PROJETO'] = pd.to_numeric(espelho_CCM['PROJETO'].str.replace('B-', ''), errors='coerce')
+        espelho_CCM = espelho_CCM.dropna()
+
+        data_frame['SUPERVISOR'] = data_frame['SUPERVISOR'].fillna(data_frame['PROJETO'].map(espelho_CCM.set_index('PROJETO')['Supervisor']))
+        data_frame.set_option('display.max_columns', None)
         print(data_frame)
 
         while True:
             try:
-                dados_list = [data_frame.columns.values.tolist()] + data_frame.values.tolist()
+                #dados_list = [data_frame.columns.values.tolist()] + data_frame.values.tolist()
+                dados_list = data_frame.values.tolist()
 
                 sh = self.GS_SERVICE.open_by_key('1GQ5pLG2DddGrEuRJILe-3g_Rwzhg-82EkVFZnX1_we4')
                 pastas_pendentes = sh.worksheet('pastas pendentes')
