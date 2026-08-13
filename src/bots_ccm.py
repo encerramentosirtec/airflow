@@ -218,24 +218,29 @@ class Bots:
                 obras_recepcionadas = self.le_planilha_google(configs.v5_gestao, "OBRAS GERAL", "B1:B")
                 obras_recepcionadas = obras_recepcionadas.query("PROJETO != ''")
                 obras_recepcionadas = obras_recepcionadas['PROJETO']
-                print('obras_recepcionadas')
+                print('obras recepcionadas')
 
                 fechadas_pendencia = self.le_planilha_google(configs.id_planilha_postagemV5, "FECHADAS COM PENDÊNCIA", "C1:C")
                 fechadas_pendencia = fechadas_pendencia.query("PROJETO != ''")
                 fechadas_pendencia = fechadas_pendencia['PROJETO']
-                print('obras_recepcionadas')
+                print('fechadas com pendencia')
 
-                entrega_documentos = self.le_planilha_google(configs.entrega_documentos, "FECHADAS COM PENDÊNCIA", "D2:D")
+                entrega_documentos = self.le_planilha_google(configs.entrega_documentos, "Etapa Entrega de Documentos", "D2:D")
                 entrega_documentos = entrega_documentos.query("Projeto != ''")
                 entrega_documentos = entrega_documentos['Projeto']
-                print('obras_recepcionadas')
+                print('entrega de  documentos')
+
+                envio_pastas = self.le_planilha_google(configs.envio_pastas, "BASE_ENVIO_PASTAS", "G1:G")
+                envio_pastas = envio_pastas.query("PROJETO != ''")
+                envio_pastas = envio_pastas['PROJETO']
+                print('envio de pastas')
                 break
             except Exception as e:
                 print(e)
                 sleep(62)
                 pass
         
-        obras_recepcionadas_geral = pd.concat([obras_recepcionadas, fechadas_pendencia, entrega_documentos], ignore_index=True)
+        obras_recepcionadas_geral = pd.concat([obras_recepcionadas, fechadas_pendencia, entrega_documentos, envio_pastas], ignore_index=True)
 
         # Filtra para remover qualquer linha que seja 'PROJETO' ou vazia/nula
         obras_recepcionadas_geral = obras_recepcionadas_geral[
@@ -247,7 +252,7 @@ class Bots:
         obras_recepcionadas_geral = (
             obras_recepcionadas_geral.astype(str)
             .str.replace(' ', '')
-            .str[2:9]
+            .str[2:]
             .pipe(pd.to_numeric, errors='coerce')
         )
 
