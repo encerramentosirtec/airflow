@@ -240,6 +240,8 @@ class Bots:
             .pipe(pd.to_numeric, errors='coerce')
         )
 
+        print(obras_recepcionadas_geral)
+
         obras_concluidas_sem_pasta_no_fechamento = []
         obras_concluidas = obras_concluidas_formatado.copy()
         obras_recepcionadas_geral = obras_recepcionadas_geral.tolist()
