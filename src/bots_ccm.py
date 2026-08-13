@@ -472,10 +472,14 @@ class Bots:
                 traceback.print_exc()
 
             x += 1
-
+        
         data_frame = pd.DataFrame(projetos_pendente_asbuilt, columns=['UNIDADE', 'PROJETO', 'TÍTULO', 'VALOR DO PROJETO', 'DATA DE ENERGIZAÇÃO', 'SUPERVISOR', 'MUNICÍPIO'])
         data_frame['PROJETO'] = data_frame['PROJETO'].drop_duplicates()
         data_frame = data_frame.dropna()
+        data_frame.to_csv(os.path.join(self.PATH,'downloads/asbuilt.csv'), index=False, sep=';')
+
+    def escreve_asbuilt(self):
+        data_frame = pd.read_csv(os.path.join(self.PATH,'downloads/asbuilt.csv'), sep=';')
 
         espelho_CCM = self.le_planilha_google(configs.espelho_CCM, "Base de dados (Espelho)", 'B2:Y')
         espelho_CCM['Projeto'] = pd.to_numeric(espelho_CCM['Projeto'].str.replace('B-', ''), errors='coerce')

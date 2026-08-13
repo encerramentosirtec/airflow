@@ -26,12 +26,20 @@ with DAG('asbuilt',
         tags = ['obra', 'geoex'],
         catchup = False) as dag:
     
-    asbuilt = PythonOperator(
-        task_id='asbuilt',
+    consulta_asbuilt = PythonOperator(
+        task_id='consulta_asbuilt',
         python_callable=bot.asbuilt,
         retries=2,
         retry_delay=duration(seconds=20),
         execution_timeout=duration(hours=2)
     )
 
-    asbuilt
+    escreve_asbuilt = PythonOperator(
+        task_id='escreve_asbuilt',
+        python_callable=bot.escreve_asbuilt,
+        retries=2,
+        retry_delay=duration(seconds=20),
+        execution_timeout=duration(hours=2)
+    )
+
+    consulta_asbuilt >> escreve_asbuilt
