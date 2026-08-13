@@ -481,6 +481,10 @@ class Bots:
         espelho_CCM['Projeto'] = pd.to_numeric(espelho_CCM['Projeto'].str.replace('B-', ''), errors='coerce')
         espelho_CCM = espelho_CCM.dropna()
 
+        # Substitui valores vazios e zeros por NaN para que o fillna funcione em todos os casos
+        data_frame['SUPERVISOR'] = data_frame['SUPERVISOR'].replace(['', 0, ' '], pd.NA)
+
+        # Preenche os valores nulos (agora incluindo os que eram vazios/zero) com o supervisor do espelho
         data_frame['SUPERVISOR'] = data_frame['SUPERVISOR'].fillna(data_frame['PROJETO'].map(espelho_CCM.set_index('Projeto')['Supervisor']))
         pd.set_option('display.max_columns', None)
         print(data_frame)
