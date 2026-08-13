@@ -183,7 +183,7 @@ class Bots:
         # Filtro para a carteira
         datas_para_filtrar = ['01/01/2023', '01/02/2023', '01/03/2023', '01/04/2023', '01/05/2023', '01/06/2023']
         obras_concluidas_completo = obras_concluidas_completo.loc[~obras_concluidas_completo['CARTEIRA'].isin(datas_para_filtrar)]
-        obras_concluidas = obras_concluidas_completo['PROJETO'].drop_duplicates().copy()
+        obras_concluidas = obras_concluidas_completo.drop_duplicates(subset=['PROJETO'])
         obras_concluidas = obras_concluidas.dropna()
         #print(obras_concluidas)
 
@@ -474,12 +474,13 @@ class Bots:
             x += 1
         
         data_frame = pd.DataFrame(projetos_pendente_asbuilt, columns=['UNIDADE', 'PROJETO', 'TÍTULO', 'VALOR DO PROJETO', 'DATA DE ENERGIZAÇÃO', 'SUPERVISOR', 'MUNICÍPIO'])
-        data_frame = data_frame.drop_duplicates(subset=['PROJETO'])
         data_frame = data_frame.dropna()
         data_frame.to_csv(os.path.join(self.PATH,'downloads/asbuilt.csv'), index=False, sep=';')
 
     def escreve_asbuilt(self):
         data_frame = pd.read_csv(os.path.join(self.PATH,'downloads/asbuilt.csv'), sep=';')
+        data_frame = data_frame.drop_duplicates(subset=['PROJETO'])
+        data_frame = data_frame.dropna()
 
         espelho_CCM = self.le_planilha_google(configs.espelho_CCM, "Base de dados (Espelho)", 'B2:Y')
         espelho_CCM['Projeto'] = pd.to_numeric(espelho_CCM['Projeto'].str.replace('B-', ''), errors='coerce')
