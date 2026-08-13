@@ -474,7 +474,7 @@ class Bots:
             x += 1
         
         data_frame = pd.DataFrame(projetos_pendente_asbuilt, columns=['UNIDADE', 'PROJETO', 'TÍTULO', 'VALOR DO PROJETO', 'DATA DE ENERGIZAÇÃO', 'SUPERVISOR', 'MUNICÍPIO'])
-        data_frame['PROJETO'] = data_frame['PROJETO'].drop_duplicates()
+        data_frame = data_frame.drop_duplicates(subset=['PROJETO'])
         data_frame = data_frame.dropna()
         data_frame.to_csv(os.path.join(self.PATH,'downloads/asbuilt.csv'), index=False, sep=';')
 
