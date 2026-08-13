@@ -236,7 +236,7 @@ class Bots:
                 print('envio de pastas')
                 break
             except Exception as e:
-                print(e)
+                traceback.print_exc()
                 sleep(62)
                 pass
         
@@ -257,6 +257,7 @@ class Bots:
         )
 
         print(obras_recepcionadas_geral)
+        print(obras_concluidas_formatado)
 
         obras_concluidas_sem_pasta_no_fechamento = []
         obras_concluidas = obras_concluidas_formatado.tolist()
