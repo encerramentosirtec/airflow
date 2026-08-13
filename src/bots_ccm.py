@@ -202,10 +202,15 @@ class Bots:
 
         padrao = r'B-|/PIVO|-PIVO|/JUDICIAL|Y-'
 
-        #obras_concluidas_formatado = obras_concluidas.astype(str).str.replace(padrao, '', regex=True).copy()
-        obras_concluidas_formatado = obras_concluidas.astype(str).apply(lambda col: col.str.replace(padrao, '', regex=True)).copy()
-        obras_concluidas_formatado = pd.to_numeric(obras_concluidas_formatado, errors='coerce')
-        obras_concluidas_formatado = obras_concluidas_formatado.drop_duplicates().dropna().astype(int)
+        obras_concluidas_formatado = (
+            obras_concluidas['PROJETO']
+            .astype(str)
+            .str.replace(padrao, '', regex=True)
+            .pipe(pd.to_numeric, errors='coerce')
+            .drop_duplicates()
+            .dropna()
+            .astype(int)
+        )
 
         ####################### LENDO PLANILHA DO FECHAMENTO
         while True:
@@ -244,7 +249,7 @@ class Bots:
         print(obras_recepcionadas_geral)
 
         obras_concluidas_sem_pasta_no_fechamento = []
-        obras_concluidas = obras_concluidas_formatado.copy()
+        obras_concluidas = obras_concluidas_formatado.tolist()
         obras_recepcionadas_geral = obras_recepcionadas_geral.tolist()
 
         
