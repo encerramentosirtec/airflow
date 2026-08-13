@@ -224,13 +224,18 @@ class Bots:
                 fechadas_pendencia = fechadas_pendencia.query("PROJETO != ''")
                 fechadas_pendencia = fechadas_pendencia['PROJETO']
                 print('obras_recepcionadas')
+
+                entrega_documentos = self.le_planilha_google(configs.entrega_documentos, "FECHADAS COM PENDÊNCIA", "D2:D")
+                entrega_documentos = entrega_documentos.query("Projeto != ''")
+                entrega_documentos = entrega_documentos['Projeto']
+                print('obras_recepcionadas')
                 break
             except Exception as e:
                 print(e)
                 sleep(62)
                 pass
         
-        obras_recepcionadas_geral = pd.concat([obras_recepcionadas, fechadas_pendencia], ignore_index=True)
+        obras_recepcionadas_geral = pd.concat([obras_recepcionadas, fechadas_pendencia, entrega_documentos], ignore_index=True)
 
         # Filtra para remover qualquer linha que seja 'PROJETO' ou vazia/nula
         obras_recepcionadas_geral = obras_recepcionadas_geral[
@@ -255,6 +260,7 @@ class Bots:
         
         ####################### CONFERE QUAIS OBRAS JÁ ESTÃO NA PLANILHA DO FECHAMENTO
         
+        print('Retirando obras já recepcionadas do fechamento')
         obras_concluidas_sem_pasta_no_fechamento = [
             obra for obra in obras_concluidas 
             if obra not in obras_recepcionadas_geral and int(obra) != 1063382
