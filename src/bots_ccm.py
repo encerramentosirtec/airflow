@@ -491,8 +491,7 @@ class Bots:
 
         while True:
             try:
-                #dados_list = [data_frame.columns.values.tolist()] + data_frame.values.tolist()
-                dados_list = data_frame.values.tolist()
+                dados_list = data_frame.fillna('').values.tolist()
 
                 sh = self.GS_SERVICE.open_by_key('1GQ5pLG2DddGrEuRJILe-3g_Rwzhg-82EkVFZnX1_we4')
                 pastas_pendentes = sh.worksheet('pastas pendentes')
