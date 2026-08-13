@@ -456,7 +456,7 @@ class Bots:
                         supervisor = supervisor[-1]
                     else:
                         supervisor = ''
-                    if supervisor[0:3] == 'SUP':
+                    if isinstance(supervisor, str) and supervisor.startswith('SUP'):
                         supervisor = supervisor[8:]
                     
                     projetos_pendente_asbuilt.append([unidade, i, titulo, vl_projeto, data_energ, supervisor, municipio])
@@ -476,14 +476,13 @@ class Bots:
         data_frame = pd.DataFrame(projetos_pendente_asbuilt, columns=['UNIDADE', 'PROJETO', 'TÍTULO', 'VALOR DO PROJETO', 'DATA DE ENERGIZAÇÃO', 'SUPERVISOR', 'MUNICÍPIO'])
         data_frame['PROJETO'] = data_frame['PROJETO'].drop_duplicates()
         data_frame = data_frame.dropna()
-        pd.set_option('display.max_rows', None)
 
         espelho_CCM = self.le_planilha_google(configs.espelho_CCM, "Base de dados (Espelho)", 'B2:Y')
         espelho_CCM['Projeto'] = pd.to_numeric(espelho_CCM['Projeto'].str.replace('B-', ''), errors='coerce')
         espelho_CCM = espelho_CCM.dropna()
 
         data_frame['SUPERVISOR'] = data_frame['SUPERVISOR'].fillna(data_frame['PROJETO'].map(espelho_CCM.set_index('Projeto')['Supervisor']))
-        data_frame.set_option('display.max_columns', None)
+        pd.set_option('display.max_columns', None)
         print(data_frame)
 
         while True:
