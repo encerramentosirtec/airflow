@@ -11,16 +11,17 @@ GEOEX = Geoex(cookie_file='cookie_hugo.json')
 
 from src.checklist_fechamento import checklist
 
-projetos = ['B-1259083', 'B-1259095']
+projetos = ['B-1259083', 'B-1259095'] # Substituir por consulta de projetos ativos
 
 r = GEOEX.consulta_hro_pastas(projetos)
 if r['sucess']:
     df = pd.DataFrame(r['data'])
-    hro = df.iloc[1]['Serial']
+    hro = df.iloc[1]['Serial'] # Substituir por loop para percorrer todos os HROs
     r = GEOEX.consulta_hro(hro)
     if r['sucess']:
         historico_atual = r['data']['Item']['HistoricoAtual']
-        df_analise = pd.DataFrame(r['data']['Item']['Analises'])
-        # print(df_analise.head())
-        # print(df_analise.info())
-        # df_analise.to_csv(f'analises.csv', index=False)
+        df_analises = pd.DataFrame(r['data']['Item']['Analises'])
+        df_analises = df_analises.query("Quantidade > 0")[['Grupo', 'Codigo', 'Nome', 'Quantidade']]
+        checklist(df_analises)
+
+        
