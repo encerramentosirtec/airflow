@@ -418,6 +418,10 @@ class Bots:
                     if isinstance(supervisor, str) and supervisor.startswith('SUP'):
                         supervisor = supervisor[8:]
                     
+                    if isinstance(vl_projeto, (int, float)):
+                        # Converte para string com vírgula como separador decimal
+                        vl_projeto = str(vl_projeto).replace('.', ',')
+
                     projetos_pendente_asbuilt.append([unidade, i, titulo, vl_projeto, data_energ, supervisor, municipio])
                     print(f'{status_pasta} - {i} - {unidade} - {municipio} - {titulo} - {data_energ} - {vl_projeto} - ({x}/{str(len(obras_concluidas_sem_pasta_no_fechamento))})')
                 else:
