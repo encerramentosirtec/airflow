@@ -465,7 +465,7 @@ class Bots:
                 pastas_pendentes = sh.worksheet('pastas pendentes')
 
                 pastas_pendentes.clear()
-                pastas_pendentes.update(values=dados_list, range_name='A1')
+                pastas_pendentes.update(values=dados_list, range_name='A1', value_input_option='USER_ENTERED')
                 sh.worksheet('data atualização').update(range_name='A1', values=[[datetime.now(self.br_tz).strftime("%d/%m/%Y %H:%M")]])
                 break
             except Exception as e:
