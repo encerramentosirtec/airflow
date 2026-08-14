@@ -183,7 +183,7 @@ class Bots:
         # Filtro para a carteira
         datas_para_filtrar = ['01/01/2023', '01/02/2023', '01/03/2023', '01/04/2023', '01/05/2023', '01/06/2023']
         obras_concluidas_completo = obras_concluidas_completo.loc[~obras_concluidas_completo['CARTEIRA'].isin(datas_para_filtrar)]
-        obras_concluidas = obras_concluidas_completo['PROJETO'].drop_duplicates().copy()
+        obras_concluidas = obras_concluidas_completo.drop_duplicates(subset=['PROJETO'])
         obras_concluidas = obras_concluidas.dropna()
         #print(obras_concluidas)
 
@@ -202,84 +202,46 @@ class Bots:
 
         padrao = r'B-|/PIVO|-PIVO|/JUDICIAL|Y-'
 
-        obras_concluidas_formatado = obras_concluidas.astype(str).str.replace(padrao, '', regex=True).copy()
-        obras_concluidas_formatado = pd.to_numeric(obras_concluidas_formatado, errors='coerce')
-        obras_concluidas_formatado = obras_concluidas_formatado.drop_duplicates().dropna().astype(int)
+        obras_concluidas_formatado = (
+            obras_concluidas['PROJETO']
+            .astype(str)
+            .str.replace(padrao, '', regex=True)
+            .pipe(pd.to_numeric, errors='coerce')
+            .drop_duplicates()
+            .dropna()
+            .astype(int)
+        )
 
         ####################### LENDO PLANILHA DO FECHAMENTO
         while True:
             try:
-                '''obras_recepcionadas_resolucao = self.le_planilha_google(configs.id_planilha_postagemV5, "Obras em resolução de problema")
-                obras_recepcionadas_resolucao = obras_recepcionadas_resolucao.query("PROJETO != ''")
-                obras_recepcionadas_resolucao = obras_recepcionadas_resolucao['PROJETO']
-                print('obras_recepcionadas_resolucao')
-                sleep(5)'''
+                obras_recepcionadas = self.le_planilha_google(configs.v5_gestao, "OBRAS GERAL", "B1:B")
+                obras_recepcionadas = obras_recepcionadas.query("PROJETO != ''")
+                obras_recepcionadas = obras_recepcionadas['PROJETO']
+                print('obras recepcionadas')
 
-                obras_recepcionadas_vtc = self.le_planilha_google(configs.id_planilha_postagemV5, "OBRAS CONQUISTA")
-                obras_recepcionadas_vtc = obras_recepcionadas_vtc.query("PROJETO != ''")
-                obras_recepcionadas_vtc = obras_recepcionadas_vtc['PROJETO']
-                print('obras_recepcionadas_vtc')
-                sleep(5)
+                fechadas_pendencia = self.le_planilha_google(configs.id_planilha_postagemV5, "FECHADAS COM PENDÊNCIA", "C1:C")
+                fechadas_pendencia = fechadas_pendencia.query("PROJETO != ''")
+                fechadas_pendencia = fechadas_pendencia['PROJETO']
+                print('fechadas com pendencia')
 
-                obras_recepcionadas_jeq = self.le_planilha_google(configs.id_planilha_postagemV5, "OBRAS JEQUIE")
-                obras_recepcionadas_jeq = obras_recepcionadas_jeq.query("PROJETO != ''")
-                obras_recepcionadas_jeq = obras_recepcionadas_jeq['PROJETO']
-                print('obras_recepcionadas_jeq')
-                sleep(5)
+                entrega_documentos = self.le_planilha_google(configs.entrega_documentos, "Etapa Entrega de Documentos", "D2:D")
+                entrega_documentos = entrega_documentos.query("Projeto != ''")
+                entrega_documentos = entrega_documentos['Projeto']
+                print('entrega de  documentos')
 
-                obras_recepcionadas_bjl = self.le_planilha_google(configs.id_planilha_postagemV5, "OBRAS LAPA")
-                obras_recepcionadas_bjl = obras_recepcionadas_bjl.query("PROJETO != ''")
-                obras_recepcionadas_bjl = obras_recepcionadas_bjl['PROJETO']
-                print('obras_recepcionadas_bjl')
-                sleep(5)
-
-                obras_recepcionadas_ire = self.le_planilha_google(configs.id_planilha_postagemV5, "OBRAS IRECE")
-                obras_recepcionadas_ire = obras_recepcionadas_ire.query("PROJETO != ''")
-                obras_recepcionadas_ire = obras_recepcionadas_ire['PROJETO']
-                print('obras_recepcionadas_ire')
-                sleep(5)
-
-                obras_recepcionadas_gbi = self.le_planilha_google(configs.id_planilha_postagemV5, "OBRAS GUANAMBI")
-                obras_recepcionadas_gbi = obras_recepcionadas_gbi.query("PROJETO != ''")
-                obras_recepcionadas_gbi = obras_recepcionadas_gbi['PROJETO']
-                print('obras_recepcionadas_gbi')
-                sleep(5)
-                
-                obras_recepcionadas_brr = self.le_planilha_google(configs.id_planilha_postagemV5, "OBRAS BARREIRAS")
-                obras_recepcionadas_brr = obras_recepcionadas_brr.query("PROJETO != ''")
-                obras_recepcionadas_brr = obras_recepcionadas_brr['PROJETO']
-                print('obras_recepcionadas_brr')
-                sleep(5)
-                
-                obras_recepcionadas_ibt = self.le_planilha_google(configs.id_planilha_postagemV5, "OBRAS IBOTIRAMA")
-                obras_recepcionadas_ibt = obras_recepcionadas_ibt.query("PROJETO != ''")
-                obras_recepcionadas_ibt = obras_recepcionadas_ibt['PROJETO']
-                print('obras_recepcionadas_ibt')
-                sleep(5)
-                
-                obras_recepcionadas_bru = self.le_planilha_google(configs.id_planilha_postagemV5, "OBRAS BRUMADO")
-                obras_recepcionadas_bru = obras_recepcionadas_bru.query("PROJETO != ''")
-                obras_recepcionadas_bru = obras_recepcionadas_bru['PROJETO']
-                print('obras_recepcionadas_bru')
+                envio_pastas = self.le_planilha_google(configs.envio_pastas, "BASE_ENVIO_PASTAS", "G1:G")
+                envio_pastas = envio_pastas.query("PROJETO != ''")
+                envio_pastas = envio_pastas['PROJETO']
+                print('envio de pastas')
                 break
             except Exception as e:
-                print(e)
+                traceback.print_exc()
                 sleep(62)
                 pass
         
-        #obras_recepcionadas_geral = pd.concat([obras_recepcionadas_resolucao, obras_recepcionadas_vtc, obras_recepcionadas_jeq , obras_recepcionadas_brr, obras_recepcionadas_gbi, obras_recepcionadas_bjl, obras_recepcionadas_ire, obras_recepcionadas_ibt, obras_recepcionadas_bru], ignore_index = True)
-        obras_recepcionadas_geral = pd.concat([obras_recepcionadas_vtc, obras_recepcionadas_jeq , obras_recepcionadas_brr, obras_recepcionadas_gbi, obras_recepcionadas_bjl, obras_recepcionadas_ire, obras_recepcionadas_ibt, obras_recepcionadas_bru], ignore_index = True)
-        
-        '''cont = 0
-        for i in obras_recepcionadas_geral:
-            if i == 'PROJETO':
-                obras_recepcionadas_geral.drop(cont)
-                continue
-            i = str(i).replace(' ', '')
-            if ((i != None) and (i != '')):
-                obras_recepcionadas_geral[cont] = int(i[2:9])
-            cont += 1'''
-        
+        obras_recepcionadas_geral = pd.concat([obras_recepcionadas, fechadas_pendencia, entrega_documentos, envio_pastas], ignore_index=True)
+
         # Filtra para remover qualquer linha que seja 'PROJETO' ou vazia/nula
         obras_recepcionadas_geral = obras_recepcionadas_geral[
             (obras_recepcionadas_geral != 'PROJETO') & 
@@ -290,24 +252,21 @@ class Bots:
         obras_recepcionadas_geral = (
             obras_recepcionadas_geral.astype(str)
             .str.replace(' ', '')
-            .str[2:9]
+            .str[2:]
             .pipe(pd.to_numeric, errors='coerce')
         )
 
+        print(obras_recepcionadas_geral)
+        print(obras_concluidas_formatado)
+
         obras_concluidas_sem_pasta_no_fechamento = []
-        obras_concluidas = obras_concluidas_formatado.copy()
+        obras_concluidas = obras_concluidas_formatado.tolist()
         obras_recepcionadas_geral = obras_recepcionadas_geral.tolist()
 
         
         ####################### CONFERE QUAIS OBRAS JÁ ESTÃO NA PLANILHA DO FECHAMENTO
-        '''cont = 0
-        for cont, i in enumerate(obras_concluidas): 
-            if i in obras_recepcionadas_geral or int(i)==1063382:
-                pass
-            else:
-                obras_concluidas_sem_pasta_no_fechamento.append(obras_concluidas[cont])
-            cont += 1'''
-
+        
+        print('Retirando obras já recepcionadas do fechamento')
         obras_concluidas_sem_pasta_no_fechamento = [
             obra for obra in obras_concluidas 
             if obra not in obras_recepcionadas_geral and int(obra) != 1063382
@@ -474,12 +433,13 @@ class Bots:
             x += 1
         
         data_frame = pd.DataFrame(projetos_pendente_asbuilt, columns=['UNIDADE', 'PROJETO', 'TÍTULO', 'VALOR DO PROJETO', 'DATA DE ENERGIZAÇÃO', 'SUPERVISOR', 'MUNICÍPIO'])
-        data_frame['PROJETO'] = data_frame['PROJETO'].drop_duplicates()
         data_frame = data_frame.dropna()
         data_frame.to_csv(os.path.join(self.PATH,'downloads/asbuilt.csv'), index=False, sep=';')
 
     def escreve_asbuilt(self):
         data_frame = pd.read_csv(os.path.join(self.PATH,'downloads/asbuilt.csv'), sep=';')
+        data_frame = data_frame.drop_duplicates(subset=['PROJETO'])
+        data_frame = data_frame.dropna()
 
         espelho_CCM = self.le_planilha_google(configs.espelho_CCM, "Base de dados (Espelho)", 'B2:Y')
         espelho_CCM['Projeto'] = pd.to_numeric(espelho_CCM['Projeto'].str.replace('B-', ''), errors='coerce')

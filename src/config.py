@@ -29,6 +29,9 @@ class configs:
     status_hektor = 'AP2:AP'
     auxiliar_hektor = 'AY2:AY'
     status_pasta = 'K2:K'
+    v5_gestao = '19xV_P6KIoZB9U03yMcdRb2oF_Q7gVdaukjAvE4xOvl8'
+    entrega_documentos = '1nFBNLPA-hKUMrqD_LZDC-lZV7Nty3KD1gzgcC5Ho088'
+    envio_pastas = '1w9a3IysiwVwQLkr8X0wKPFDmO_5YpYqglz5Cjq-Bm3E'
     
     # Asbuilt
     id_planilha_planejamento = '1Ogsv2IUWmqG6icE2nk7xraKqnDzXoGgDUv5wxdMEeqQ'
