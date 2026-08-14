@@ -1,8 +1,11 @@
 from functools import lru_cache
 
 import pandas as pd
-from src.bigquery import BigQuery
 
+from src.evolution_api import EvolutionAPI
+EVOLUTION_API = EvolutionAPI()
+
+from src.bigquery import BigQuery
 CLIENT_BIGQUERY = BigQuery()
 
 
@@ -114,14 +117,11 @@ def _get_df_materiais():
 
 def checklist(df):
     """Função para gerar o checklist de fechamento<br>
-    Inputs:<br>
-        <t>df contendo: <br>
-            - Grupo: Material ou Serviço<br>
-            - Codigo: Código do material ou serviço<br>
-            - Nome: Descrição do material ou serviço<br>
-            - Quantidade: Quantidade do material ou serviço<br>
-    Returns:
-        pd.DataFrame: DataFrame contendo o checklist de fechamento
+    Inputs - df contendo: <br>
+        - Grupo: Material ou Serviço<br>
+        - Codigo: Código do material ou serviço<br>
+        - Nome: Descrição do material ou serviço<br>
+        - Quantidade: Quantidade do material ou serviço<br>
     """
 
     df_servicos = _get_df_servicos()
@@ -139,6 +139,5 @@ def checklist(df):
     resultados += _check_cruzetas(df)
 
     df_checklist = pd.DataFrame(resultados)
-    print(df_checklist)
 
     return df_checklist
