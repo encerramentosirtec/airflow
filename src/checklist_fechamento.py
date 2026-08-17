@@ -9,6 +9,47 @@ from src.bigquery import BigQuery
 CLIENT_BIGQUERY = BigQuery()
 
 
+@lru_cache(maxsize=1)
+def _get_df_servicos():
+    """Lê a base de caderno de serviços do BigQuery.<br>
+    Resultado fica em cache em memória: só bate no BigQuery na primeira
+    chamada dentro do processo; chamadas seguintes reusam o mesmo DataFrame.
+    """
+    try:
+        query = """SELECT
+                        CODIGO,
+                        APLICACAO,
+                        DETALHE
+                    FROM
+                        `sirtec-472112.external_tables.caderno_de_servicos`
+                """
+        return CLIENT_BIGQUERY.query_bigquery_table(query)
+    except Exception as e:
+        print(f"Erro ao ler a caderno de servicos: {e}")
+        raise (e)
+
+
+@lru_cache(maxsize=1)
+def _get_df_materiais():
+    """Lê a base de materiais do BigQuery.<br>
+    Resultado fica em cache em memória: só bate no BigQuery na primeira
+    chamada dentro do processo; chamadas seguintes reusam o mesmo DataFrame.
+    """
+    try:
+        query = """SELECT
+                        CODIGO,
+                        CATEGORIA,
+                        DETALHE,
+                        NV_TENSAO
+                    FROM
+                        `sirtec-472112.external_tables.base_de_materiais`"""
+        return CLIENT_BIGQUERY.query_bigquery_table(query)
+    except Exception as e:
+        print(f"Erro ao ler a base de materiais: {e}")
+        raise (e)
+
+
+
 def _check_cruzetas(df):
     """Verifica as quantidades de cruzeta do checklist (cruzeta dupla conta como 2).<br>
     Retorna uma lista de dicts (um por verificação), no formato padrão dos
@@ -75,46 +116,6 @@ def _check_postes(df):
     ]
 
 
-@lru_cache(maxsize=1)
-def _get_df_servicos():
-    """Lê a base de caderno de serviços do BigQuery.<br>
-    Resultado fica em cache em memória: só bate no BigQuery na primeira
-    chamada dentro do processo; chamadas seguintes reusam o mesmo DataFrame.
-    """
-    try:
-        query = """SELECT
-                        CODIGO,
-                        APLICACAO,
-                        DETALHE
-                    FROM
-                        `sirtec-472112.external_tables.caderno_de_servicos`
-                """
-        return CLIENT_BIGQUERY.query_bigquery_table(query)
-    except Exception as e:
-        print(f"Erro ao ler a caderno de servicos: {e}")
-        raise (e)
-
-
-@lru_cache(maxsize=1)
-def _get_df_materiais():
-    """Lê a base de materiais do BigQuery.<br>
-    Resultado fica em cache em memória: só bate no BigQuery na primeira
-    chamada dentro do processo; chamadas seguintes reusam o mesmo DataFrame.
-    """
-    try:
-        query = """SELECT
-                        CODIGO,
-                        CATEGORIA,
-                        DETALHE,
-                        NV_TENSAO
-                    FROM
-                        `sirtec-472112.external_tables.base_de_materiais`"""
-        return CLIENT_BIGQUERY.query_bigquery_table(query)
-    except Exception as e:
-        print(f"Erro ao ler a base de materiais: {e}")
-        raise (e)
-
-
 def checklist(df):
     """Função para gerar o checklist de fechamento<br>
     Inputs - df contendo: <br>
@@ -132,7 +133,7 @@ def checklist(df):
 
     df = df.drop(columns=['CODIGO', 'CODIGO_materiais'])\
             .rename(columns={'APLICACAO': 'Aplicacao_servico', 'DETALHE': 'Detalhe_servico', 'CATEGORIA': 'Categoria_material', 'NV_TENSAO': 'Nv_Tensao', 'DETALHE_materiais': 'Detalhe_material'})
-
+    # print(df)
 
     resultados = []
     resultados += _check_postes(df)
