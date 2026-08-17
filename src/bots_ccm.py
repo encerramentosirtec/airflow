@@ -738,6 +738,7 @@ class Bots:
     def atualiza_municipio(self):
         planilha = '1GQ5pLG2DddGrEuRJILe-3g_Rwzhg-82EkVFZnX1_we4'
         sh = self.gs.le_planilha(planilha, '+asbuilt', intervalo='B:B')
+        sh = sh.query("PROJETO != ''")
         projetos = list(sh["PROJETO"])
         total = len(projetos)
         print(self.hora_atual() + ': Atualizando Municípios')
@@ -746,12 +747,11 @@ class Bots:
         for idx, projeto in enumerate(projetos, start=1):
             if projeto != '' and projeto[0] == 'B':
                 print(f'Atualizando {idx}/{total} - {projeto}')
-                valores.append(self.consulta_municipio(projeto))
+                valores.append((projeto,) + self.consulta_municipio(projeto))
             else:
                 print(f'Pulando {idx}/{total} - linha vazia')
-                valores.append(['',''])
+                valores.append((projeto,'',''))
 
-
-        self.gs.escreve_planilha(planilha, 'zps09/municipio', pd.DataFrame(valores, columns=['DATA ZPS09', 'MUNICÍPIO']), range='A2:B', input_option='USER_ENTERED')
+        self.gs.escreve_planilha(planilha, 'zps09/municipio', pd.DataFrame(valores, columns=['PROJETO', 'DATA ZPS09', 'MUNICÍPIO']), range='A2:C', input_option='USER_ENTERED')
         print(self.hora_atual() + ': Municípios atualizados!')
 
