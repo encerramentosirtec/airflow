@@ -687,6 +687,33 @@ class Bots:
                 
         return datazps09, data_pasta, status_pasta
 
+    def consulta_municipio(self, projeto):
+        datazps09, municipio = '', ''
+        try:
+            r = self.geoex.consultar_projeto(projeto)
+        except Exception as e:
+            print("erro inesperado ao consultar projeto", projeto, r)
+            raise e
+        
+        if r['sucess']:
+            r = r['data']
+            if r['DtZps09']!=None:
+                datazps09 = datetime.fromisoformat(r['DtZps09']).date().strftime("%d/%m/%Y")
+            if r['Municipio']!=None:
+                municipio = r['Municipio']
+        else:
+            if r['status_code'] == 400:
+                return 'SEM ACESSO','SEM ACESSO','SEM ACESSO'
+            raise Exception(
+                    f"""
+                    Falha ao consultar {projeto}.
+                    Statuscode: {r['status_code']}
+                    Message: {r['data']}
+                    """
+                )
+                
+        return datazps09, municipio
+    
     def atualiza_pasta(self):
         planilha = 'https://docs.google.com/spreadsheets/d/1p5hP6cXqZ67jUksUivGhiCd_F_wxP5PMpZIW8jxzHPA/edit?gid=445257240#gid=445257240'
         sh = self.gs.le_planilha(planilha, 'PRAZO ENVIO', intervalo='A:H')
@@ -707,3 +734,24 @@ class Bots:
         self.gs.escreve_planilha(planilha, 'Status de Pastas - BOT', pd.DataFrame(valores, columns=['PROJETO','DATA ZPS09', 'DATA PASTA', 'STATUS PASTA']), range='A2:D', input_option='USER_ENTERED')
         print(self.hora_atual() + ': Pastas atualizadas!')
         #print(valores)
+
+    def atualiza_municipio(self):
+        planilha = '1GQ5pLG2DddGrEuRJILe-3g_Rwzhg-82EkVFZnX1_we4'
+        sh = self.gs.le_planilha(planilha, '+asbuilt', intervalo='B:B')
+        projetos = list(sh["PROJETO"])
+        total = len(projetos)
+        print(self.hora_atual() + ': Atualizando Municípios')
+        valores = []
+
+        for idx, projeto in enumerate(projetos, start=1):
+            if projeto != '' and projeto[0] == 'B':
+                print(f'Atualizando {idx}/{total} - {projeto}')
+                valores.append(self.consulta_municipio(projeto))
+            else:
+                print(f'Pulando {idx}/{total} - linha vazia')
+                valores.append(['',''])
+
+
+        self.gs.escreve_planilha(planilha, 'zps09/municipio', pd.DataFrame(valores, columns=['DATA ZPS09', 'MUNICÍPIO']), range='A2:B', input_option='USER_ENTERED')
+        print(self.hora_atual() + ': Municípios atualizados!')
+
