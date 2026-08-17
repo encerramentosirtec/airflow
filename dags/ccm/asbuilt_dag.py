@@ -42,12 +42,12 @@ with DAG('asbuilt',
         execution_timeout=duration(minutes=10)
     )
 
-    atualiza_municipios = PythonOperator(
-        task_id='atualiza_municipios',
-        python_callable=bot.atualiza_municipios,
+    atualiza_municipio = PythonOperator(
+        task_id='atualiza_municipio',
+        python_callable=bot.atualiza_municipio,
         retries=2,
         retry_delay=duration(seconds=20),
         execution_timeout=duration(minutes=10)
     )
 
-    consulta_asbuilt >> escreve_asbuilt >> atualiza_municipios
+    consulta_asbuilt >> escreve_asbuilt >> atualiza_municipio
