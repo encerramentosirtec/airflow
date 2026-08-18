@@ -785,7 +785,7 @@ class Bots:
 
             page.goto('https://sirtecba.gpm.srv.br/ci/Servico/VistoriaObras')
             sleep(1)
-            page.get_by_text('Pesquisar', exact=True).click()
+            page.locator('button.btn-primary[type="submit"]:has-text("Pesquisar")').click()
 
             print('Baixando relatório')
             # Espera pelo evento de download antes de clicar no link
