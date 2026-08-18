@@ -31,7 +31,7 @@ with DAG('asbuilt',
         python_callable=bot.asbuilt,
         retries=2,
         retry_delay=duration(seconds=20),
-        execution_timeout=duration(hours=2)
+        execution_timeout=duration(minutes=10)
     )
 
     escreve_asbuilt = PythonOperator(
@@ -39,7 +39,15 @@ with DAG('asbuilt',
         python_callable=bot.escreve_asbuilt,
         retries=2,
         retry_delay=duration(seconds=20),
-        execution_timeout=duration(hours=2)
+        execution_timeout=duration(minutes=10)
     )
 
-    consulta_asbuilt >> escreve_asbuilt
+    atualiza_municipio = PythonOperator(
+        task_id='atualiza_municipio',
+        python_callable=bot.atualiza_municipio,
+        retries=2,
+        retry_delay=duration(seconds=20),
+        execution_timeout=duration(minutes=10)
+    )
+
+    consulta_asbuilt >> escreve_asbuilt >> atualiza_municipio

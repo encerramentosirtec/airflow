@@ -202,10 +202,15 @@ class Bots:
 
         padrao = r'B-|/PIVO|-PIVO|/JUDICIAL|Y-'
 
-        #obras_concluidas_formatado = obras_concluidas.astype(str).str.replace(padrao, '', regex=True).copy()
-        obras_concluidas_formatado = obras_concluidas.astype(str).apply(lambda col: col.str.replace(padrao, '', regex=True)).copy()
-        obras_concluidas_formatado = pd.to_numeric(obras_concluidas_formatado, errors='coerce')
-        obras_concluidas_formatado = obras_concluidas_formatado.drop_duplicates().dropna().astype(int)
+        obras_concluidas_formatado = (
+            obras_concluidas['PROJETO']
+            .astype(str)
+            .str.replace(padrao, '', regex=True)
+            .pipe(pd.to_numeric, errors='coerce')
+            .drop_duplicates()
+            .dropna()
+            .astype(int)
+        )
 
         ####################### LENDO PLANILHA DO FECHAMENTO
         while True:
@@ -213,19 +218,29 @@ class Bots:
                 obras_recepcionadas = self.le_planilha_google(configs.v5_gestao, "OBRAS GERAL", "B1:B")
                 obras_recepcionadas = obras_recepcionadas.query("PROJETO != ''")
                 obras_recepcionadas = obras_recepcionadas['PROJETO']
-                print('obras_recepcionadas')
+                print('obras recepcionadas')
 
                 fechadas_pendencia = self.le_planilha_google(configs.id_planilha_postagemV5, "FECHADAS COM PENDÊNCIA", "C1:C")
                 fechadas_pendencia = fechadas_pendencia.query("PROJETO != ''")
                 fechadas_pendencia = fechadas_pendencia['PROJETO']
-                print('obras_recepcionadas')
+                print('fechadas com pendencia')
+
+                entrega_documentos = self.le_planilha_google(configs.entrega_documentos, "Etapa Entrega de Documentos", "D2:D")
+                entrega_documentos = entrega_documentos.query("Projeto != ''")
+                entrega_documentos = entrega_documentos['Projeto']
+                print('entrega de  documentos')
+
+                envio_pastas = self.le_planilha_google(configs.envio_pastas, "BASE_ENVIO_PASTAS", "G1:G")
+                envio_pastas = envio_pastas.query("PROJETO != ''")
+                envio_pastas = envio_pastas['PROJETO']
+                print('envio de pastas')
                 break
             except Exception as e:
-                print(e)
+                traceback.print_exc()
                 sleep(62)
                 pass
         
-        obras_recepcionadas_geral = pd.concat([obras_recepcionadas, fechadas_pendencia], ignore_index=True)
+        obras_recepcionadas_geral = pd.concat([obras_recepcionadas, fechadas_pendencia, entrega_documentos, envio_pastas], ignore_index=True)
 
         # Filtra para remover qualquer linha que seja 'PROJETO' ou vazia/nula
         obras_recepcionadas_geral = obras_recepcionadas_geral[
@@ -237,19 +252,21 @@ class Bots:
         obras_recepcionadas_geral = (
             obras_recepcionadas_geral.astype(str)
             .str.replace(' ', '')
-            .str[2:9]
+            .str[2:]
             .pipe(pd.to_numeric, errors='coerce')
         )
 
         print(obras_recepcionadas_geral)
+        print(obras_concluidas_formatado)
 
         obras_concluidas_sem_pasta_no_fechamento = []
-        obras_concluidas = obras_concluidas_formatado.copy()
+        obras_concluidas = obras_concluidas_formatado.tolist()
         obras_recepcionadas_geral = obras_recepcionadas_geral.tolist()
 
         
         ####################### CONFERE QUAIS OBRAS JÁ ESTÃO NA PLANILHA DO FECHAMENTO
         
+        print('Retirando obras já recepcionadas do fechamento')
         obras_concluidas_sem_pasta_no_fechamento = [
             obra for obra in obras_concluidas 
             if obra not in obras_recepcionadas_geral and int(obra) != 1063382
@@ -401,6 +418,10 @@ class Bots:
                     if isinstance(supervisor, str) and supervisor.startswith('SUP'):
                         supervisor = supervisor[8:]
                     
+                    if isinstance(vl_projeto, (int, float)):
+                        # Converte para string com vírgula como separador decimal
+                        vl_projeto = str(vl_projeto).replace('.', ',')
+
                     projetos_pendente_asbuilt.append([unidade, i, titulo, vl_projeto, data_energ, supervisor, municipio])
                     print(f'{status_pasta} - {i} - {unidade} - {municipio} - {titulo} - {data_energ} - {vl_projeto} - ({x}/{str(len(obras_concluidas_sem_pasta_no_fechamento))})')
                 else:
@@ -444,7 +465,7 @@ class Bots:
                 pastas_pendentes = sh.worksheet('pastas pendentes')
 
                 pastas_pendentes.clear()
-                pastas_pendentes.update(values=dados_list, range_name='A1')
+                pastas_pendentes.update(values=dados_list, range_name='A1', value_input_option='USER_ENTERED')
                 sh.worksheet('data atualização').update(range_name='A1', values=[[datetime.now(self.br_tz).strftime("%d/%m/%Y %H:%M")]])
                 break
             except Exception as e:
@@ -666,6 +687,33 @@ class Bots:
                 
         return datazps09, data_pasta, status_pasta
 
+    def consulta_municipio(self, projeto):
+        datazps09, municipio = '', ''
+        try:
+            r = self.geoex.consultar_projeto(projeto)
+        except Exception as e:
+            print("erro inesperado ao consultar projeto", projeto, r)
+            raise e
+        
+        if r['sucess']:
+            r = r['data']
+            if r['DtZps09']!=None:
+                datazps09 = datetime.fromisoformat(r['DtZps09']).date().strftime("%d/%m/%Y")
+            if r['Municipio']!=None:
+                municipio = r['Municipio']
+        else:
+            if r['status_code'] == 400:
+                return 'SEM ACESSO','SEM ACESSO','SEM ACESSO'
+            raise Exception(
+                    f"""
+                    Falha ao consultar {projeto}.
+                    Statuscode: {r['status_code']}
+                    Message: {r['data']}
+                    """
+                )
+                
+        return datazps09, municipio
+    
     def atualiza_pasta(self):
         planilha = 'https://docs.google.com/spreadsheets/d/1p5hP6cXqZ67jUksUivGhiCd_F_wxP5PMpZIW8jxzHPA/edit?gid=445257240#gid=445257240'
         sh = self.gs.le_planilha(planilha, 'PRAZO ENVIO', intervalo='A:H')
@@ -686,3 +734,24 @@ class Bots:
         self.gs.escreve_planilha(planilha, 'Status de Pastas - BOT', pd.DataFrame(valores, columns=['PROJETO','DATA ZPS09', 'DATA PASTA', 'STATUS PASTA']), range='A2:D', input_option='USER_ENTERED')
         print(self.hora_atual() + ': Pastas atualizadas!')
         #print(valores)
+
+    def atualiza_municipio(self):
+        planilha = '1GQ5pLG2DddGrEuRJILe-3g_Rwzhg-82EkVFZnX1_we4'
+        sh = self.gs.le_planilha(planilha, '+asbuilt', intervalo='B:B')
+        sh = sh.query("PROJETO != ''")
+        projetos = list(sh["PROJETO"])
+        total = len(projetos)
+        print(self.hora_atual() + ': Atualizando Municípios')
+        valores = []
+
+        for idx, projeto in enumerate(projetos, start=1):
+            if projeto != '' and projeto[0] == 'B':
+                print(f'Atualizando {idx}/{total} - {projeto}')
+                valores.append((projeto,) + self.consulta_municipio(projeto))
+            else:
+                print(f'Pulando {idx}/{total} - linha vazia')
+                valores.append((projeto,'',''))
+
+        self.gs.escreve_planilha(planilha, 'zps09/municipio', pd.DataFrame(valores, columns=['PROJETO', 'DATA ZPS09', 'MUNICÍPIO']), range='A2:C', input_option='USER_ENTERED')
+        print(self.hora_atual() + ': Municípios atualizados!')
+
