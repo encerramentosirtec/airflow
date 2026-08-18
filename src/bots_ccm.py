@@ -783,7 +783,7 @@ class Bots:
             page.keyboard.press('Enter')
             page.wait_for_load_state('networkidle')
 
-            page.goto('https://sirtecba.gpm.srv.br/#GR522')
+            page.goto('https://sirtecba.gpm.srv.br/ci/Servico/VistoriaObras')
             sleep(1)
             page.click('//html/body/main/div/div[6]/form/div[11]/button')
 
