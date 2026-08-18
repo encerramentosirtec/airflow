@@ -10,6 +10,8 @@ from datetime import datetime
 from src.config import configs
 from src.geoex import Geoex, GeoexHook
 from src.google_sheets import GoogleSheets
+from playwright.sync_api import sync_playwright
+from airflow.sdk import Variable
 
 class Bots:
 
@@ -107,6 +109,7 @@ class Bots:
 
         
         return resposta
+
 
 
     # As-Built
@@ -473,6 +476,7 @@ class Bots:
                 sleep(30)
 
 
+
     # V5
     def consulta_projeto(self, projeto):
         datazps09 = ''
@@ -755,3 +759,63 @@ class Bots:
         self.gs.escreve_planilha(planilha, 'zps09/municipio', pd.DataFrame(valores, columns=['PROJETO', 'DATA ZPS09', 'MUNICÍPIO']), range='A2:C', input_option='USER_ENTERED')
         print(self.hora_atual() + ': Municípios atualizados!')
 
+
+
+    #AsBuilts no GPM
+    def consulta_asbuilt_gpm(self):
+        print('-----Consultando AsBuilts no GPM-----')
+        print('Iniciando Playwright...')
+
+        user = Variable.get("gpm_user")
+        password = Variable.get("gpm_pass")
+
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context(accept_downloads=True)
+            page = context.new_page()
+
+            print('Acessando o GPM...')
+            page.goto('https://sirtecba.gpm.srv.br')
+
+            print('Fazendo Login')
+            page.fill('//*[@id="idLogin"]', user)
+            page.fill('//*[@id="idSenha"]', password)
+            page.keyboard.press('Enter')
+            page.wait_for_load_state('networkidle')
+
+            page.goto('https://sirtecba.gpm.srv.br/ci/Geral/Home')
+            sleep(1)
+            page.click('//html/body/main/div/div[6]/form/div[11]/button')
+
+            print('Baixando relatório')
+            # Espera pelo evento de download antes de clicar no link
+            with page.expect_download() as download_info:
+                page.click('//html/body/main/div/div[6]/div[2]/div/div/div/button[2]')
+            download = download_info.value
+            
+            # Salva o arquivo baixado no diretório desejado
+            print(f'Arquivo baixado: {download.suggested_filename}')
+            download.save_as(os.path.join(os.path.join(self.PATH, 'downloads'), 'asbuilt_gpm' + download.suggested_filename[-4:]))
+            
+            print('Relatório salvo com sucesso')
+
+            context.close()
+            browser.close()
+
+    def processa_asbuilt_gpm(self):
+        print('Tratando dados do GPM...')
+        # Lê o arquivo baixado
+        gpm_df = pd.read_csv(os.path.join(self.PATH, 'downloads', 'asbuilt_gpm.csv'), sep=';')
+
+        # Seleciona apenas as colunas necessárias
+        gpm_df = gpm_df[['Tipo', 'Ordem de Trabalho (OT) Principal']]
+        gpm_df.columns = ['TIPO', 'PROJETO']
+        gpm_df = gpm_df[gpm_df['TIPO'] == 'CCM - AS-BUILT - BA']
+
+        # Remove duplicatas e linhas com valores nulos
+        gpm_df = gpm_df.drop_duplicates(subset=['PROJETO']).dropna()
+
+        print(f'Foram encontrados {len(gpm_df)} projetos do tipo CCM - AS-BUILT - BA no GPM.')
+        
+        planilha = '1hoeANiHmaA-NB-lQWELpFcNHmMOBrccpCXH6A2WwYuI'
+        self.gs.sobrescreve_planilha(planilha, 'RELATORIO ASBUILT GPM', gpm_df['PROJETO'], range='A2:A', input_option='USER_ENTERED')
