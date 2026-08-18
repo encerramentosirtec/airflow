@@ -783,7 +783,7 @@ class Bots:
             page.keyboard.press('Enter')
             page.wait_for_load_state('networkidle')
 
-            page.goto('https://sirtecba.gpm.srv.br/ci/Geral/Home')
+            page.goto('https://sirtecba.gpm.srv.br/#GR522')
             sleep(1)
             page.click('//html/body/main/div/div[6]/form/div[11]/button')
 
@@ -816,6 +816,6 @@ class Bots:
         gpm_df = gpm_df.drop_duplicates(subset=['PROJETO']).dropna()
 
         print(f'Foram encontrados {len(gpm_df)} projetos do tipo CCM - AS-BUILT - BA no GPM.')
-        
+
         planilha = '1hoeANiHmaA-NB-lQWELpFcNHmMOBrccpCXH6A2WwYuI'
         self.gs.sobrescreve_planilha(planilha, 'RELATORIO ASBUILT GPM', gpm_df['PROJETO'], range='A2:A', input_option='USER_ENTERED')
