@@ -1,8 +1,8 @@
-# import os
-# import sys
-# PATH = os.getenv('AIRFLOW_HOME')
-# os.chdir(PATH)
-# sys.path.insert(0, PATH)
+import os
+import sys
+PATH = os.getenv('AIRFLOW_HOME')
+os.chdir(PATH)
+sys.path.insert(0, PATH)
 
 import pandas as pd
 
@@ -14,6 +14,8 @@ from src.checklist_fechamento import checklist
 from src.google_sheets import GoogleSheets
 GS_SERVICE = GoogleSheets('sirtec-bot.json')
 
+from src.bigquery import BigQuery
+BIGQUERY = BigQuery()
 
 def _obter_ultimo_envio(historico):
     """Retorna o registro do histórico referente ao último envio (status 'ENVIADO').<br>
@@ -27,8 +29,36 @@ def _obter_ultimo_envio(historico):
         return None
     return max(envios, key=lambda h: h['Data'])
 
+def _hros_verificados():
+    """Retorna o conjunto de envios (HistoricoId, coluna ID_HRO na base) que já
+    foram checados e registrados em `analises_hro` — usado para não repetir a
+    verificação do mesmo envio de HRO. Se o HRO for reenviado (novo
+    HistoricoId), ele volta a ser verificado normalmente.
+    """
+    query = """
+        SELECT DISTINCT
+            ID_HRO
+        FROM `sirtec-472112.external_tables.analises_hro`
+    """
+    df = BIGQUERY.query_bigquery_table(query)
+    return set(df['ID_HRO'])
 
-projetos = ['B-1259084'] # Substituir por consulta de projetos ativos
+def _listar_projetos():
+    query = """
+        SELECT
+            PROJETO
+        FROM 
+            `sirtec-472112.external_tables.projetos_manut_corretiva`
+        WHERE
+            STATUS_PASTA IN ('PENDENTE', 'CRIADO', 'VALIDADO', 'REJEITADO')
+    """
+    df = BIGQUERY.query_bigquery_table(query)
+    return df['PROJETO'].tolist()
+
+projetos = _listar_projetos()
+print(f"Projetos a verificar: {projetos}")
+
+hros_verificados = _hros_verificados()
 
 r = GEOEX.consulta_hro_pastas(projetos)
 if r['sucess']:
@@ -45,6 +75,9 @@ if r['sucess']:
                 ultimo_envio = _obter_ultimo_envio(items['Historico'])
                 if ultimo_envio is None:
                     print(f"HRO {hro_id} sem envio registrado no histórico, pulando.")
+                    continue
+                if ultimo_envio['HistoricoId'] in hros_verificados:
+                    print(f"HRO {hro_id} (envio {ultimo_envio['HistoricoId']}) já verificado, pulando.")
                     continue
                 df_analises = pd.DataFrame(items['Analises'])
                 df_analises = df_analises.query("Quantidade != 0")[['Grupo', 'Codigo', 'Nome', 'Quantidade']]
