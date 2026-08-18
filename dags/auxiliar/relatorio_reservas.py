@@ -23,15 +23,7 @@ with DAG('relatorio-reservas',
         schedule = None,#'0 7-18 * * 1-6',
         max_active_runs = 1,
         tags = ['stc', 'geoex'],
-        catchup = False,
-        on_failure_callback=[
-            send_smtp_notification(
-                from_email="sirtec.heli@gmail.com",
-                to="heli.silva@sirtec.com.br",
-                subject="[Error] The dag {{ dag.dag_id }} failed",
-                html_content="debug logs",
-            )
-        ],) as dag:
+        catchup = False,) as dag:
     
     relatorio = PythonOperator(
         task_id='relatorio',

@@ -38,7 +38,7 @@ with DAG('controladora_relatorios',
             send_smtp_notification(
                 from_email="sirtec.heli@gmail.com",
                 to="heli.silva@sirtec.com.br",
-                subject="[Error] The dag {{ dag.dag_id }} failed",
+                subject="[Airflow] The dag {{ dag.dag_id }} failed",
                 html_content="debug logs",
             )
         ],
