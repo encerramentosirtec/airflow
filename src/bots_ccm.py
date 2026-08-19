@@ -765,7 +765,7 @@ class Bots:
     def consulta_asbuilt_gpm(self):
         import nest_asyncio
         nest_asyncio.apply()
-        
+
         print('-----Consultando AsBuilts no GPM-----')
         print('Iniciando Playwright')
 
@@ -795,8 +795,8 @@ class Bots:
             botao_csv.wait_for(state="visible", timeout=30000)
 
             # Espera pelo evento de download antes de clicar no link
-            with page.expect_download() as download_info:
-                botao_csv.click()
+            with page.expect_download(timeout=120000) as download_info:
+                botao_csv.click(timeout=120000, no_wait_after=True)
 
             download = download_info.value
             
