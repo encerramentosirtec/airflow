@@ -787,6 +787,7 @@ class Bots:
             page.goto('https://sirtecba.gpm.srv.br/ci/Servico/VistoriaObras/pesquisar')
 
             print('Baixando relatório')
+            sleep(10)
             # Espera pelo evento de download antes de clicar no link
             with page.expect_download() as download_info:
                 page.click('//html/body/main/div/div[6]/div[2]/div/div/div/button[2]')
