@@ -14,7 +14,7 @@ default_args = {
     'email' : ['heli.silva@sirtec.com.br'],
     'email_on_failure' : True,
     'email_on_retry' : False,
-    'retries' : 1,
+    'retries' : 2,
     'owner' : 'bob'
 }
 
@@ -39,7 +39,7 @@ with DAG('asbuilt_gpm',
     consulta_asbuilt_gpm = PythonOperator(
         task_id='consulta_asbuilt_gpm',
         python_callable=bot.consulta_asbuilt_gpm,
-        retries=1,
+        retries=2,
         retry_delay=duration(seconds=20),
         execution_timeout=duration(minutes=10)
     )
