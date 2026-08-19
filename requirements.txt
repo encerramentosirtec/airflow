@@ -19,6 +19,7 @@ bs4==0.0.2
 #smtplib
 playwright
 pandas_gbq
+nest_asyncio
 
 # Instalar o airflow com comando: pip install "apache-airflow==3.0.2" "apache-airflow-providers-google==8.0.0"
 # winget install -e --id Astronomer.Astro
