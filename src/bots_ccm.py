@@ -771,7 +771,7 @@ class Bots:
 
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
-            context = browser.new_context(accept_downloads=True)
+            context = browser.new_context(accept_downloads=True, viewport={'width': 1920, 'height': 1080})
             page = context.new_page()
 
             print('Acessando o GPM')
@@ -788,9 +788,13 @@ class Bots:
 
             print('Baixando relatório')
             sleep(10)
+            botao_csv = page.locator("button.buttons-csv")
+            botao_csv.wait_for(state="visible", timeout=30000)
+
             # Espera pelo evento de download antes de clicar no link
             with page.expect_download() as download_info:
-                page.click('//html/body/main/div/div[6]/div[2]/div/div/div/button[2]')
+                botao_csv.click()
+                
             download = download_info.value
             
             # Salva o arquivo baixado no diretório desejado
