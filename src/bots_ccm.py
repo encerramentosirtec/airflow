@@ -825,4 +825,4 @@ class Bots:
         print(f'Foram encontrados {len(gpm_df)} projetos do tipo CCM - AS-BUILT - BA no GPM.')
 
         planilha = '1hoeANiHmaA-NB-lQWELpFcNHmMOBrccpCXH6A2WwYuI'
-        self.gs.sobrescreve_planilha(planilha, 'RELATORIO ASBUILT GPM', gpm_df['PROJETO'], range='A2:A', input_option='USER_ENTERED')
+        self.gs.sobrescreve_planilha(planilha, 'RELATORIO ASBUILT GPM', gpm_df['PROJETO'], input_option='USER_ENTERED')
