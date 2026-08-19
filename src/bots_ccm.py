@@ -821,8 +821,9 @@ class Bots:
 
         # Remove duplicatas e linhas com valores nulos
         gpm_df = gpm_df.drop_duplicates(subset=['PROJETO']).dropna()
+        gpm_df = gpm_df['PROJETO']
 
         print(f'Foram encontrados {len(gpm_df)} projetos do tipo CCM - AS-BUILT - BA no GPM.')
 
         planilha = '1hoeANiHmaA-NB-lQWELpFcNHmMOBrccpCXH6A2WwYuI'
-        self.gs.sobrescreve_planilha(planilha, 'RELATORIO ASBUILT GPM', gpm_df['PROJETO'], input_option='USER_ENTERED')
+        self.gs.sobrescreve_planilha(planilha, 'RELATORIO ASBUILT GPM', gpm_df, input_option='USER_ENTERED')
