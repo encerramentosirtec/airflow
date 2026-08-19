@@ -764,7 +764,7 @@ class Bots:
     #AsBuilts no GPM
     def consulta_asbuilt_gpm(self):
         print('-----Consultando AsBuilts no GPM-----')
-        print('Iniciando Playwright...')
+        print('Iniciando Playwright')
 
         user = Variable.get("gpm_user")
         password = Variable.get("gpm_pass")
@@ -774,7 +774,7 @@ class Bots:
             context = browser.new_context(accept_downloads=True)
             page = context.new_page()
 
-            print('Acessando o GPM...')
+            print('Acessando o GPM')
             page.goto('https://sirtecba.gpm.srv.br')
 
             print('Fazendo Login')
@@ -783,9 +783,8 @@ class Bots:
             page.keyboard.press('Enter')
             page.wait_for_load_state('networkidle')
 
-            page.goto('https://sirtecba.gpm.srv.br/ci/Servico/VistoriaObras')
-            sleep(1)
-            page.get_by_role("button", name="Pesquisar").click()
+            print('Consultando projetos')
+            page.goto('https://sirtecba.gpm.srv.br/ci/Servico/VistoriaObras/pesquisar')
 
             print('Baixando relatório')
             # Espera pelo evento de download antes de clicar no link
@@ -803,7 +802,7 @@ class Bots:
             browser.close()
 
     def processa_asbuilt_gpm(self):
-        print('Tratando dados do GPM...')
+        print('Tratando dados do GPM')
         # Lê o arquivo baixado
         gpm_df = pd.read_csv(os.path.join(self.PATH, 'downloads', 'asbuilt_gpm.csv'), sep=';')
 
