@@ -21,7 +21,7 @@ with DAG('solar',
         default_args = default_args,
         #default_view="graph",
         start_date=datetime(2026, 4, 16, tzinfo=pendulum.timezone("America/Sao_Paulo")),
-        schedule = '0,30 7-18,20 * * 1-6',
+        schedule = '29,59 7-18,20 * * 1-6',
         tags = ['solar', 'geoex', 'stc'],
         catchup = False) as dag:
     
