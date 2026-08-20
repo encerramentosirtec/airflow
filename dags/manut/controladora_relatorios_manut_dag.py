@@ -17,13 +17,13 @@ default_args = {
 with DAG('controladora_relatorios_manut',
         default_args = default_args,
         start_date=datetime(2026, 4, 17, tzinfo=timezone("America/Sao_Paulo")),
-        schedule = '0/20 7-22 * * 1-6',
+        schedule = '19/20 7-22 * * 1-6',
         tags = ['aux', 'relatorios', 'manut', 'geoex'],
         catchup = False,
         on_failure_callback=[
             send_smtp_notification(
                 from_email="sirtec.heli@gmail.com",
-                to="heli.silva@sirtec.com.br",
+                to="hugo.viana@sirtec.com.br",
                 subject="[Error] The dag {{ dag.dag_id }} failed",
                 html_content="debug logs",
             )

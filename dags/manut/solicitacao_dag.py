@@ -3,6 +3,8 @@
 from airflow.sdk import DAG
 #from airflow.operators.python import PythonOperator
 from airflow.providers.standard.operators.python import PythonOperator
+
+from airflow.providers.smtp.notifications.smtp import send_smtp_notification
 #bibliotecas
 '''import os
 import sys'''
@@ -115,6 +117,42 @@ def atualiza_solicitacoes():
 
 
 
+def enviar_email_de_falha(context):
+    """
+    Função de callback acionada quando a task falha.
+    """
+    dag_run = context.get('dag_run')
+    
+    # Busca todas as tasks que falharam nesta execução da DAG
+    failed_tis = dag_run.get_task_instances(state='failed')
+    
+    # Monta uma lista HTML com as tasks que falharam e seus respectivos links de log
+    detalhes_falhas = ""
+    for ti in failed_tis:
+        detalhes_falhas += f"<li><strong>Task ID:</strong> {ti.task_id} | <a href='{ti.log_url}'>Acessar Log do Erro</a></li>"
+
+    assunto = f"[Alerta Airflow] Falha na DAG: {dag_run.dag_id}"
+    
+    corpo_html = f"""
+    <h3>A DAG <strong>{dag_run.dag_id}</strong> falhou!</h3>
+    <p><strong>Data de Execução:</strong> {context.get('execution_date')}</p>
+    
+    <h4>Tasks que causaram a falha:</h4>
+    <ul>
+        {detalhes_falhas}
+    </ul>
+    
+    <p>Clique nos links acima para ver o erro (Exception) exato que foi gerado pelo Python.</p>
+    """
+
+    # 5. Enviar o e-mail usando a configuração de SMTP do Airflow
+    send_smtp_notification(
+        from_email="sirtec.heli@gmail.com",
+        to="heli.silva@sirtec.com.br",
+        subject=assunto,
+        html_content=corpo_html,
+    )
+
 
 default_args = {
     'depends_on_past' : False,
@@ -133,7 +171,9 @@ with DAG('solicitacoes-de-reservas',
         schedule = '0 6,12 * * 1-6',
         max_active_runs = 1,
         tags = ['reservas', 'geoex', 'manut'],
-        catchup = False) as dag:
+        catchup = False,
+        on_failure_callback=enviar_email_de_falha
+        ) as dag:
 
     solicitacoes = PythonOperator(
         task_id = 'solicitacoes',
