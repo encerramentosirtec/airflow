@@ -76,8 +76,8 @@ def _montar_mensagem_whatsapp(pendencias_por_hro):
     Status == 'VERIFICAR') encontradas em cada HRO analisado nesta execução.
     """
     linhas = [f"⚠️ Checklist de fechamento encontrou {len(pendencias_por_hro)} HRO(s) com item(ns) a verificar:"]
-    for projeto, hro, df_pendencias in pendencias_por_hro:
-        linhas.append(f"\n📌 *{projeto} - {hro}*")
+    for projeto, hro, responsavel, df_pendencias in pendencias_por_hro:
+        linhas.append(f"\n📌 *{projeto} - {hro}*\nResponsável: {responsavel}")
         for item in df_pendencias.itertuples():
             diferenca = item.Diferenca if item.Diferenca != '' else 'N/A'
             linhas.append(f"   • {item.Item} ({item.Verificacao}) — diferença: {diferenca}")
@@ -143,7 +143,7 @@ def checar_hros():
 
         pendencias = analise[analise['Status'] == 'VERIFICAR']
         if not pendencias.empty:
-            pendencias_por_hro.append((projeto, hro['Serial'], pendencias))
+            pendencias_por_hro.append((projeto, hro['Serial'], ultimo_envio['Usuario'], pendencias))
 
     if pendencias_por_hro:
         mensagem = _montar_mensagem_whatsapp(pendencias_por_hro)
