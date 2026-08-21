@@ -273,12 +273,10 @@ def _check_fator_k(df):
 
     df_fator = df.query("Aplicacao_servico == 'FATOR'")
     valor_fator = df_fator['Valor_total'].sum()
-    print(valor_fator)
     if valor_fator == 0:
         return []
-
-    valor_demais_itens = df.query("Aplicacao_servico != 'FATOR'")['Valor_total'].sum()
-    print(valor_demais_itens)
+    
+    valor_demais_itens = df.query("Aplicacao_servico != 'FATOR' & Grupo == 'SERVIÇOS'")['Valor_total'].sum()
     if df_fator.shape[0] != 1:
         status = 'VERIFICAR'
         valor_esperado = None
@@ -288,8 +286,8 @@ def _check_fator_k(df):
             status = 'VERIFICAR'
             valor_esperado = None
         else:
-            valor_esperado = round(valor_demais_itens * percentual, 2)
-            status = 'OK' if valor_esperado == round(valor_fator, 2) else 'VERIFICAR'
+            valor_esperado = valor_demais_itens * percentual
+            status = 'OK' if abs(valor_esperado - valor_fator) <= 0.01 else 'VERIFICAR'
 
     return [
         {
