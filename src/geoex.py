@@ -507,7 +507,6 @@ class Geoex(GeoexHook):
         else:
             return {'sucess': False, 'status_code': r.status_code, 'data': None}
 
-        return r
 
 
     def consulta_hro(self, hro):
