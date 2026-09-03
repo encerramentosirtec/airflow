@@ -58,7 +58,10 @@ def atualizar_base_medicoes():
 
     ### Leitura e tratamento dos dados
     df = pd.read_csv(os.path.join(PATH, 'downloads/Geoex - Relatório - Acompanhamento - Detalhado.csv'), encoding='ISO-8859-1', sep=';', thousands='.', decimal=',')
-    
+
+    # Atualiza planilha de Romeu
+    GS_SERVICE.sobrescreve_planilha(url='https://docs.google.com/spreadsheets/d/1oWkfeX34YMTYO31Zoo1QL58uvaGg-JeDa1j8gqEeguA/edit?gid=600917239#gid=600917239', aba='Página23', df=df)
+
     # Filtrando o dataframe
     df = df[~df['TITULO'].str.startswith(('COBRANCA', 'LIGACAO', 'PERDAS')) & ~df['TITULO'].str.contains('SOLAR', na=False)]
 
