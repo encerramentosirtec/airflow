@@ -707,7 +707,7 @@ class Bots:
                 municipio = r['Municipio']
         else:
             if r['status_code'] == 400:
-                return 'SEM ACESSO','SEM ACESSO','SEM ACESSO'
+                return 'SEM ACESSO','SEM ACESSO'
             raise Exception(
                     f"""
                     Falha ao consultar {projeto}.
