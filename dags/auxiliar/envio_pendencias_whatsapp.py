@@ -32,7 +32,7 @@ EVO_API = EvolutionAPI()
 from src.email_dashboard import _estilo_gerencia
 
 PASTA_FIGURAS = os.path.join(PATH, "assets", "figures")
-NUMERO_TESTE = "120363409216677503@g.us"
+NUMERO_TESTE = "120363071699650663@g.us"
 
 
 query = """
@@ -196,6 +196,10 @@ def _gera_tabela_agrupada(df, caminho_saida, titulo, colunas, col_valor, top_n=N
     if top_n:
         df = df.head(top_n)
     df = df.copy()
+    df = df[df["UNIDADE"].notna()].copy()
+    df["SUPERVISOR"] = df["SUPERVISOR"].fillna("SEM SUPERVISOR")
+    df = df[df["UNIDADE"].notna()].copy()
+    df["SUPERVISOR"] = df["SUPERVISOR"].fillna("SEM SUPERVISOR")
     df = df[df["UNIDADE"].notna()].copy()
     df["SUPERVISOR"] = df["SUPERVISOR"].fillna("SEM SUPERVISOR")
 
@@ -521,21 +525,21 @@ with DAG(
     max_active_runs=1,
     tags=['whatsapp'],
 ):
-
+        trigger_rule="always",
     tarefa_pendencia_geral = PythonOperator(
-        task_id="envia_imagem_pendencias_geral",
+        trigger_rule="always",
         python_callable=envia_imagem_pendencias_geral,
         trigger_rule="always",
     )
-
+        trigger_rule="always",
     tarefa_pendencia_asbuilt = PythonOperator(
-        task_id="envia_imagem_pendencias_asbuilt",
+        trigger_rule="always",
         python_callable=envia_imagem_pendencias_asbuilt,
         trigger_rule="always",
     )
-
+        trigger_rule="always",
     tarefa_pendencia_movimentacao = PythonOperator(
-        task_id="envia_imagem_pendencias_movimentacao",
+        trigger_rule="always",
         python_callable=envia_imagem_pendencias_movimentacao,
         trigger_rule="always",
     )
