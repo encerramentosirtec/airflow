@@ -32,7 +32,7 @@ EVO_API = EvolutionAPI()
 from src.email_dashboard import _estilo_gerencia
 
 PASTA_FIGURAS = os.path.join(PATH, "assets", "figures")
-NUMERO_TESTE = "120363071699650663@g.us"
+NUMERO_TESTE = "120363409216677503@g.us"
 
 
 query = """
@@ -196,6 +196,8 @@ def _gera_tabela_agrupada(df, caminho_saida, titulo, colunas, col_valor, top_n=N
     if top_n:
         df = df.head(top_n)
     df = df.copy()
+    df = df[df["UNIDADE"].notna()].copy()
+    df["SUPERVISOR"] = df["SUPERVISOR"].fillna("SEM SUPERVISOR")
 
     resumo_gerencia = df.groupby("GERENCIA")[col_valor].sum().sort_values(ascending=False)
     n_unidades = sum(df.loc[df["GERENCIA"] == g, "UNIDADE"].nunique() for g in resumo_gerencia.index)
@@ -523,19 +525,19 @@ with DAG(
     tarefa_pendencia_geral = PythonOperator(
         task_id="envia_imagem_pendencias_geral",
         python_callable=envia_imagem_pendencias_geral,
-        trigger_rule="all_success",
+        trigger_rule="always",
     )
 
     tarefa_pendencia_asbuilt = PythonOperator(
         task_id="envia_imagem_pendencias_asbuilt",
         python_callable=envia_imagem_pendencias_asbuilt,
-        trigger_rule="all_success",
+        trigger_rule="always",
     )
 
     tarefa_pendencia_movimentacao = PythonOperator(
         task_id="envia_imagem_pendencias_movimentacao",
         python_callable=envia_imagem_pendencias_movimentacao,
-        trigger_rule="all_success",
+        trigger_rule="always",
     )
 
     tarefa_pendencia_geral >> tarefa_pendencia_asbuilt >> tarefa_pendencia_movimentacao
