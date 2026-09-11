@@ -444,9 +444,11 @@ class Bots:
         data_frame.to_csv(os.path.join(self.PATH,'downloads/asbuilt.csv'), index=False, sep=';')
 
     def escreve_asbuilt(self):
+        pd.set_option('display.max_columns', None)
         data_frame = pd.read_csv(os.path.join(self.PATH,'downloads/asbuilt.csv'), sep=';')
         data_frame = data_frame.drop_duplicates(subset=['PROJETO'])
-        data_frame = data_frame.dropna()
+        #data_frame = data_frame.dropna()
+        print(data_frame)
 
         espelho_CCM = self.le_planilha_google(configs.espelho_CCM, "Base de dados (Espelho)", 'B2:Y')
         espelho_CCM['Projeto'] = pd.to_numeric(espelho_CCM['Projeto'].str.replace('B-', ''), errors='coerce')
@@ -457,7 +459,6 @@ class Bots:
 
         # Preenche os valores nulos (agora incluindo os que eram vazios/zero) com o supervisor do espelho
         data_frame['SUPERVISOR'] = data_frame['SUPERVISOR'].fillna(data_frame['PROJETO'].map(espelho_CCM.set_index('Projeto')['Supervisor']))
-        pd.set_option('display.max_columns', None)
         print(data_frame)
 
         while True:
