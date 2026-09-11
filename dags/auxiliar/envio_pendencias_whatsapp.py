@@ -525,7 +525,6 @@ with DAG(
     max_active_runs=1,
     tags=['whatsapp'],
 ):
-        trigger_rule="always",
     tarefa_pendencia_geral = PythonOperator(
         trigger_rule="always",
         python_callable=envia_imagem_pendencias_geral,
