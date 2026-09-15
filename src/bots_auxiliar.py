@@ -55,6 +55,7 @@ class Bots_aux():
                         ('INTERVENÇÃO', 'CORRETIVA - PASSIVO'): 'MANUT',
                         ('INTERVENÇÃO', 'CORRETIVA EM REDE'): 'MANUT',
                         ('INTERVENÇÃO', 'CORRETIVA EM EQUIPAMENTO'): 'CCM',
+                        ('INTERVENÇÃO', 'CORRETIVA SOLAR'): 'STC',
                         ('INTERVENÇÃO', 'PREVENTIVA'): 'MANUT',
                         ('INTERVENÇÃO', 'PREVENTIVA - PASSIVO'): 'MANUT',
                         ('INTERVENÇÃO', 'PREVENTIVA EM REDE'): 'MANUT',
