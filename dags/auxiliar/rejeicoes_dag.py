@@ -14,8 +14,8 @@ default_args = {
     'email_on_failure' : True,
     'email_on_retry' : False,
     'owner' : 'heli',
-    'retries' : 2,
-    'retry_delay' : duration(seconds=5)
+    #'retries' : 2,
+    #'retry_delay' : duration(seconds=5)
 }
 
 with DAG('rejeicoes',
