@@ -177,6 +177,7 @@ with DAG(
     schedule='0 * * * *',  # a cada hora
     default_args=default_args,
     start_date=datetime(2026, 8, 21, tzinfo=pendulum.timezone("America/Sao_Paulo")),
+    max_active_runs = 1,
     catchup=False,
 ):
 

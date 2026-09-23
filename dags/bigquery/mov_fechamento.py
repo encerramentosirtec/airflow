@@ -129,6 +129,7 @@ with DAG(
     'atualiza_mov_fechamento',
     schedule='@daily',
     start_date=datetime(2026, 4, 16, tzinfo=pendulum.timezone("America/Sao_Paulo")),
+    max_active_runs = 1,
     tags=['bigquery']
 ):
     

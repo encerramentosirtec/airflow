@@ -57,6 +57,7 @@ with DAG(
     dag_id='atualiza_pedidos_criados',
     tags=['auxiliar'],
     schedule=None,#'*/40 6-22 * * 1-6',
+    max_active_runs = 1,
     start_date=datetime(2026, 4, 16, tzinfo=timezone("America/Sao_Paulo"))
 ):
     

@@ -23,6 +23,7 @@ with DAG('cookie-manut',
         schedule = None,
         tags = ['manut', 'cookie', 'aux'],
         catchup = False,
+        max_active_runs = 1,
         on_failure_callback=[
             send_smtp_notification(
                 from_email="sirtec.heli@gmail.com",

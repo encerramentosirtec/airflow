@@ -23,6 +23,7 @@ with DAG('solar',
         start_date=datetime(2026, 4, 16, tzinfo=pendulum.timezone("America/Sao_Paulo")),
         schedule = '29,59 7-18,20 * * 1-6',
         tags = ['solar', 'geoex', 'stc'],
+        max_active_runs = 1,
         catchup = False) as dag:
     
     solar = PythonOperator(

@@ -20,6 +20,7 @@ with DAG('controladora_relatorios_manut',
         schedule = '19/20 7-22 * * 1-6',
         tags = ['aux', 'relatorios', 'manut', 'geoex'],
         catchup = False,
+        max_active_runs = 1,
         on_failure_callback=[
             send_smtp_notification(
                 from_email="sirtec.heli@gmail.com",

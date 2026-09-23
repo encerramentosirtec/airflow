@@ -118,6 +118,7 @@ with DAG(
     tags=['manut', 'geoex'],
     schedule=None,#'*/30 6-22 * * *',
     default_args=default_args,
+    max_active_runs = 1,
     start_date=datetime(2026, 4, 16, tzinfo=pendulum.timezone("America/Sao_Paulo"))
 ):
 

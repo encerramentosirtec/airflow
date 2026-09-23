@@ -136,6 +136,7 @@ with DAG(
     'atualiza_pedidos_faturados',
     schedule='@daily',
     start_date=datetime(2026, 4, 16, tzinfo=pendulum.timezone("America/Sao_Paulo")),
+    max_active_runs = 1,
     tags=['bigquery']
 ):
     

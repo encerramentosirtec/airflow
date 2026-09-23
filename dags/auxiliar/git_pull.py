@@ -8,6 +8,7 @@ with DAG(
         start_date=datetime(2026, 4, 16, tzinfo=timezone("America/Sao_Paulo")),
         schedule = None,
         tags = ['git', 'bash', 'aux'],
+        max_active_runs = 1,
         catchup=False ) as dag:
 
     sync_repo = BashOperator(

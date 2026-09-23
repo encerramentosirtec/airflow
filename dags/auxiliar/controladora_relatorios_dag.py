@@ -34,6 +34,7 @@ with DAG('controladora_relatorios',
         schedule = '9/10 7-18 * * 1-6',
         tags = ['aux', 'relatorios', 'stc', 'email', 'geoex'],
         catchup = False,
+        max_active_runs = 1,
         on_failure_callback=[
             send_smtp_notification(
                 from_email="sirtec.heli@gmail.com",
