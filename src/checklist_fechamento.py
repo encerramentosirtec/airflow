@@ -300,6 +300,12 @@ def _check_fator_k(df):
         }
     ]
 
+def _check_valor_kit(df):
+    """Verifica se o valor do kit aplicado no checklist é coerente com o tipo de serviço"""
+
+
+
+    return
 
 def checklist(df):
     """Função para gerar o checklist de fechamento<br>
@@ -326,9 +332,7 @@ def checklist(df):
                 'DETALHE_materiais': 'Detalhe_material',
                 'VALOR': 'Valor_material',
             })
-    # Valor unitário: usa o valor de serviço quando houver, senão o de material.
     df['Valor_total'] = df['Quantidade'] * df['Valor_servico'].fillna(df['Valor_material']).fillna(0)
-    # print(df)
 
     resultados = []
     resultados += _check_postes(df)
@@ -343,4 +347,37 @@ def checklist(df):
     # Aplicado/Esperado em vez de Quantidade Servico/Material), então
     # pd.DataFrame(resultados) gera NaN nas células ausentes. NaN quebra o envio
     # para o Google Sheets (JSON não aceita NaN), então trocamos por ''.
+    return df_checklist.fillna('')
+
+
+def checklist_kit(df):
+    df_servicos = _get_df_servicos()
+    df_materiais = _get_df_materiais()
+
+    df = df.merge(df_servicos, how='left', left_on=['Codigo'], right_on=['CODIGO'], suffixes=('', '_servico'))
+    df = df.merge(df_materiais, how='left', left_on=['Codigo'], right_on=['CODIGO'], suffixes=('', '_materiais'))
+
+    df = df.drop(columns=['CODIGO', 'CODIGO_materiais'])\
+            .rename(columns={
+                'APLICACAO': 'Aplicacao_servico',
+                'DETALHE': 'Detalhe_servico',
+                'VALOR_BASE': 'Valor_servico',
+                'CATEGORIA': 'Categoria_material',
+                'NV_TENSAO': 'Nv_Tensao',
+                'DETALHE_materiais': 'Detalhe_material',
+                'VALOR': 'Valor_material',
+            })
+    # Valor unitário: usa o valor de serviço quando houver, senão o de material.
+    df['Valor_total'] = df['Quantidade'] * df['Valor_servico'].fillna(df['Valor_material']).fillna(0)
+
+
+    resultados = []
+    resultados += _check_postes(df)
+    # resultados += _check_cruzetas(df)
+    # resultados += _check_equipamentos(df)
+    resultados += _check_cabos(df)
+    # resultados += _check_fator_k(df)
+
+    df_checklist = pd.DataFrame(resultados)
+
     return df_checklist.fillna('')

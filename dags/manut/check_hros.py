@@ -15,7 +15,7 @@ import pandas as pd
 from src.geoex import Geoex
 GEOEX = Geoex(cookie_file='cookie_hugo.json')
 
-from src.checklist_fechamento import checklist
+from src.checklist_fechamento import checklist, checklist_kit
 
 from src.google_sheets import GoogleSheets
 GS_SERVICE = GoogleSheets('sirtec-bot.json')
@@ -48,14 +48,15 @@ def _hros_verificados():
     foram checados e registrados em `analises_hro` — usado para não repetir a
     verificação do mesmo envio de HRO. Se o HRO for reenviado (novo
     HistoricoId), ele volta a ser verificado normalmente.
-    """
-    query = """
-        SELECT DISTINCT
-            ID_HRO
-        FROM `sirtec-472112.external_tables.analises_hro`
-    """
-    df = BIGQUERY.query_bigquery_table(query)
-    return set(df['ID_HRO'])
+    # """
+    df = GS_SERVICE.le_planilha(
+        url=URL_PLANILHA_ANALISES,
+        aba='Análises',
+        intervalo='K:K',
+    )
+    ids = df.drop_duplicates(subset=['Id envio HRO'], keep='last')
+
+    return set(ids['Id envio HRO'])
 
 
 def _listar_projetos():
@@ -89,50 +90,71 @@ def checar_hros():
     checklist de fechamento de cada um, registra na planilha de Análises e envia
     um alerta por WhatsApp quando algum item do checklist ficar como 'VERIFICAR'.
     """
+
+    # CONSULTAR PROJETOS ATIVOS
     projetos = _listar_projetos()
     print(f"Projetos a verificar: {projetos}")
 
-    hros_verificados = _hros_verificados()
-    pendencias_por_hro = []
+    # CONSULTAR HROS JÁ VERIFICADOS (para não repetir a verificação do mesmo envio)
+    hros_verificados = _hros_verificados() 
 
+    # Lista de tuplas (projeto, hro, responsavel, df_pendencias) para montar a mensagem de alerta do WhatsApp
+    pendencias_por_hro = [] 
+
+    # Consulta os HROs das pastas dos projetos ativos
     r = GEOEX.consulta_hro_pastas(projetos)
     if not r['sucess']:
         raise Exception(f"Erro ao consultar pastas dos projetos: {r['data']}")
-
     df_hros = r['data']
+
+    # Faz a conferencia de cada HRO, monta o checklist e registra na planilha de Análises
     for hro in df_hros:
         projeto = hro['ProjetoText']
         hro_id = hro['Serial']
         status_hro = hro['HistoricoStatus']['Nome']
-        print(projeto, hro_id, status_hro)
         if status_hro not in ('ENVIADO', 'VALIDADO', 'VALIDANDO'):
+            print(f"HRO {hro_id} do projeto {projeto} com status '{status_hro}' não será verificado.")
             continue
+        print(f"Verificando HRO {hro_id} do projeto {projeto} (status: {status_hro})...")
 
+        # Consulta os detalhes do HRO
         r_hro = GEOEX.consulta_hro(hro_id)
         if not r_hro['sucess']:
             print(f"Erro ao consultar HRO {hro_id}: {r_hro['data']}")
             continue
-
         items = r_hro['data']['Item']
         ultimo_envio = _obter_ultimo_envio(items['Historico'])
-        if ultimo_envio is None:
-            print(f"HRO {hro_id} sem envio registrado no histórico, pulando.")
-            continue
         if ultimo_envio['HistoricoId'] in hros_verificados:
             print(f"HRO {hro_id} (envio {ultimo_envio['HistoricoId']}) já verificado, pulando.")
             continue
 
+        # Lista os serviços e materiais preenchidos no HRO
         df_analises = pd.DataFrame(items['Analises'])
         df_analises = df_analises.query("Quantidade != 0")[['Grupo', 'Codigo', 'Nome', 'Quantidade']]
-        analise = checklist(df_analises)
-        analise = analise.assign(
-                    Projeto=projeto,
-                    HRO=hro['Serial'],
-                    Responsavel=ultimo_envio['Usuario'],
-                    Data=ultimo_envio['Data'],
-                    Historico_id=ultimo_envio['HistoricoId']
-                )
-        analise['Data'] = pd.to_datetime(analise['Data']).dt.strftime('%d/%m/%Y %H:%M:%S')
+
+        # Faz o checklist de acordo com o contrato do projeto e registra na planilha de Análises
+        contrato = items['EmpresaContratoId']
+        if contrato in (4600075605, 4600075577):
+            analise = checklist_kit(df_analises)
+            analise = analise.assign(
+                        Projeto=projeto,
+                        HRO=hro['Serial'],
+                        Responsavel=ultimo_envio['Usuario'],
+                        Data=ultimo_envio['Data'],
+                        Historico_id=ultimo_envio['HistoricoId']
+                    )
+            analise['Data'] = pd.to_datetime(analise['Data']).dt.strftime('%d/%m/%Y %H:%M:%S')
+
+        if contrato in (4600079168, 4600079167):
+            analise = checklist(df_analises)
+            analise = analise.assign(
+                        Projeto=projeto,
+                        HRO=hro['Serial'],
+                        Responsavel=ultimo_envio['Usuario'],
+                        Data=ultimo_envio['Data'],
+                        Historico_id=ultimo_envio['HistoricoId']
+                    )
+            analise['Data'] = pd.to_datetime(analise['Data']).dt.strftime('%d/%m/%Y %H:%M:%S')
 
         GS_SERVICE.atualiza_planilha(
             url=URL_PLANILHA_ANALISES,
