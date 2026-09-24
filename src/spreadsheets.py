@@ -18,6 +18,8 @@ SOLICITACOES_RESERVA = 'https://docs.google.com/spreadsheets/d/1JFfnQaw-llIvPUp7
 
 CONTATOS = 'https://docs.google.com/spreadsheets/d/10wWgiV9_i9nljInqxXjFOmbRa3zPpS2iG4HWwoT2_Eg'
 
+MANUT_PRJ = 'https://docs.google.com/spreadsheets/d/1mVufRznedxogFI9ANTraLrOjTZVzlOm98_X0cGTDXyQ'
+
 PEDIDOS = 'https://docs.google.com/spreadsheets/d/1ADph291rbSWTN4pB6wpF1zs26delz58a_vWMlq_uffc'
 
 BASE_MUNICIPIOS = "https://docs.google.com/spreadsheets/d/13bo5N0W3cvFyafpex-0wDGH_vYBKuc7RfpJY34eqo7s"
