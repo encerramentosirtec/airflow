@@ -274,7 +274,7 @@ class Bots_aux():
         #agrupa os projetos e ordena por setor e data
         df2 = df.groupby(['SETOR','LOCALIDADE','USUARIO SOLICITACAO','PROJETO','DATA PENDENCIA','PROTOCOLO','VALOR','REPETICOES'])['OBSERVACAO'].agg(join_with_empty).reset_index()
         df2.sort_values(by=['SETOR', 'DATA PENDENCIA'], inplace=True)
-        df2['DIFERENCA_DIAS'] = (pd.Timestamp.today().normalize() - df2['DATA PENDENCIA']).dt.days.astype(int)
+        df2['DIFERENCA DIAS'] = (pd.Timestamp.today().normalize() - df2['DATA PENDENCIA']).dt.days.astype(int)
         df2['DATA PENDENCIA'] = df2['DATA PENDENCIA'].dt.strftime('%d/%m/%Y')
         df2['REPETICOES'] = df2['REPETICOES'].astype(int)
         
@@ -304,7 +304,7 @@ class Bots_aux():
             else:
                 return 'background-color: green; color: white'
 
-        df3 = df2[['SETOR','LOCALIDADE','USUARIO SOLICITACAO','PROJETO','VALOR TOTAL','DATA PENDENCIA','DIFERENCA_DIAS','REPETICOES','OBSERVACAO']]
+        df3 = df2[['SETOR','LOCALIDADE','USUARIO SOLICITACAO','PROJETO','VALOR TOTAL','DATA PENDENCIA','DIFERENCA DIAS','REPETICOES','OBSERVACAO']]
         df3 = df3.style.map(colorir_notas, subset=['REPETICOES'])
         
         if projetos[~projetos['PROJETO'].isin(antigos['PROJETO'])].shape[0]>0:
@@ -433,7 +433,7 @@ class Bots_aux():
         # Create a multipart message and set headers
         message = MIMEMultipart()
         message["From"] = sender_email
-        message["To"] = ", ".join(receiver_emails_test)
+        message["To"] = ", ".join(receiver_emails)#_test)
         #message["Bcc"] = "heli.silva@sirtec.com.br"
         message["Subject"] = "Relatório de rejeições de pastas"
 
@@ -461,7 +461,7 @@ class Bots_aux():
         with smtplib.SMTP_SSL(smtp_server, port) as server:
             #server.starttls()
             server.login(login, password)
-            server.sendmail(sender_email, receiver_emails_test, message.as_string())
+            server.sendmail(sender_email, receiver_emails, message.as_string())
 
         print('Sent')
 
