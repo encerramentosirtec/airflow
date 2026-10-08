@@ -274,6 +274,7 @@ class Bots_aux():
         #agrupa os projetos e ordena por setor e data
         df2 = df.groupby(['SETOR','LOCALIDADE','USUARIO SOLICITACAO','PROJETO','DATA PENDENCIA','PROTOCOLO','VALOR','REPETICOES'])['OBSERVACAO'].agg(join_with_empty).reset_index()
         df2.sort_values(by=['SETOR', 'DATA PENDENCIA'], inplace=True)
+        df2['DIFERENCA_DIAS'] = (pd.Timestamp.today().normalize() - df2['DATA PENDENCIA']).dt.days.astype(int)
         df2['DATA PENDENCIA'] = df2['DATA PENDENCIA'].dt.strftime('%d/%m/%Y')
         df2['REPETICOES'] = df2['REPETICOES'].astype(int)
         
@@ -303,7 +304,7 @@ class Bots_aux():
             else:
                 return 'background-color: green; color: white'
 
-        df3 = df2[['SETOR','LOCALIDADE','USUARIO SOLICITACAO','PROJETO','VALOR TOTAL','DATA PENDENCIA','REPETICOES','OBSERVACAO']]
+        df3 = df2[['SETOR','LOCALIDADE','USUARIO SOLICITACAO','PROJETO','VALOR TOTAL','DATA PENDENCIA','DIFERENCA_DIAS','REPETICOES','OBSERVACAO']]
         df3 = df3.style.map(colorir_notas, subset=['REPETICOES'])
         
         if projetos[~projetos['PROJETO'].isin(antigos['PROJETO'])].shape[0]>0:
