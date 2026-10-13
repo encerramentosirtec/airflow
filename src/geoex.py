@@ -256,8 +256,8 @@ class Geoex(GeoexHook):
 
         while True:
             if r.status_code == 200:
-                if name != None: nome_arquivo = f'{name}.{url[-3:]}'
-                else: nome_arquivo = f'{nome}.{url[-3:]}'
+                if name != None: nome_arquivo = f'{name}.csv'
+                else: nome_arquivo = f'{nome}.csv'
 
                 full_path = os.path.join(self.PATH, f'{file_path}/{nome_arquivo}')
                 print(f"Tentando salvar em: {full_path}")
