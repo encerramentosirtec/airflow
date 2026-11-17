@@ -261,10 +261,18 @@ class Bots:
             self.bot.send_message(message.chat.id, f'Login: admin\nSenha: {senha['admin']}')
 
         @self.bot.message_handler(commands=['link'])
-        def senha(message):
+        def link(message):
             with open(os.path.join(self.PATH, 'tunnel_link.txt'), 'r') as arquivo:
-                link = arquivo.read()
-            self.bot.send_message(message.chat.id, f'O link de acesso para o Airflow é {link}')
+                linhas = [linha.strip() for linha in arquivo if linha.strip()]
+            tunnel_link = ''
+            ip_local = ''
+            for linha in linhas:
+                if linha.startswith('Link do túnel:'):
+                    tunnel_link = linha.replace('Link do túnel:', '').strip()
+                elif linha.startswith('IP da rede local:'):
+                    ip_local = linha.replace('IP da rede local:', '').strip()
+            msg = f'🔗 Link do túnel: {tunnel_link}\n🌐 IP da rede local: {ip_local}'
+            self.bot.send_message(message.chat.id, msg)
 
         @self.bot.message_handler(func=lambda message: True)
         def echo_message(message):
