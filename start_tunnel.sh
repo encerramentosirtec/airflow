@@ -5,6 +5,8 @@ VENV="$WORKDIR/venv/bin/activate"
 LOG_FILE="$WORKDIR/tunnel.log"
 LINK_FILE="$WORKDIR/tunnel_link.txt"
 
+cd WORKDIR || { echo "Falha ao mudar para o diretório $WORKDIR"; exit 1; }
+
 # Ativa o ambiente virtual
 source "$VENV"
 
